@@ -15,8 +15,10 @@ engine = create_async_engine(
 
 AsyncSessionFactory = async_sessionmaker(engine, expire_on_commit=False)
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class UUIDModel(Base):
     __abstract__ = True
@@ -28,8 +30,10 @@ class UUIDModel(Base):
         default=uuid.uuid4
     )
 
+
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionFactory() as session:
         yield session
+
 
 DBSession = Annotated[AsyncSession, Depends(get_db_session)]

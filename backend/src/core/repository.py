@@ -7,6 +7,7 @@ from src.core.database import UUIDModel
 
 ModelType = TypeVar("ModelType", bound=UUIDModel)
 
+
 class BaseRepository(Generic[ModelType]):
     def __init__(self, model: Type[ModelType], db: AsyncSession):
         self.model = model

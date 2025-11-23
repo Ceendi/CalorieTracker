@@ -14,7 +14,8 @@ sys.path.append(os.getcwd())
 from src.core.database import Base
 from src.core.config import settings
 
-import src.access_control.infrastructure.orm
+import src.access_control.domain.models
+
 # import src.food_catalogue.infrastructure.orm
 # import src.tracking.infrastructure.orm
 
@@ -34,6 +35,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
