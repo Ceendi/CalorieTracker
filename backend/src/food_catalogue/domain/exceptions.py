@@ -1,0 +1,2 @@
+class FoodNotFoundError(Exception):
+    pass
