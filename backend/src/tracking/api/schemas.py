@@ -1,0 +1,47 @@
+from datetime import date
+from typing import List, Optional
+from uuid import UUID
+
+from pydantic import BaseModel
+
+from src.tracking.domain.entities import MealType
+
+
+class MealEntryCreate(BaseModel):
+    date: date
+    meal_type: MealType
+    product_id: UUID
+    amount_grams: float
+
+
+class MealEntryUpdate(BaseModel):
+    amount_grams: Optional[float] = None
+    meal_type: Optional[MealType] = None
+
+
+class MealEntryRead(BaseModel):
+    id: UUID
+    daily_log_id: UUID
+    meal_type: MealType
+    product_name: str
+    amount_grams: float
+    computed_kcal: int
+    computed_protein: float
+    computed_fat: float
+    computed_carbs: float
+    
+    class Config:
+        from_attributes = True
+
+
+class DailyLogRead(BaseModel):
+    id: UUID
+    date: date
+    total_kcal: int
+    total_protein: float
+    total_fat: float
+    total_carbs: float
+    entries: List[MealEntryRead]
+    
+    class Config:
+        from_attributes = True

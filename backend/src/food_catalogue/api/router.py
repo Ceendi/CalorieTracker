@@ -9,7 +9,7 @@ from src.food_catalogue.api.schemas import FoodOutSchema, CreateCustomFoodIn
 from src.food_catalogue.application.services import FoodService
 from src.food_catalogue.domain.entities import Nutrition, Food
 
-router = APIRouter(prefix="/v1/foods", tags=["Food Catalogue"])
+router = APIRouter()
 
 
 @router.get("/search", response_model=List[FoodOutSchema])
