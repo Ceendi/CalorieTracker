@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from src.access_control.api.routes import router as access_control_router
+from src.users.api.routes import router as access_control_router
 from src.food_catalogue.api.router import router as food_router
 from src.tracking.api.router import router as tracking_router
 from src.core.config import settings

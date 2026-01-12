@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from starlette import status
 
-from src.access_control.api.routes import current_active_user
+from src.users.api.routes import current_active_user
 from src.food_catalogue.api.dependencies import get_food_service
 from src.food_catalogue.api.schemas import FoodOutSchema, CreateCustomFoodIn
 from src.food_catalogue.application.services import FoodService

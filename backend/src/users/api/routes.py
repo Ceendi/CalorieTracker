@@ -1,11 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_users import FastAPIUsers
 from httpx_oauth.clients.google import GoogleOAuth2
 from httpx_oauth.oauth2 import BaseOAuth2
 
-from src.access_control.api.schemas import UserRead, UserCreate, UserUpdate
-from src.access_control.application.manager import get_user_manager
-from src.access_control.infrastructure.security import auth_backend
+from src.users.api.schemas import UserRead, UserCreate, UserUpdate, ChangePassword
+from src.users.application.manager import get_user_manager
+from src.users.domain.models import User
+from src.users.infrastructure.security import auth_backend
 from src.core.config import settings
 
 fastapi_users = FastAPIUsers(
@@ -62,3 +63,25 @@ router.include_router(
 )
 
 current_active_user = fastapi_users.current_user(active=True)
+
+
+@router.post("/users/change-password", tags=["Users"])
+async def change_password(
+        data: ChangePassword,
+        user: User = Depends(current_active_user),
+        user_manager=Depends(get_user_manager)
+):
+    if not user.hashed_password:
+        raise HTTPException(status_code=400, detail="User has no password set")
+
+    verified, _ = user_manager.password_helper.verify_and_update(
+        data.old_password, user.hashed_password
+    )
+
+    if not verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid old password")
+
+    hashed_password = user_manager.password_helper.hash(data.new_password)
+    await user_manager.user_db.update(user, {"hashed_password": hashed_password})
+
+    return {"message": "Password updated successfully"}

@@ -4,8 +4,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.access_control.api.routes import current_active_user
-from src.access_control.domain.models import User
+from src.users.api.routes import current_active_user
+from src.users.domain.models import User
 from src.tracking.api.dependencies import get_tracking_service
 from src.tracking.api.schemas import DailyLogRead, MealEntryCreate, MealEntryUpdate
 from src.tracking.application.services import TrackingService

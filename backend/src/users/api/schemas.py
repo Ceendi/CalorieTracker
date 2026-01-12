@@ -10,11 +10,19 @@ def validate_strong_password(v: str) -> str:
         raise ValueError(f"Password must be at least 8 characters long")
     if not any(char.isdigit() for char in v):
         raise ValueError(f"Password must contain at least one digit")
+    if not any(char.isupper() for char in v):
+        raise ValueError(f"Password must contain at least one uppercase letter")
     return v
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
-    pass
+    is_onboarded: bool
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    goal: Optional[str] = None
+    activity_level: Optional[str] = None
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -31,7 +39,13 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    password: Optional[str] = None
+    is_onboarded: Optional[bool] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    goal: Optional[str] = None
+    activity_level: Optional[str] = None
 
     @field_validator("email", "is_superuser", "is_active", "is_verified", check_fields=False)
     def forbid_sensitive_updates(cls, v):
@@ -44,3 +58,11 @@ class UserUpdate(schemas.BaseUserUpdate):
         if v is not None:
             return validate_strong_password(v)
         return v
+
+class ChangePassword(schemas.BaseModel):
+    old_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    def valid_password(cls, v: str):
+        return validate_strong_password(v)
