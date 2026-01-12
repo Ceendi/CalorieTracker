@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding, Goal } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,33 +36,35 @@ export default function GoalScreen() {
       }}
     >
       <View className="flex-1 px-6 pt-10">
-        <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step3')}</Text>
-        <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.goal')}</Text>
-        <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.goalSubtitle')}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+          <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step3')}</Text>
+          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.goal')}</Text>
+          <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.goalSubtitle')}</Text>
 
-        <View className="mb-6">
-          {goals.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => setGoal(item.id)}
-              className={`mb-3 p-4 rounded-xl border flex-row items-center ${
-                goal === item.id 
-                  ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
-                  : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
-              }`}
-            >
-              <View className="ml-2">
-                 <Text className={`font-semibold text-lg ${
-                  goal === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-white'
-                }`}>
-                  {item.label}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+          <View className="mb-6">
+            {goals.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => setGoal(item.id)}
+                className={`mb-3 p-4 rounded-xl border flex-row items-center ${
+                  goal === item.id 
+                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
+                    : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
+                }`}
+              >
+                <View className="ml-2">
+                   <Text className={`font-semibold text-lg ${
+                    goal === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-white'
+                  }`}>
+                    {item.label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
 
-        <View className="flex-1 justify-end mb-64">
+        <View className="py-6 pb-10">
            <TouchableOpacity 
             onPress={onNext}
             disabled={!goal}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding, Gender } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -46,48 +46,50 @@ export default function BasicInfoScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 pt-10">
-            <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step1')}</Text>
-            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.basicDetails')}</Text>
-            <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.basicDetailsSubtitle')}</Text>
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+              <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step1')}</Text>
+              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.basicDetails')}</Text>
+              <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.basicDetailsSubtitle')}</Text>
 
-            <View className="mb-6">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.age')}</Text>
-              <TextInput
-                className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                placeholder={t('onboarding.agePlaceholder')}
-                placeholderTextColor="#9CA3AF"
-                keyboardType="number-pad"
-                value={age}
-                onChangeText={setAge}
-              />
-            </View>
-
-            <View className="mb-6">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('onboarding.gender')}</Text>
-              <View className="flex-row justify-between">
-                {genders.map((g) => (
-                  <TouchableOpacity
-                    key={g}
-                    onPress={() => setGender(g)}
-                    className={`flex-1 mx-1 p-3 rounded-xl border ${
-                      gender === g 
-                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
-                        : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
-                    } items-center`}
-                  >
-                    <Text
-                      className={`font-semibold ${
-                        gender === g ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'
-                      }`}
-                    >
-                      {getGenderLabel(g)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View className="mb-6">
+                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.age')}</Text>
+                <TextInput
+                  className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
+                  placeholder={t('onboarding.agePlaceholder')}
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="number-pad"
+                  value={age}
+                  onChangeText={setAge}
+                />
               </View>
-            </View>
 
-            <View className="absolute bottom-36 left-6 right-6">
+              <View className="mb-10">
+                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('onboarding.gender')}</Text>
+                <View className="flex-row justify-between">
+                  {genders.map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      onPress={() => setGender(g)}
+                      className={`flex-1 mx-1 p-3 rounded-xl border ${
+                        gender === g 
+                          ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
+                          : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
+                      } items-center`}
+                    >
+                      <Text
+                        className={`font-semibold ${
+                          gender === g ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'
+                        }`}
+                      >
+                        {getGenderLabel(g)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View className="py-6 pb-10">
               <TouchableOpacity 
                 onPress={onNext}
                 disabled={!age || !gender}

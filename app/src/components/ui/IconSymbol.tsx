@@ -18,6 +18,7 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.down': 'keyboard-arrow-down',
   'calendar': 'calendar-today',
   'chart.bar.fill': 'bar-chart',
   'person.fill': 'person',
@@ -29,6 +30,14 @@ const MAPPING = {
   'globe': 'public',
   'lock.fill': 'lock',
   'pencil': 'edit',
+  'ruler': 'straighten',
+  'scalemass': 'monitor-weight',
+  'target': 'track-changes',
+  'figure.run': 'directions-run',
+  'trending-down': 'trending-down',
+  'minus': 'remove',
+  'trending-up': 'trending-up',
+  'rectangle.portrait.and.arrow.right': 'logout',
 } as IconMapping;
 
 /**

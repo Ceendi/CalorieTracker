@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,41 +36,43 @@ export default function MeasurementsScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 pt-10">
-            <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step2')}</Text>
-            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.measurements')}</Text>
-            <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.measurementsSubtitle')}</Text>
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+              <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step2')}</Text>
+              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.measurements')}</Text>
+              <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.measurementsSubtitle')}</Text>
 
-            <View className="mb-6">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.height')}</Text>
-              <View className="flex-row items-center">
-                <TextInput
-                  className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                  placeholder="175"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="number-pad"
-                  value={height}
-                  onChangeText={setHeight}
-                />
-                <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">cm</Text>
+              <View className="mb-6">
+                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.height')}</Text>
+                <View className="flex-row items-center">
+                  <TextInput
+                    className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
+                    placeholder="175"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                    value={height}
+                    onChangeText={setHeight}
+                  />
+                  <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">cm</Text>
+                </View>
               </View>
-            </View>
 
-            <View className="mb-6">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.weight')}</Text>
-              <View className="flex-row items-center">
-                <TextInput
-                  className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                  placeholder="70"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="number-pad"
-                  value={weight}
-                  onChangeText={setWeight}
-                />
-                <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">kg</Text>
+              <View className="mb-6">
+                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.weight')}</Text>
+                <View className="flex-row items-center">
+                  <TextInput
+                    className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
+                    placeholder="70"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                    value={weight}
+                    onChangeText={setWeight}
+                  />
+                  <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">kg</Text>
+                </View>
               </View>
-            </View>
+            </ScrollView>
 
-            <View className="absolute bottom-28 left-6 right-6">
+            <View className="py-6 pb-10">
               <TouchableOpacity 
                 onPress={onNext}
                 disabled={!height || !weight}
