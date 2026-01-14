@@ -40,6 +40,14 @@ export const authService = {
     return await apiClient.post('/auth/jwt/logout');
   },
 
+  async forgotPassword(email: string) {
+    return await apiClient.post('/auth/forgot-password', { email });
+  },
+
+  async resetPassword(token: string, password: string) {
+    return await apiClient.post('/auth/reset-password', { token, password });
+  },
+
   async changePassword(data: ChangePasswordInput) {
     const response = await apiClient.post('/users/change-password', {
       old_password: data.oldPassword,

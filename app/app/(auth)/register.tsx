@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerSchema, RegisterInput } from '@/utils/validators';
+import { createRegisterSchema, RegisterInput } from '@/utils/validators';
 import { useAuth } from '@/hooks/useAuth';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,19 +16,28 @@ import { SettingsModal } from '@/components/profile/SettingsModal';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { signUp, isLoading } = useAuth();
+  const { signUp } = useAuth();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { colorScheme } = useColorScheme();
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
+  const registerSchema = useMemo(() => createRegisterSchema(t), [t]);
+
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
 
   const onSubmit = async (data: RegisterInput) => {
     setErrorMsg(null);
+    setIsLoading(true);
     try {
       await signUp(data);
     } catch (error: any) {
@@ -41,7 +50,7 @@ export default function RegisterScreen() {
         } else if (typeof detail === 'string') {
             setErrorMsg(detail);
         } else if (Array.isArray(detail)) {
-            const messages = detail.map((err: any) => err.msg || 'Invalid input').join('\n');
+            const messages = detail.map((err: any) => err.msg || t('auth.invalidData')).join('\n');
             setErrorMsg(messages);
         } else if (error.response?.status === 400) {
             setErrorMsg(t('auth.invalidData'));
@@ -51,6 +60,8 @@ export default function RegisterScreen() {
       } else {
           setErrorMsg(t('auth.unexpectedError'));
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 

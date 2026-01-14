@@ -23,7 +23,6 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   signIn: async (data) => {
     try {
-      set({ isLoading: true });
       const { access_token, refresh_token } = await authService.login(data);
       
       await storageService.setAccessToken(access_token);
@@ -32,20 +31,18 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
 
       const user = await authService.getMe();
-      set({ user, isSignout: false, isLoading: false });
+      set({ user, isSignout: false });
       
       if (user) { 
         router.replace('/(tabs)'); 
       }
     } catch (error) {
-      set({ isLoading: false });
       throw error;
     }
   },
 
   signUp: async (data) => {
     try {
-      set({ isLoading: true });
       await authService.register(data);
       
       const { access_token, refresh_token } = await authService.login({ 
@@ -59,11 +56,10 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
 
       const user = await authService.getMe();
-      set({ user, isLoading: false });
+      set({ user });
       
       router.replace({ pathname: '/(auth)/verify-email', params: { email: data.email } });
     } catch (error) {
-      set({ isLoading: false });
       throw error;
     }
   },
@@ -89,7 +85,6 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
       const user = await authService.getMe();
       set({ user, isLoading: false });
-      router.replace('/(tabs)');
     } catch (error) {
       set({ user: null, isLoading: false });
     }

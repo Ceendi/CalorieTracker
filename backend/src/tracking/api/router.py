@@ -24,7 +24,7 @@ async def add_entry(
     try:
         return await service.add_meal_entry(
             user_id=user.id,
-            date=entry_data.date,
+            log_date=entry_data.date,
             meal_type=entry_data.meal_type,
             product_id=entry_data.product_id,
             amount_grams=entry_data.amount_grams

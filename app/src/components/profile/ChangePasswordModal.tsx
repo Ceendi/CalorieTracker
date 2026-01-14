@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState, useMemo } from 'react';
+import { View, Text, TouchableOpacity, Modal, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { createChangePasswordSchema, ChangePasswordInput } from '@/utils/validators';
 import { ControlledInput } from '@/components/ui/ControlledInput';
-import { changePasswordSchema, ChangePasswordInput } from '@/utils/validators';
+import { useLanguage } from '@/hooks/useLanguage';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { authService } from '@/services/auth.service';
 import { isAxiosError } from 'axios';
-import { useLanguage } from '@/hooks/useLanguage';
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -16,13 +15,19 @@ interface ChangePasswordModalProps {
 }
 
 export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalProps) {
-  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const { t } = useLanguage();
+
+  const changePasswordSchema = useMemo(() => createChangePasswordSchema(t), [t]);
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<ChangePasswordInput>({
     resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
   });
 
   const onSubmit = async (data: ChangePasswordInput) => {
@@ -34,13 +39,10 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
         { text: "OK", onPress: handleClose }
       ]);
     } catch (error: any) {
-      if (isAxiosError(error)) {
-        const detail = error.response?.data?.detail;
-        if (typeof detail === 'string') {
-          setErrorMsg(detail);
-        } else {
-          setErrorMsg(t('changePassword.errorMatch'));
-        }
+      if (error.response?.data?.detail === 'Invalid old password') {
+        setErrorMsg(t('changePassword.errorInvalidOldPassword'));
+      } else if (error.response?.status === 400) {
+        setErrorMsg(t('changePassword.errorMatch'));
       } else {
         setErrorMsg(t('changePassword.errorGeneric'));
       }
@@ -63,7 +65,6 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
       onRequestClose={handleClose}
     >
       <View className="flex-1 bg-gray-50 dark:bg-slate-900">
-        {/* Header */}
         <View className="flex-row justify-center items-center p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 relative">
           <Text className="text-xl font-bold text-gray-900 dark:text-white">{t('changePassword.title')}</Text>
           <TouchableOpacity 

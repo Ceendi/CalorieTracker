@@ -53,14 +53,17 @@ export default function BasicInfoScreen() {
 
               <View className="mb-6">
                 <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.age')}</Text>
-                <TextInput
-                  className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                  placeholder={t('onboarding.agePlaceholder')}
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="number-pad"
-                  value={age}
-                  onChangeText={setAge}
-                />
+                <View className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                  <TextInput
+                    className="text-gray-900 dark:text-white flex-1 h-full"
+                    style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
+                    placeholder={t('onboarding.agePlaceholder')}
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                    value={age}
+                    onChangeText={setAge}
+                  />
+                </View>
               </View>
 
               <View className="mb-10">

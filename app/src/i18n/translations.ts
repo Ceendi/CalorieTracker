@@ -6,7 +6,7 @@ export const translations = {
       cancel: "Cancel",
       done: "Done",
       editProfile: "Edit Profile",
-      yourStats: "Your Stats",
+      yourStats: "Your Profile",
       height: "Height",
       weight: "Weight",
       age: "Age",
@@ -17,6 +17,12 @@ export const translations = {
       error: "Error",
       updateFailed: "Failed to update profile",
       version: "Version",
+      recommended: "Recommended",
+      validation: {
+        height: "Height must be between 50 and 300 cm",
+        weight: "Weight must be between 20 and 500 kg",
+        age: "Age must be between 10 and 120"
+      }
     },
     settings: {
       title: "Settings",
@@ -47,6 +53,11 @@ export const translations = {
              high: "Very active",
              very_high: "Extra active",
         },
+        genders: {
+            male: "Male",
+            female: "Female",
+        },
+        gender: "Gender",
         activityDescriptions: {
           sedentary: "Little or no exercise",
           light: "Exercise 1-3 times/week",
@@ -85,6 +96,26 @@ export const translations = {
       minPasswordPlaceholder: "Min 8 chars, 1 upper, 1 number",
       confirmPasswordPlaceholder: "Repeat password",
       codePlaceholder: "123456",
+      forgotPassword: "Forgot Password?",
+      resetPasswordTitle: "Reset Password",
+      resetPasswordSubtitle: "Enter your email to receive a password reset link",
+      sendResetLink: "Send Reset Link",
+      checkEmail: "Check your email",
+      checkEmailSubtitle: "We've sent password reset instructions to",
+      resetSuccess: "Password reset successful",
+      errorEmailNotFound: "User with this email was not found.",
+      validation: {
+        invalidEmail: "Invalid email address",
+        emailRequired: "Email is required",
+        passwordRequired: "Password is required",
+        passwordMin: "Password must be at least 8 characters",
+        passwordUppercase: "Password must contain at least one uppercase letter",
+        passwordNumber: "Password must contain at least one number",
+        passwordMatch: "Passwords don't match",
+        invalidCode: "Invalid verification code",
+        currentPasswordRequired: "Current password is required",
+        invalidCredentials: "Invalid email or password",
+      }
     },
     changePassword: {
       title: "Change Password",
@@ -101,6 +132,7 @@ export const translations = {
       errorTitle: "Error",
       errorGeneric: "An unexpected error occurred.",
       errorMatch: "Failed to change password. Please check your current password.",
+      errorInvalidOldPassword: "Invalid old password.",
     },
     tabs: {
       home: "Home",
@@ -132,6 +164,81 @@ export const translations = {
       female: "Female",
       other: "Other",
       agePlaceholder: "e.g. 25"
+    },
+    addFood: {
+        title: "Add Meal",
+        searchPlaceholder: "Search for food...",
+        noResults: "No results found.",
+        emptyState: "Search for products or enter manually",
+        startScanning: "Start Scanning",
+        modes: {
+            product: "Product",
+            scan: "Scan",
+            audio: "Voice",
+            photo: "Photo"
+        },
+        placeholders: {
+            voiceTitle: "Voice Entry",
+            voiceDesc: "Record your meal description to log it automatically. Coming soon!",
+            photoTitle: "Photo Entry",
+            photoDesc: "Snap a photo of your meal for instant analysis. Coming soon!",
+            barcodeTitle: "Barcode Scanner",
+            barcodeDesc: "Scan product barcode to find it instantly."
+        },
+        manualEntry: "Manual Entry"
+    },
+    scanner: {
+        permissionTitle: "Camera Access Required",
+        permissionMessage: "To scan food barcodes, we need permission to use your camera.",
+        grantPermission: "Grant Permission",
+        scanInstruction: "Scan a food barcode",
+        alignInstruction: "Align code within frame"
+    },
+    manualEntry: {
+        title: "Manual Entry",
+        nameLabel: "Dish / Product Name",
+        namePlaceholder: "e.g. Scrambled Eggs",
+        nutritionLabel: "Nutrition per 100g",
+        calories: "Calories",
+        protein: "Protein",
+        fat: "Fat",
+        carbs: "Carbs",
+        portionLabel: "Portion Size (g)",
+        mealLabel: "Meal",
+        save: "Save Entry",
+        success: "Success",
+        error: "Error",
+        validationName: "Please enter a food name.",
+        entryAdded: "Entry added successfully.",
+        createFailed: "Failed to create custom food."
+    },
+    foodDetails: {
+        title: "Add Food",
+        addToDiary: "Add to Diary",
+        loading: "Loading...",
+        errorTitle: "Error",
+        notFound: "Product not found.",
+        noData: "No food data provided.",
+        creationFailed: "Failed to create food product.",
+        unknownProduct: "Unknown Product"
+    },
+    meals: {
+        breakfast: "Breakfast",
+        lunch: "Lunch",
+        snack: "Snack",
+        dinner: "Dinner"
+    },
+    dashboard: {
+        welcome: "Welcome back,",
+        caloriesResult: "Calories Net",
+        remaining: "Remaining",
+        eaten: "Eaten",
+        goal: "Goal",
+        quickAdd: "Quick Add",
+        noEntries: "No meals logged yet today.",
+        addFirst: "Tap + to add your first meal.",
+        delete: "Delete",
+        edit: "Edit"
     }
   },
   pl: {
@@ -139,7 +246,7 @@ export const translations = {
       cancel: "Anuluj",
       done: "Gotowe",
       editProfile: "Edytuj profil",
-      yourStats: "Twoje statystyki",
+      yourStats: "Twój Profil",
       height: "Wzrost",
       weight: "Waga",
       age: "Wiek",
@@ -150,6 +257,12 @@ export const translations = {
       error: "Błąd",
       updateFailed: "Nie udało się zaktualizować profilu",
       version: "Wersja",
+      recommended: "Zalecane",
+      validation: {
+        height: "Wzrost musi mieścić się w przedziale 50 - 300 cm",
+        weight: "Waga musi mieścić się w przedziale 20 - 500 kg",
+        age: "Wiek musi mieścić się w przedziale 10 - 120 lat"
+      }
     },
     settings: {
       title: "Ustawienia",
@@ -180,6 +293,11 @@ export const translations = {
              high: "Bardzo aktywny",
              very_high: "Ekstra aktywny",
         },
+        genders: {
+            male: "Mężczyzna",
+            female: "Kobieta",
+        },
+        gender: "Płeć",
         activityDescriptions: {
           sedentary: "Mało lub brak ćwiczeń",
           light: "Ćwiczenia 1-3 razy w tygodniu",
@@ -218,6 +336,26 @@ export const translations = {
       minPasswordPlaceholder: "Min 8 znaków, 1 duża litera, 1 cyfra",
       confirmPasswordPlaceholder: "Powtórz hasło",
       codePlaceholder: "123456",
+      forgotPassword: "Zapomniałeś hasła?",
+      resetPasswordTitle: "Resetowanie hasła",
+      resetPasswordSubtitle: "Wpisz swój email, aby otrzymać link do resetowania hasła",
+      sendResetLink: "Wyślij link",
+      checkEmail: "Sprawdź email",
+      checkEmailSubtitle: "Wysłaliśmy instrukcję resetowania hasła na adres",
+      resetSuccess: "Hasło zostało pomyślnie zresetowane",
+      errorEmailNotFound: "Użytkownik o tym adresie email nie został znaleziony.",
+      validation: {
+        invalidEmail: "Nieprawidłowy adres email",
+        emailRequired: "Email jest wymagany",
+        passwordRequired: "Hasło jest wymagane",
+        passwordMin: "Hasło musi mieć co najmniej 8 znaków",
+        passwordUppercase: "Hasło musi zawierać co najmniej jedną wielką literę",
+        passwordNumber: "Hasło musi zawierać co najmniej jedną cyfrę",
+        passwordMatch: "Hasła nie są identyczne",
+        invalidCode: "Nieprawidłowy kod weryfikacyjny",
+        currentPasswordRequired: "Obecne hasło jest wymagane",
+        invalidCredentials: "Nieprawidłowy email lub hasło",
+      }
     },
     changePassword: {
       title: "Zmień hasło",
@@ -234,6 +372,7 @@ export const translations = {
       errorTitle: "Błąd",
       errorGeneric: "Wystąpił nieoczekiwany błąd.",
       errorMatch: "Nie udało się zmienić hasła. Sprawdź obecne hasło.",
+      errorInvalidOldPassword: "Stare hasło jest nieprawidłowe.",
     },
     tabs: {
       home: "Start",
@@ -265,6 +404,81 @@ export const translations = {
       female: "Kobieta",
       other: "Inne",
       agePlaceholder: "np. 25"
+    },
+    addFood: {
+        title: "Dodaj Posiłek",
+        searchPlaceholder: "Szukaj jedzenia...",
+        noResults: "Nie znaleziono wyników.",
+        emptyState: "Szukaj produktów lub wprowadź ręcznie",
+        startScanning: "Rozpocznij skanowanie",
+        modes: {
+            product: "Produkt",
+            scan: "Skanuj",
+            audio: "Głos",
+            photo: "Zdjęcie"
+        },
+        placeholders: {
+            voiceTitle: "Wprowadzanie głosowe",
+            voiceDesc: "Nagraj opis posiłku, aby dodać go automatycznie. Wkrótce!",
+            photoTitle: "Zdjęcie posiłku",
+            photoDesc: "Zrób zdjęcie posiłku dla natychmiastowej analizy. Wkrótce!",
+            barcodeTitle: "Skaner Kodów",
+            barcodeDesc: "Zeskanuj kod kreskowy produktu, aby go znaleźć."
+        },
+        manualEntry: "Ręczne wprowadzanie"
+    },
+    scanner: {
+        permissionTitle: "Wymagany dostęp do kamery",
+        permissionMessage: "Aby skanować kody kreskowe, potrzebujemy dostępu do kamery.",
+        grantPermission: "Przyznaj dostęp",
+        scanInstruction: "Zeskanuj kod kreskowy",
+        alignInstruction: "Umieść kod w ramce"
+    },
+    manualEntry: {
+        title: "Ręczne wprowadzanie",
+        nameLabel: "Nazwa dania / produktu",
+        namePlaceholder: "np. Jajecznica",
+        nutritionLabel: "Wartości odżywcze w 100g",
+        calories: "Kalorie",
+        protein: "Białko",
+        fat: "Tłuszcz",
+        carbs: "Węglowodany",
+        portionLabel: "Rozmiar porcji (g)",
+        mealLabel: "Posiłek",
+        save: "Zapisz",
+        success: "Sukces",
+        error: "Błąd",
+        validationName: "Proszę wprowadzić nazwę produktu.",
+        entryAdded: "Pomyślnie dodano wpis.",
+        createFailed: "Nie udało się utworzyć produktu."
+    },
+    foodDetails: {
+        title: "Dodaj jedzenie",
+        addToDiary: "Dodaj do dziennika",
+        loading: "Ładowanie...",
+        errorTitle: "Błąd",
+        notFound: "Nie znaleziono produktu.",
+        noData: "Brak danych o produkcie.",
+        creationFailed: "Nie udało się utworzyć produktu.",
+        unknownProduct: "Nieznany produkt"
+    },
+    meals: {
+        breakfast: "Śniadanie",
+        lunch: "Obiad",
+        snack: "Przekąska",
+        dinner: "Kolacja"
+    },
+    dashboard: {
+        welcome: "Witaj,",
+        caloriesResult: "Bilans kalorii",
+        remaining: "Pozostało",
+        eaten: "Zjedzone",
+        goal: "Cel",
+        quickAdd: "Szybkie dodawanie",
+        noEntries: "Brak posiłków dzisiaj.",
+        addFirst: "Kliknij +, aby dodać pierwszy posiłek.",
+        delete: "Usuń",
+        edit: "Edytuj"
     }
   }
 };

@@ -1,35 +1,66 @@
 import { z } from 'zod';
 
-export const loginSchema = z.object({
-  username: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
+export const createLoginSchema = (t: (key: string) => string) => z.object({
+  username: z.string()
+    .min(1, { message: t('auth.validation.emailRequired') })
+    .email({ message: t('auth.validation.invalidEmail') }),
+  password: z.string()
+    .min(1, { message: t('auth.validation.passwordRequired') }),
 });
 
-export const registerSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+export const createRegisterSchema = (t: (key: string) => string) => z.object({
+  email: z.string()
+    .min(1, { message: t('auth.validation.emailRequired') })
+    .email({ message: t('auth.validation.invalidEmail') }),
   password: z.string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
-  confirmPassword: z.string(),
+    .min(1, { message: t('auth.validation.passwordRequired') })
+    .min(8, { message: t('auth.validation.passwordMin') })
+    .regex(/[A-Z]/, { message: t('auth.validation.passwordUppercase') })
+    .regex(/[0-9]/, { message: t('auth.validation.passwordNumber') }),
+  confirmPassword: z.string()
+    .min(1, { message: t('auth.validation.passwordRequired') }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: t('auth.validation.passwordMatch'),
   path: ["confirmPassword"],
 });
 
-export const verificationSchema = z.object({
-  code: z.string().length(6, { message: "Invalid verification code" }),
+export const createVerificationSchema = (t: (key: string) => string) => z.object({
+  code: z.string()
+    .min(1, { message: t('auth.validation.invalidCode') })
+    .length(6, { message: t('auth.validation.invalidCode') }),
 });
 
-export const changePasswordSchema = z.object({
-  oldPassword: z.string().min(1, { message: "Current password is required" }),
+export const createForgotPasswordSchema = (t: (key: string) => string) => z.object({
+  email: z.string()
+    .min(1, { message: t('auth.validation.emailRequired') })
+    .email({ message: t('auth.validation.invalidEmail') }),
+});
+
+export const createChangePasswordSchema = (t: (key: string) => string) => z.object({
+  oldPassword: z.string()
+    .min(1, { message: t('auth.validation.currentPasswordRequired') }),
   newPassword: z.string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
-  confirmPassword: z.string(),
+    .min(1, { message: t('auth.validation.passwordRequired') })
+    .min(8, { message: t('auth.validation.passwordMin') })
+    .regex(/[A-Z]/, { message: t('auth.validation.passwordUppercase') })
+    .regex(/[0-9]/, { message: t('auth.validation.passwordNumber') }),
+  confirmPassword: z.string()
+    .min(1, { message: t('auth.validation.passwordRequired') }),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: t('auth.validation.passwordMatch'),
+  path: ["confirmPassword"],
+});
+
+export const createResetPasswordSchema = (t: (key: string) => string) => z.object({
+  password: z.string()
+    .min(1, { message: t('auth.validation.passwordRequired') })
+    .min(8, { message: t('auth.validation.passwordMin') })
+    .regex(/[A-Z]/, { message: t('auth.validation.passwordUppercase') })
+    .regex(/[0-9]/, { message: t('auth.validation.passwordNumber') }),
+  confirmPassword: z.string()
+    .min(1, { message: t('auth.validation.passwordRequired') }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: t('auth.validation.passwordMatch'),
   path: ["confirmPassword"],
 });
 
@@ -47,7 +78,9 @@ export interface User {
   activity_level?: string;
 }
 
-export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type VerificationInput = z.infer<typeof verificationSchema>;
-export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
+export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;
+export type VerificationInput = z.infer<ReturnType<typeof createVerificationSchema>>;
+export type ForgotPasswordInput = z.infer<ReturnType<typeof createForgotPasswordSchema>>;
+export type ChangePasswordInput = z.infer<ReturnType<typeof createChangePasswordSchema>>;
+export type ResetPasswordInput = z.infer<ReturnType<typeof createResetPasswordSchema>>;

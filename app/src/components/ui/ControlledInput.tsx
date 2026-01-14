@@ -17,14 +17,17 @@ export const ControlledInput = ({ control, name, label, error, style, ...textInp
         control={control}
         name={name}
         render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            className={`bg-white dark:bg-slate-800 border text-gray-900 dark:text-white rounded-lg p-3 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
-            placeholderTextColor="#9CA3AF"
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-            {...textInputProps}
-          />
+          <View className={`bg-white dark:bg-slate-800 border rounded-lg h-12 justify-center px-3 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}>
+            <TextInput
+              className="text-gray-900 dark:text-white flex-1"
+              style={{ fontSize: 16, paddingVertical: 0, includeFontPadding: false }}
+              placeholderTextColor="#9CA3AF"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              {...textInputProps}
+            />
+          </View>
         )}
       />
       {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}

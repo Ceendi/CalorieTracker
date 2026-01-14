@@ -44,14 +44,17 @@ export default function MeasurementsScreen() {
               <View className="mb-6">
                 <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.height')}</Text>
                 <View className="flex-row items-center">
-                  <TextInput
-                    className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                    placeholder="175"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="number-pad"
-                    value={height}
-                    onChangeText={setHeight}
-                  />
+                  <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                    <TextInput
+                      className="text-gray-900 dark:text-white flex-1 h-full"
+                      style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
+                      placeholder="175"
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="number-pad"
+                      value={height}
+                      onChangeText={setHeight}
+                    />
+                  </View>
                   <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">cm</Text>
                 </View>
               </View>
@@ -59,14 +62,17 @@ export default function MeasurementsScreen() {
               <View className="mb-6">
                 <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.weight')}</Text>
                 <View className="flex-row items-center">
-                  <TextInput
-                    className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-lg text-gray-900 dark:text-white"
-                    placeholder="70"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="number-pad"
-                    value={weight}
-                    onChangeText={setWeight}
-                  />
+                  <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                    <TextInput
+                      className="text-gray-900 dark:text-white flex-1 h-full"
+                      style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
+                      placeholder="70"
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="number-pad"
+                      value={weight}
+                      onChangeText={setWeight}
+                    />
+                  </View>
                   <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">kg</Text>
                 </View>
               </View>

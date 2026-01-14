@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { verificationSchema, VerificationInput } from '@/utils/validators';
+import { createVerificationSchema, VerificationInput } from '@/utils/validators';
 import { authService } from '@/services/auth.service';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +28,8 @@ export default function VerifyEmailScreen() {
   const { colorScheme } = useColorScheme();
   const [settingsVisible, setSettingsVisible] = React.useState(false);
   
+  const verificationSchema = React.useMemo(() => createVerificationSchema(t), [t]);
+
   const { control, handleSubmit, formState: { errors } } = useForm<VerificationInput>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {

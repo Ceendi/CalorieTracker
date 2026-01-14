@@ -11,3 +11,8 @@ export const ACTIVITY_OPTIONS = [
   { label: 'Very Active', value: 'high' },
   { label: 'Extra Active', value: 'very_high' },
 ];
+
+export const GENDER_OPTIONS = [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+];

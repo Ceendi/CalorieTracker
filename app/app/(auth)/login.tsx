@@ -1,35 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema, LoginInput } from '@/utils/validators';
+import { createLoginSchema, LoginInput } from '@/utils/validators';
 import { useAuth } from '@/hooks/useAuth';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/hooks/useLanguage';
+import { isAxiosError } from 'axios';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SettingsModal } from '@/components/profile/SettingsModal';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn, isLoading } = useAuth();
+  const { signIn } = useAuth();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
+  const loginSchema = useMemo(() => createLoginSchema(t), [t]);
+
   const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
   });
 
   const onSubmit = async (data: LoginInput) => {
+    setIsLoading(true);
+    setErrorMsg(null);
     try {
       await signIn(data);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (isAxiosError(error) && (error.response?.status === 400 || error.response?.status === 401)) {
+        setErrorMsg(t('auth.validation.invalidCredentials'));
+      } else {
+        setErrorMsg(t('auth.unexpectedError'));
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,6 +80,12 @@ export default function LoginScreen() {
               <Text className="text-gray-500 dark:text-gray-400 mt-2">{t('auth.signInSubtitle')}</Text>
             </View>
 
+            {errorMsg && (
+              <View className="mb-4 p-3 bg-red-100 border border-red-400 rounded-lg">
+                <Text className="text-red-700 text-center">{errorMsg}</Text>
+              </View>
+            )}
+
             <ControlledInput
               control={control}
               name="username"
@@ -81,6 +104,15 @@ export default function LoginScreen() {
               secureTextEntry
               error={errors.password?.message}
             />
+
+            <TouchableOpacity 
+              onPress={() => router.push('/(auth)/forgot-password')}
+              className="self-end mt-2"
+            >
+              <Text className="text-indigo-600 dark:text-indigo-400 font-medium">
+                {t('auth.forgotPassword')}
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity 
               className="mt-6 mb-4"

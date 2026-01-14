@@ -8,8 +8,10 @@ import { apiClient } from '@/services/api.client';
 import { InfoItem } from '@/components/profile/InfoItem';
 import { SelectionModal } from '@/components/profile/SelectionModal';
 import { SettingsModal } from '@/components/profile/SettingsModal';
-import { GOAL_OPTIONS, ACTIVITY_OPTIONS } from '@/constants/options';
+import { GOAL_OPTIONS, ACTIVITY_OPTIONS, GENDER_OPTIONS } from '@/constants/options';
 import { useLanguage } from '@/hooks/useLanguage';
+import { calculateDailyGoal } from '@/utils/calculations';
+import { User } from '@/utils/validators';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshUser } = useAuth();
@@ -24,15 +26,45 @@ export default function ProfileScreen() {
     age: user?.age?.toString() || '',
     goal: user?.goal || '',
     activity_level: user?.activity_level || '',
+    gender: (user?.gender || 'male').toLowerCase(),
   });
 
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
-  const [activeSelectField, setActiveSelectField] = useState<'goal' | 'activity_level' | null>(null);
+  const [activeSelectField, setActiveSelectField] = useState<'goal' | 'activity_level' | 'gender' | null>(null);
+  
+  const currentCalories = React.useMemo(() => {
+    const profile: Partial<User> = {
+        weight: parseFloat(formData.weight) || 0,
+        height: parseFloat(formData.height) || 0,
+        age: parseInt(formData.age) || 0,
+        gender: formData.gender,
+        activity_level: formData.activity_level,
+        goal: formData.goal
+    };
+    return calculateDailyGoal(profile);
+  }, [formData]);
 
 
 
   const handleSave = async () => {
+    const heightVal = parseFloat(formData.height);
+    const weightVal = parseFloat(formData.weight);
+    const ageVal = parseInt(formData.age);
+
+    if (isNaN(heightVal) || heightVal < 50 || heightVal > 300) {
+      Alert.alert(t('profile.error'), t('profile.validation.height'));
+      return;
+    }
+    if (isNaN(weightVal) || weightVal < 20 || weightVal > 500) {
+      Alert.alert(t('profile.error'), t('profile.validation.weight'));
+      return;
+    }
+    if (isNaN(ageVal) || ageVal < 10 || ageVal > 120) {
+      Alert.alert(t('profile.error'), t('profile.validation.age'));
+      return;
+    }
+
     try {
       setIsLoading(true);
       await apiClient.patch('/users/me', {
@@ -41,6 +73,7 @@ export default function ProfileScreen() {
         age: formData.age ? parseInt(formData.age) : null,
         goal: formData.goal,
         activity_level: formData.activity_level,
+        gender: formData.gender,
       });
       await refreshUser();
       setIsEditing(false);
@@ -63,6 +96,11 @@ export default function ProfileScreen() {
       label: t(`options.activities.${opt.value}`)
   }));
 
+  const translatedGenderOptions = GENDER_OPTIONS.map(opt => ({
+      ...opt,
+      label: t(`options.genders.${opt.value}`)
+  }));
+
   const toggleEdit = () => {
     if (isEditing) {
       setFormData({
@@ -71,6 +109,7 @@ export default function ProfileScreen() {
         age: user?.age?.toString() || '',
         goal: user?.goal || '',
         activity_level: user?.activity_level || '',
+        gender: user?.gender || 'male',
       });
       setIsEditing(false);
     } else {
@@ -78,7 +117,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const openSelection = (field: 'goal' | 'activity_level') => {
+  const openSelection = (field: 'goal' | 'activity_level' | 'gender') => {
     setActiveSelectField(field);
     setModalVisible(true);
   };
@@ -165,6 +204,17 @@ export default function ProfileScreen() {
           isEditing={isEditing} 
           onChangeText={(t) => setFormData({...formData, age: t})} 
         />
+
+        <InfoItem 
+          label={t('options.gender')}
+          value={formData.gender} 
+          fieldKey="gender" 
+          icon="person.fill" 
+          isSelect 
+          selectOptions={translatedGenderOptions}
+          isEditing={isEditing} 
+          onOpenSelection={() => openSelection('gender')}
+        />
         
         <InfoItem 
           label={t('profile.goal')}
@@ -186,11 +236,43 @@ export default function ProfileScreen() {
           isEditing={isEditing} 
           onOpenSelection={() => openSelection('activity_level')}
         />
+
+        <View className="p-4 bg-indigo-50 dark:bg-slate-800 rounded-2xl mb-3 border border-indigo-100 dark:border-indigo-500/30">
+             <View className="flex-row items-center justify-between mb-3">
+                 <View className="flex-row items-center gap-3">
+                    <View className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
+                        <IconSymbol name="flame.fill" size={20} color={colorScheme === 'dark' ? '#818CF8' : '#4F46E5'} />
+                    </View>
+                    <View>
+                        <Text className="text-gray-900 dark:text-white font-bold text-base">{t('dashboard.goal')}</Text>
+                        <Text className="text-xs text-gray-500 dark:text-gray-400">{t('profile.recommended')}</Text>
+                    </View>
+                 </View>
+                 <Text className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {currentCalories.calories} kcal
+                 </Text>
+             </View>
+             
+             <View className="flex-row justify-between pt-3 border-t border-indigo-100 dark:border-gray-700">
+                <View className="items-center">
+                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.protein')}</Text>
+                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.protein}g</Text>
+                </View>
+                <View className="items-center">
+                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.fat')}</Text>
+                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.fat}g</Text>
+                </View>
+                <View className="items-center">
+                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.carbs')}</Text>
+                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.carbs}g</Text>
+                </View>
+             </View>
+        </View>
         
         <SelectionModal 
             visible={modalVisible}
-            title={`${t('options.select')} ${activeSelectField === 'goal' ? t('options.goal') : t('options.activity')}`}
-            options={activeSelectField === 'goal' ? translatedGoalOptions : translatedActivityOptions}
+            title={`${t('options.select')} ${activeSelectField === 'goal' ? t('options.goal') : activeSelectField === 'gender' ? t('options.gender') : t('options.activity')}`}
+            options={activeSelectField === 'goal' ? translatedGoalOptions : activeSelectField === 'gender' ? translatedGenderOptions : translatedActivityOptions}
             selectedValue={activeSelectField ? formData[activeSelectField] : ''}
             onSelect={selectOption}
             onClose={() => setModalVisible(false)}

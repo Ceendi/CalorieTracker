@@ -62,10 +62,11 @@ export const InfoItem = ({
               value={value}
               onChangeText={onChangeText}
               keyboardType={isNumber ? 'numeric' : 'default'}
-              className="flex-1 text-indigo-600 dark:text-indigo-400 font-bold text-lg text-right p-0"
-              style={{ textAlignVertical: 'center' }}
+              className="flex-1 text-indigo-600 dark:text-indigo-400 font-bold text-right h-full"
+              style={{ fontSize: 18, textAlignVertical: 'center', includeFontPadding: false, paddingVertical: 0 }}
               placeholder="-"
               placeholderTextColor="#9CA3AF"
+              selectTextOnFocus
             />
         )
       ) : (

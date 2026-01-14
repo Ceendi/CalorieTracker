@@ -57,6 +57,8 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             )
             self.db.add(daily_log)
             await self.db.flush() 
+            
+        await self.db.refresh(daily_log, attribute_names=['entries'])
         
         return self._to_domain(daily_log)
 

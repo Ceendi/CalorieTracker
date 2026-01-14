@@ -8,18 +8,21 @@ import '../global.css';
 import { cssInterop } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/hooks/useAuth';
+import { View, ActivityIndicator } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 cssInterop(LinearGradient, {
   className: {
     target: 'style',
   },
 });
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/hooks/useAuth';
-import { View, ActivityIndicator } from 'react-native';
+const queryClient = new QueryClient();
 
-function RootLayoutNav() {
-  const { colorScheme } = useColorScheme();
+function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading, checkSession } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -35,7 +38,6 @@ function RootLayoutNav() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
-    const inTabsGroup = segments[0] === '(tabs)';
 
     if (!user && !inAuthGroup) {
       router.replace('/(auth)/login');
@@ -57,6 +59,20 @@ function RootLayoutNav() {
     }
   }, [user, isLoading, segments]);
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-white dark:bg-black justify-center items-center">
+         <ActivityIndicator size="large" color="#4F46E5" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function RootNavigation() {
+  const { colorScheme } = useColorScheme();
+  
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -65,16 +81,18 @@ function RootLayoutNav() {
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
-      
-      {isLoading && (
-        <View className="absolute inset-0 bg-white/80 dark:bg-black/80 justify-center items-center z-50">
-           <ActivityIndicator size="large" color="#4F46E5" />
-        </View>
-      )}
     </ThemeProvider>
   );
 }
 
 export default function RootLayout() {
-  return <RootLayoutNav />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthGuard>
+          <RootNavigation />
+        </AuthGuard>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
+  );
 }
