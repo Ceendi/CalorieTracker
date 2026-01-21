@@ -49,16 +49,16 @@ CATEGORY_MAP = {
 
 UNIT_MAP = {
     "Sztuka": ("piece", "sztuka"),
-    "Sztuka (mała)": ("piece", "sztuka"),
-    "Sztuka (średnia)": ("piece", "sztuka"),
-    "Sztuka (duża)": ("piece", "sztuka"),
+    "Sztuka (mała)": ("piece", "Sztuka (mała)"),
+    "Sztuka (średnia)": ("piece", "Sztuka (średnia)"),
+    "Sztuka (duża)": ("piece", "Sztuka (duża)"),
     "Łyżka": ("tablespoon", "łyżka"),
     "Łyżeczka": ("teaspoon", "łyżeczka"),
     "Szklanka": ("cup", "szklanka"),
     "Porcja": ("portion", "porcja"),
-    "Porcja (mała)": ("portion", "porcja"),
-    "Porcja (średnia)": ("portion", "porcja"),
-    "Porcja (duża)": ("portion", "porcja"),
+    "Porcja (mała)": ("portion", "Porcja (mała)"),
+    "Porcja (średnia)": ("portion", "Porcja (średnia)"),
+    "Porcja (duża)": ("portion", "Porcja (duża)"),
 }
 
 

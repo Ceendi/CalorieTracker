@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_, or_, case, nulls_last
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.food_catalogue.domain.entities import Food, Nutrition, UnitInfo
@@ -56,7 +56,8 @@ class SqlAlchemyFoodRepository:
                 or_(FoodModel.owner_id == owner_id, FoodModel.owner_id.is_(None)),
             )
         ).order_by(
-            FoodModel.owner_id.nulls_last(),
+            nulls_last(FoodModel.owner_id),
+            case((FoodModel.source == 'fineli', 0), else_=1),
             FoodModel.popularity_score.desc()
         ).limit(limit)
 
