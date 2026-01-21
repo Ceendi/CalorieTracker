@@ -38,3 +38,6 @@ class FoodService:
         saved = await self.repo.save_custom_food(food_with_owner)
 
         return saved
+
+    async def get_basic_products(self, category: Optional[str] = None, limit: int = 100) -> List[Food]:
+        return await self.repo.get_by_source("base_db", category=category, limit=limit)

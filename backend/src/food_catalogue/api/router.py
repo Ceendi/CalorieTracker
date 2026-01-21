@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 from starlette import status
@@ -12,6 +12,45 @@ from src.food_catalogue.domain.entities import Nutrition, Food
 router = APIRouter()
 
 
+CATEGORIES = [
+    "Cukier i słodziki",
+    "Dania wegetariańskie",
+    "Dania z jaj",
+    "Drób",
+    "Inne",
+    "Mięso",
+    "Mięso i drób",
+    "Nabiał",
+    "Nabiał i jaja",
+    "Napoje",
+    "Napoje roślinne",
+    "Orzechy i pestki",
+    "Owoce",
+    "Owoce morza",
+    "Pieczywo",
+    "Płatki śniadaniowe",
+    "Produkty wegańskie",
+    "Produkty zbożowe",
+    "Przyprawy",
+    "Przyprawy i dodatki",
+    "Rośliny strączkowe",
+    "Ryby",
+    "Sery",
+    "Słodycze i przekąski",
+    "Soki",
+    "Sosy",
+    "Tłuszcze",
+    "Tłuszcze i oleje",
+    "Warzywa",
+    "Wędliny"
+]
+
+
+@router.get("/categories", response_model=List[str])
+async def get_categories():
+    return CATEGORIES
+
+
 @router.get("/search", response_model=List[FoodOutSchema])
 async def search(
         q: str = Query(..., min_length=1),
@@ -20,6 +59,19 @@ async def search(
 ):
     results = await svc.search_food(q, user_id=user.id)
     return results
+
+
+@router.get("/basic", response_model=List[FoodOutSchema])
+async def get_basic_products(
+        category: Optional[str] = Query(None, description="Filter by category"),
+        limit: int = Query(100, ge=1, le=500, description="Maximum number of products to return"),
+        svc: FoodService = Depends(get_food_service),
+):
+    """
+    Get basic products with optional category filtering.
+    Available categories can be fetched from /categories endpoint.
+    """
+    return await svc.get_basic_products(category=category, limit=limit)
 
 
 @router.get("/barcode/{barcode}", response_model=FoodOutSchema)
