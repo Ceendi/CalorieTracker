@@ -13,6 +13,10 @@ class MealEntryCreate(BaseModel):
     product_id: UUID
     amount_grams: float
 
+    unit_label: Optional[str] = None
+    unit_grams: Optional[float] = None
+    unit_quantity: Optional[float] = None
+
 
 class MealEntryUpdate(BaseModel):
     amount_grams: Optional[float] = None
@@ -22,6 +26,7 @@ class MealEntryUpdate(BaseModel):
 class MealEntryRead(BaseModel):
     id: UUID
     daily_log_id: UUID
+    product_id: Optional[UUID] = None
     meal_type: MealType
     product_name: str
     amount_grams: float
@@ -29,6 +34,15 @@ class MealEntryRead(BaseModel):
     computed_protein: float
     computed_fat: float
     computed_carbs: float
+
+    kcal_per_100g: Optional[int] = None
+    prot_per_100g: Optional[float] = None
+    fat_per_100g: Optional[float] = None
+    carb_per_100g: Optional[float] = None
+
+    unit_label: Optional[str] = None
+    unit_grams: Optional[float] = None
+    unit_quantity: Optional[float] = None
     
     class Config:
         from_attributes = True

@@ -204,6 +204,7 @@ export const translations = {
         fat: "Fat",
         carbs: "Carbs",
         portionLabel: "Portion Size (g)",
+        quantity: "Quantity",
         mealLabel: "Meal",
         save: "Save Entry",
         success: "Success",
@@ -220,7 +221,12 @@ export const translations = {
         notFound: "Product not found.",
         noData: "No food data provided.",
         creationFailed: "Failed to create food product.",
-        unknownProduct: "Unknown Product"
+        unknownProduct: "Unknown Product",
+        selectUnit: "Select unit",
+        grams: "Grams",
+        macroP: "P",
+        macroF: "F",
+        macroC: "C"
     },
     meals: {
         breakfast: "Breakfast",
@@ -238,7 +244,8 @@ export const translations = {
         noEntries: "No meals logged yet today.",
         addFirst: "Tap + to add your first meal.",
         delete: "Delete",
-        edit: "Edit"
+        edit: "Edit",
+        over: "Over"
     }
   },
   pl: {
@@ -444,6 +451,7 @@ export const translations = {
         fat: "Tłuszcz",
         carbs: "Węglowodany",
         portionLabel: "Rozmiar porcji (g)",
+        quantity: "Ilość",
         mealLabel: "Posiłek",
         save: "Zapisz",
         success: "Sukces",
@@ -460,7 +468,12 @@ export const translations = {
         notFound: "Nie znaleziono produktu.",
         noData: "Brak danych o produkcie.",
         creationFailed: "Nie udało się utworzyć produktu.",
-        unknownProduct: "Nieznany produkt"
+        unknownProduct: "Nieznany produkt",
+        selectUnit: "Wybierz jednostkę",
+        grams: "Gramy",
+        macroP: "B",
+        macroF: "T",
+        macroC: "W"
     },
     meals: {
         breakfast: "Śniadanie",
@@ -478,7 +491,8 @@ export const translations = {
         noEntries: "Brak posiłków dzisiaj.",
         addFirst: "Kliknij +, aby dodać pierwszy posiłek.",
         delete: "Usuń",
-        edit: "Edytuj"
+        edit: "Edytuj",
+        over: "Przekroczono"
     }
   }
 };

@@ -48,6 +48,7 @@ const MAPPING: Record<string, MaterialIconName> = {
   'pencil.and.outline': 'edit',
   'flame.fill': 'local-fire-department',
   'fork.knife': 'restaurant',
+  'checkmark.seal.fill': 'verified',
 };
 
 type IconSymbolName = keyof typeof MAPPING;

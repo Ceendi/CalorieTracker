@@ -254,15 +254,17 @@ export default function ProfileScreen() {
              </View>
              
              <View className="flex-row justify-between pt-3 border-t border-indigo-100 dark:border-gray-700">
-                <View className="items-center">
+                <View className="items-center flex-1">
                     <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.protein')}</Text>
                     <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.protein}g</Text>
                 </View>
-                <View className="items-center">
+                <View className="w-px h-8 bg-indigo-100 dark:bg-gray-700" />
+                <View className="items-center flex-1">
                     <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.fat')}</Text>
                     <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.fat}g</Text>
                 </View>
-                <View className="items-center">
+                <View className="w-px h-8 bg-indigo-100 dark:bg-gray-700" />
+                <View className="items-center flex-1">
                     <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.carbs')}</Text>
                     <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.carbs}g</Text>
                 </View>

@@ -32,7 +32,19 @@ apiClient.interceptors.response.use(
         const refreshToken = await storageService.getRefreshToken();
         
         if (refreshToken) {
-             return Promise.reject(error);
+           const response = await axios.post(`${CONFIG.API_URL}/auth/refresh`, {
+               refresh_token: refreshToken
+           });
+           
+           const { access_token, refresh_token: new_refresh_token } = response.data;
+           
+           await storageService.setAccessToken(access_token);
+           if (new_refresh_token) {
+               await storageService.setRefreshToken(new_refresh_token);
+           }
+           
+           originalRequest.headers.Authorization = `Bearer ${access_token}`;
+           return apiClient(originalRequest);
         }
       } catch (refreshError) {
         await storageService.clearAll();

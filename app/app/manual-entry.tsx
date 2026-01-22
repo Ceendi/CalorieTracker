@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useLogEntry, useCreateFood } from '@/hooks/useFood';
 import { CreateEntryDto, MealType, CreateFoodDto } from '@/types/food';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -19,7 +20,17 @@ export default function ManualEntryScreen() {
   const [fat, setFat] = useState('');
   const [carbs, setCarbs] = useState('');
   const [weight, setWeight] = useState('100');
-  const [selectedMeal, setSelectedMeal] = useState<MealType>(MealType.BREAKFAST);
+  
+  const getInitialMealType = () => {
+      const hour = new Date().getHours();
+      if (hour < 10) return MealType.BREAKFAST;
+      if (hour < 13) return MealType.LUNCH;
+      if (hour < 17) return MealType.SNACK;
+      if (hour < 20) return MealType.DINNER;
+      return MealType.SNACK;
+  };
+  
+  const [selectedMeal, setSelectedMeal] = useState<MealType>(getInitialMealType());
 
   const { mutate: logEntry, isPending: isLogging } = useLogEntry();
   const { mutateAsync: createFood, isPending: isCreating } = useCreateFood();
@@ -193,14 +204,28 @@ export default function ManualEntryScreen() {
 
                 <View className="bg-white dark:bg-slate-800 rounded-2xl p-4 mb-4 shadow-sm border border-gray-100 dark:border-slate-700">
                     <Text className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t('manualEntry.portionLabel')}</Text>
-                    <View className="flex-row items-baseline">
-                        <TextInput
-                            className="flex-1 text-2xl font-bold text-gray-900 dark:text-white p-2 border-b border-gray-200 dark:border-slate-600"
-                            value={weight}
-                            onChangeText={setWeight}
-                            keyboardType="numeric"
-                        />
-                        <Text className="text-lg text-gray-500 ml-2">g</Text>
+                    <View className="flex-row items-stretch gap-2 h-14">
+                        <TouchableOpacity 
+                            className="w-12 bg-gray-100 dark:bg-slate-900 rounded-xl items-center justify-center"
+                            onPress={() => setWeight(String(Math.max(10, (parseFloat(weight) || 0) - 10)))}
+                        >
+                            <IconSymbol name="minus" size={20} color="#6B7280" />
+                        </TouchableOpacity>
+                        <View className="flex-1 flex-row items-center bg-gray-50 dark:bg-slate-900 rounded-xl px-4">
+                            <TextInput
+                                className="flex-1 text-xl font-bold text-gray-900 dark:text-white text-center"
+                                value={weight}
+                                onChangeText={setWeight}
+                                keyboardType="numeric"
+                            />
+                            <Text className="text-base text-gray-500 ml-1">g</Text>
+                        </View>
+                        <TouchableOpacity 
+                            className="w-12 bg-gray-100 dark:bg-slate-900 rounded-xl items-center justify-center"
+                            onPress={() => setWeight(String((parseFloat(weight) || 0) + 10))}
+                        >
+                            <IconSymbol name="plus" size={20} color="#6B7280" />
+                        </TouchableOpacity>
                     </View>
                 </View>
 

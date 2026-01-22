@@ -85,21 +85,36 @@ export default function AddScreen() {
                     keyboardShouldPersistTaps="handled"
                     renderItem={({ item }) => (
                          <TouchableOpacity 
-                             className="flex-row items-center bg-white dark:bg-slate-800 p-4 rounded-2xl mb-3 shadow-sm border border-gray-100 dark:border-slate-700/50"
+                             className="bg-white dark:bg-[#283548] p-3 rounded-2xl mb-2 shadow-sm border border-gray-100 dark:border-slate-700/50"
                              onPress={() => handleItemPress(item)}
                          >
-                            <View className="flex-1">
-                                <Text className="text-base font-semibold text-gray-900 dark:text-white mb-1">{item.name}</Text>
-                                <Text className="text-sm text-gray-500 dark:text-gray-400">{item.brand}</Text>
+                            <View className="flex-row items-center justify-between mb-1">
+                                <View className="flex-1 mr-2">
+                                    <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+                                        {item.name}
+                                        {item.source === 'fineli' && (
+                                            <>
+                                                {' '}
+                                                <IconSymbol name="checkmark.seal.fill" size={16} color="#6366f1" style={{ transform: [{ translateY: 4 }] }} />
+                                            </>
+                                        )}
+                                    </Text>
+                                    {item.brand && item.brand.length > 0 && (
+                                        <Text className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{item.brand}</Text>
+                                    )}
+                                </View>
+                                <IconSymbol name="plus.circle.fill" size={28} color="#4F46E5" />
                             </View>
-                            <View className="items-end mr-4">
-                                <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-0.5">{Math.round(item.nutrition?.calories_per_100g || 0)} kcal</Text>
-                                <Text className="text-xs text-gray-400">
-                                   P:{(item.nutrition?.protein_per_100g || 0).toFixed(1)} F:{(item.nutrition?.fat_per_100g || 0).toFixed(1)} C:{(item.nutrition?.carbs_per_100g || 0).toFixed(1)}
+
+                            <View className="flex-row items-baseline pt-1 border-t border-gray-50 dark:border-slate-700/50">
+                                <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+                                    {Math.round(item.nutrition?.calories_per_100g || 0)} kcal <Text className="text-xs font-normal text-gray-400">/ 100g</Text>
+                                </Text>
+                                <Text className="text-sm text-gray-400 ml-3">
+                                   {t('foodDetails.macroP')}:{(item.nutrition?.protein_per_100g || 0).toFixed(1)} {t('foodDetails.macroF')}:{(item.nutrition?.fat_per_100g || 0).toFixed(1)} {t('foodDetails.macroC')}:{(item.nutrition?.carbs_per_100g || 0).toFixed(1)}
                                 </Text>
                             </View>
-                            <IconSymbol name="plus.circle.fill" size={28} color="#4F46E5" />
-                        </TouchableOpacity>
+                         </TouchableOpacity>
                     )}
                     onRefresh={refetch}
                     refreshing={isRefetching}

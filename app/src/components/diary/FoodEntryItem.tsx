@@ -41,7 +41,7 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
                     </View>
                     <View>
                         <Text className="text-gray-400 dark:text-gray-500 text-xs">
-                            P: {Math.round(entry.protein)} F: {Math.round(entry.fat)} C: {Math.round(entry.carbs)}
+                            {t('foodDetails.macroP')}: {Math.round(entry.protein)} {t('foodDetails.macroF')}: {Math.round(entry.fat)} {t('foodDetails.macroC')}: {Math.round(entry.carbs)}
                         </Text>
                     </View>
                 </TouchableOpacity>

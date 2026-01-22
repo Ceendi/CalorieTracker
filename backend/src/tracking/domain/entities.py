@@ -26,6 +26,10 @@ class MealEntry:
     carb_per_100g: float
 
     product_id: Optional[UUID] = None
+    
+    unit_label: Optional[str] = None
+    unit_grams: Optional[float] = None
+    unit_quantity: Optional[float] = None
 
     @property
     def computed_kcal(self) -> int:

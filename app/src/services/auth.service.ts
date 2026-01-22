@@ -7,7 +7,7 @@ export const authService = {
     formData.append('username', data.username);
     formData.append('password', data.password);
     
-    const response = await apiClient.post('/auth/jwt/login', formData, {
+    const response = await apiClient.post('/auth/login', formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
     return response.data;
@@ -37,7 +37,15 @@ export const authService = {
   },
 
   async logout() {
-    return await apiClient.post('/auth/jwt/logout');
+    try {
+        const { storageService } = require('./storage.service');
+        const refreshToken = await storageService.getRefreshToken();
+        if (refreshToken) {
+            return await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+        }
+    } catch (e) {
+        console.error('Logout error', e);
+    }
   },
 
   async forgotPassword(email: string) {

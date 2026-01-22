@@ -19,7 +19,10 @@ class TrackingService:
         log_date: date,
         meal_type: MealType,
         product_id: uuid.UUID,
-        amount_grams: float
+        amount_grams: float,
+        unit_label: Optional[str] = None,
+        unit_grams: Optional[float] = None,
+        unit_quantity: Optional[float] = None
     ) -> DailyLog:
         product = await self.food_repo.get_by_id(product_id)
         if not product:
@@ -35,6 +38,9 @@ class TrackingService:
             product_id=product.id,
             product_name=product.name,
             amount_grams=amount_grams,
+            unit_label=unit_label,
+            unit_grams=unit_grams,
+            unit_quantity=unit_quantity,
             kcal_per_100g=int(product.nutrition.calories_per_100g),
             prot_per_100g=product.nutrition.protein_per_100g,
             fat_per_100g=product.nutrition.fat_per_100g,
@@ -42,6 +48,7 @@ class TrackingService:
         )
         
         await self.tracking_repo.add_entry(user_id, entry_domain)
+        await self.tracking_repo.recalculate_totals(daily_log.id)
         await self.tracking_repo.commit() 
         
         return await self.tracking_repo.get_daily_log(user_id, log_date)
@@ -50,9 +57,15 @@ class TrackingService:
         return await self.tracking_repo.get_daily_log(user_id, log_date)
 
     async def remove_entry(self, user_id: uuid.UUID, entry_id: uuid.UUID) -> None:
+        entry = await self.tracking_repo.get_entry(entry_id, user_id)
+        if not entry:
+            raise MealEntryNotFoundError(str(entry_id))
+        daily_log_id = entry.daily_log_id
+        
         result = await self.tracking_repo.delete_entry(entry_id, user_id)
         if not result:
             raise MealEntryNotFoundError(str(entry_id))
+        await self.tracking_repo.recalculate_totals(daily_log_id)
         await self.tracking_repo.commit()
 
     async def update_meal_entry(
@@ -77,6 +90,7 @@ class TrackingService:
             
         if updated:
             await self.tracking_repo.update_entry(entry)
+            await self.tracking_repo.recalculate_totals(entry.daily_log_id)
             await self.tracking_repo.commit()
 
     async def get_history(self, user_id: uuid.UUID, start_date: date, end_date: date, page: int = 1,

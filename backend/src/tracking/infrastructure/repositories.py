@@ -70,6 +70,9 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             product_name=entry.product_name,
             meal_type=entry.meal_type.value,
             amount_grams=entry.amount_grams,
+            unit_label=entry.unit_label,
+            unit_grams=entry.unit_grams,
+            unit_quantity=entry.unit_quantity,
             kcal_per_100g=entry.kcal_per_100g,
             prot_per_100g=entry.prot_per_100g,
             fat_per_100g=entry.fat_per_100g,
@@ -117,6 +120,9 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             product_id=orm_entry.product_id,
             product_name=orm_entry.product_name,
             amount_grams=orm_entry.amount_grams,
+            unit_label=orm_entry.unit_label,
+            unit_grams=orm_entry.unit_grams,
+            unit_quantity=orm_entry.unit_quantity,
             kcal_per_100g=orm_entry.kcal_per_100g,
             prot_per_100g=orm_entry.prot_per_100g,
             fat_per_100g=orm_entry.fat_per_100g,
@@ -136,7 +142,8 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             orm_entry.meal_type = entry.meal_type.value
             await self.db.flush()
 
-    async def get_history(self, user_id: UUID, start_date: date, end_date: date, page: int = 1, page_size: int = 50) -> List[DailyLog]:
+    async def get_history(self, user_id: UUID, start_date: date, end_date: date, page: int = 1, page_size: int = 50) \
+            -> List[DailyLog]:
         offset = (page - 1) * page_size
         stmt = (
             select(TrackingDailyLog)
@@ -156,6 +163,33 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
         result = await self.db.execute(stmt)
         return [self._to_domain(log) for log in result.scalars().all()]
 
+    async def recalculate_totals(self, daily_log_id: UUID) -> None:
+        stmt = select(TrackingDailyLog).where(
+            TrackingDailyLog.id == daily_log_id
+        ).options(selectinload(TrackingDailyLog.entries))
+        
+        result = await self.db.execute(stmt)
+        daily_log = result.scalar_one_or_none()
+        
+        if daily_log:
+            total_kcal = 0
+            total_protein = 0.0
+            total_fat = 0.0
+            total_carbs = 0.0
+            
+            for e in daily_log.entries:
+                ratio = e.amount_grams / 100
+                total_kcal += int(e.kcal_per_100g * ratio)
+                total_protein += e.prot_per_100g * ratio
+                total_fat += e.fat_per_100g * ratio
+                total_carbs += e.carb_per_100g * ratio
+            
+            daily_log.total_kcal = total_kcal
+            daily_log.total_protein = total_protein
+            daily_log.total_fat = total_fat
+            daily_log.total_carbs = total_carbs
+            await self.db.flush()
+
     async def commit(self) -> None:
         await self.db.commit()
 
@@ -172,6 +206,9 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
                     product_id=e.product_id,
                     product_name=e.product_name,
                     amount_grams=e.amount_grams,
+                    unit_label=e.unit_label,
+                    unit_grams=e.unit_grams,
+                    unit_quantity=e.unit_quantity,
                     kcal_per_100g=e.kcal_per_100g,
                     prot_per_100g=e.prot_per_100g,
                     fat_per_100g=e.fat_per_100g,

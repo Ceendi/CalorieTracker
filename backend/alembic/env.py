@@ -15,6 +15,7 @@ from src.core.database import Base
 from src.core.config import settings
 
 import src.users.domain.models
+import src.users.infrastructure.models
 import src.food_catalogue.infrastructure.orm_models
 import src.tracking.infrastructure.orm_models
 

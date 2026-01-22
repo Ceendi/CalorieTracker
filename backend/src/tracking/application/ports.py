@@ -39,3 +39,7 @@ class TrackingRepositoryPort(ABC):
     @abstractmethod
     async def commit(self) -> None:
         pass
+
+    @abstractmethod
+    async def recalculate_totals(self, daily_log_id: uuid.UUID) -> None:
+        pass

@@ -42,6 +42,10 @@ class TrackingMealEntry(UUIDModel):
     meal_type: Mapped[str] = mapped_column(String, nullable=False)
     
     amount_grams: Mapped[float] = mapped_column(Float, nullable=False)
+
+    unit_label: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    unit_grams: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    unit_quantity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     
     kcal_per_100g: Mapped[int] = mapped_column(Integer, nullable=False)
     prot_per_100g: Mapped[float] = mapped_column(Float, nullable=False)

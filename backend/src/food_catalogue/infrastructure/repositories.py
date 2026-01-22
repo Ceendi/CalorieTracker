@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 
-from sqlalchemy import select, and_, or_, case, nulls_last
+from sqlalchemy import select, and_, or_, case, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.food_catalogue.domain.entities import Food, Nutrition, UnitInfo
@@ -49,15 +49,36 @@ class SqlAlchemyFoodRepository:
         result = await self.session.execute(stmt)
         return self._to_domain(result.scalar_one_or_none())
 
+    def _create_fuzzy_regex(self, query: str) -> str:
+        replacements = {
+            'a': '[aą]', 'c': '[cć]', 'e': '[eę]', 'l': '[lł]', 'n': '[nń]', 
+            'o': '[oó]', 's': '[sś]', 'z': '[zźż]',
+            'A': '[AĄ]', 'C': '[CĆ]', 'E': '[EĘ]', 'L': '[LŁ]', 'N': '[NŃ]', 
+            'O': '[OÓ]', 'S': '[SŚ]', 'Z': '[ZŹŻ]'
+        }
+        
+        import re
+        safe_query = re.escape(query)
+        
+        pattern = ""
+        for char in safe_query:
+            pattern += replacements.get(char, char)
+            
+        return pattern
+
     async def search_by_name(self, query: str, limit: int = 20, owner_id: Optional[uuid.UUID] = None) -> List[Food]:
+        fuzzy_pattern = self._create_fuzzy_regex(query)
+        
         stmt = select(FoodModel).where(
             and_(
-                FoodModel.name.ilike(f"%{query}%"),
+                FoodModel.name.op("~*")(fuzzy_pattern),
                 or_(FoodModel.owner_id == owner_id, FoodModel.owner_id.is_(None)),
             )
         ).order_by(
-            nulls_last(FoodModel.owner_id),
+            case((FoodModel.name.ilike(query), 0), else_=1),
+            case((FoodModel.name.op("~*")(f"^{fuzzy_pattern}"), 0), else_=1),
             case((FoodModel.source == 'fineli', 0), else_=1),
+            func.length(FoodModel.name),
             FoodModel.popularity_score.desc()
         ).limit(limit)
 

@@ -31,6 +31,9 @@ class FoodService:
 
         return None
 
+    async def get_by_id(self, food_id: str) -> Optional[Food]:
+        return await self.repo.get_by_id(uuid.UUID(food_id))
+
     async def create_custom_food(self, food: Food, owner_id: uuid.UUID) -> Food:
         from dataclasses import replace
         food_with_owner = replace(food, owner_id=owner_id)

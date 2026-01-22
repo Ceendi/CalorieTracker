@@ -67,11 +67,18 @@ async def get_basic_products(
         limit: int = Query(100, ge=1, le=500, description="Maximum number of products to return"),
         svc: FoodService = Depends(get_food_service),
 ):
-    """
-    Get basic products with optional category filtering.
-    Available categories can be fetched from /categories endpoint.
-    """
     return await svc.get_basic_products(category=category, limit=limit)
+
+
+@router.get("/{food_id}", response_model=FoodOutSchema)
+async def get_product_by_id(
+        food_id: str,
+        svc: FoodService = Depends(get_food_service),
+):
+    food = await svc.get_by_id(food_id)
+    if not food:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return food
 
 
 @router.get("/barcode/{barcode}", response_model=FoodOutSchema)

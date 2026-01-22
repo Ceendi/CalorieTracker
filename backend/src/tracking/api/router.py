@@ -27,7 +27,10 @@ async def add_entry(
             log_date=entry_data.date,
             meal_type=entry_data.meal_type,
             product_id=entry_data.product_id,
-            amount_grams=entry_data.amount_grams
+            amount_grams=entry_data.amount_grams,
+            unit_label=entry_data.unit_label,
+            unit_grams=entry_data.unit_grams,
+            unit_quantity=entry_data.unit_quantity
         )
     except ProductNotFoundInTrackingError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)

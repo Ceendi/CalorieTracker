@@ -34,19 +34,23 @@ function mapLog(apiLog: any): DailyLog {
     entries: (apiLog.entries || []).map((e: any) => ({
       ...e,
       product: {
-        id: null,
+        id: e.product_id || null,
         name: e.product_name || 'Unknown',
         nutrition: {
-             calories_per_100g: 0,
-             protein_per_100g: 0,
-             fat_per_100g: 0,
-             carbs_per_100g: 0
+             calories_per_100g: e.kcal_per_100g || 0,
+             protein_per_100g: e.prot_per_100g || 0,
+             fat_per_100g: e.fat_per_100g || 0,
+             carbs_per_100g: e.carb_per_100g || 0
         }
       },
+      product_id: e.product_id,
       calories: e.computed_kcal,
       protein: e.computed_protein,
       fat: e.computed_fat,
-      carbs: e.computed_carbs
+      carbs: e.computed_carbs,
+      unit_label: e.unit_label,
+      unit_grams: e.unit_grams,
+      unit_quantity: e.unit_quantity
     }))
   };
 }

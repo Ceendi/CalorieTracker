@@ -59,6 +59,7 @@ class UserUpdate(schemas.BaseUserUpdate):
             return validate_strong_password(v)
         return v
 
+
 class ChangePassword(schemas.BaseModel):
     old_password: str
     new_password: str

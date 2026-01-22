@@ -4,6 +4,7 @@ from httpx_oauth.clients.google import GoogleOAuth2
 from httpx_oauth.oauth2 import BaseOAuth2
 
 from src.users.api.schemas import UserRead, UserCreate, UserUpdate, ChangePassword
+from src.users.api.auth_router import router as auth_router
 from src.users.application.manager import get_user_manager
 from src.users.domain.models import User
 from src.users.infrastructure.security import auth_backend
@@ -43,6 +44,12 @@ router.include_router(
 google_oauth_client: BaseOAuth2 = GoogleOAuth2(
     settings.GOOGLE_CLIENT_ID,
     settings.GOOGLE_CLIENT_SECRET,
+)
+
+router.include_router(
+    auth_router,
+    prefix="/auth",
+    tags=["Auth"]
 )
 
 router.include_router(

@@ -5,6 +5,12 @@ export interface Nutrition {
   carbs_per_100g: number;
 }
 
+export interface UnitInfo {
+  unit: string;
+  grams: number;
+  label: string;
+}
+
 export interface FoodProduct {
   id: string | null;
   name: string;
@@ -13,6 +19,7 @@ export interface FoodProduct {
   owner_id?: string;
   source?: string;
   brand?: string;
+  units?: UnitInfo[];
 }
 
 export interface Food extends FoodProduct {}
@@ -29,6 +36,10 @@ export interface CreateEntryDto {
   meal_type: MealType;
   product_id: string; // UUID
   amount_grams: number;
+
+  unit_label?: string;
+  unit_grams?: number;
+  unit_quantity?: number;
 }
 
 export interface CreateFoodDto {
@@ -49,6 +60,10 @@ export interface MealEntry {
   protein: number;
   fat: number;
   carbs: number;
+
+  unit_label?: string;
+  unit_grams?: number;
+  unit_quantity?: number;
 }
 
 export interface DailyLog {

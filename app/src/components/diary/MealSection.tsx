@@ -43,7 +43,7 @@ export function MealSection({ type, entries, onAdd, onDeleteEntry, onEditEntry }
         className="flex-row items-center py-2"
       >
         <IconSymbol name="plus.circle.fill" size={20} color="#4F46E5" />
-        <Text className="text-indigo-600 font-medium ml-2">{t('foodDetails.title')}</Text>
+        <Text className="text-indigo-600 font-medium ml-2">{t('dashboard.quickAdd')}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -37,8 +37,10 @@ export default function HomeScreen() {
   const calculatedGoal = user ? calculateDailyGoal(user) : { calories: 2000, protein: 160, fat: 70, carbs: 250 };
   const dailyGoal = calculatedGoal.calories;
   const consumed = dailyLog?.total_kcal || 0;
-  const remaining = Math.max(0, dailyGoal - consumed);
+  const remaining = dailyGoal - consumed;
+  const isOverGoal = consumed > dailyGoal;
   const progress = Math.min(consumed / dailyGoal, 1);
+  const percentage = Math.round((consumed / dailyGoal) * 100);
 
   const handleAddMeal = (type: MealType) => {
       router.push('/(tabs)/add');
@@ -52,7 +54,10 @@ export default function HomeScreen() {
                item: JSON.stringify(entry.product),
                initialAmount: entry.amount_grams.toString(),
                initialMealType: entry.meal_type,
-               date: formattedDate
+               date: formattedDate,
+               initialUnitLabel: entry.unit_label,
+               initialUnitGrams: entry.unit_grams?.toString(),
+               initialUnitQuantity: entry.unit_quantity?.toString()
            }
        });
   };
@@ -87,7 +92,7 @@ export default function HomeScreen() {
           className="rounded-[32px] p-5 mb-5 shadow-md"
         >
             <View className="flex-row justify-between items-center mb-4">
-                 <Text className="text-indigo-100 font-semibold text-base">{t('dashboard.eaten')}</Text>
+                 <Text className="text-indigo-100 font-semibold text-base">{t('dashboard.caloriesResult')}</Text>
                  <IconSymbol name="flame.fill" size={20} color="#E0E7FF" />
             </View>
 
@@ -96,26 +101,26 @@ export default function HomeScreen() {
                     size={180} 
                     strokeWidth={18} 
                     progress={progress} 
-                    color="white" 
+                    color={isOverGoal ? '#EF4444' : 'white'} 
                     trackColor="rgba(255,255,255,0.15)"
                 >
                     <View className="items-center justify-center">
-                        <Text className="text-4xl font-black text-white tracking-tight leading-tight">
-                            {Math.round(remaining)}
+                        <Text className={`text-4xl font-black tracking-tight leading-tight ${isOverGoal ? 'text-red-300' : 'text-white'}`}>
+                            {isOverGoal ? `${Math.abs(Math.round(remaining))}` : Math.round(remaining)}
                         </Text>
-                        <Text className="text-indigo-200 text-xs font-medium uppercase tracking-widest mt-1">
-                            {t('dashboard.remaining')}
+                        <Text className={`text-xs font-medium uppercase tracking-widest mt-1 ${isOverGoal ? 'text-red-200' : 'text-indigo-200'}`}>
+                            {isOverGoal ? t('dashboard.over') : t('dashboard.remaining')}
                         </Text>
                     </View>
                 </GaugeProgress>
             </View>
 
-            <View className="flex-row justify-between px-4 bg-indigo-950/20 rounded-2xl py-2 mx-2 border border-indigo-400/10 mb-1">
+            <View className="flex-row justify-around px-4 bg-indigo-950/20 rounded-2xl py-3 mx-2 border border-indigo-400/10 mb-1">
                  <View className="items-center">
                      <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">{t('dashboard.eaten')}</Text>
                      <Text className="text-lg font-black text-white">{Math.round(consumed)}</Text>
                  </View>
-                 <View className="w-[1px] bg-indigo-400/20 h-full mx-4" />
+                 <View className="w-[1px] bg-indigo-400/30 h-10" />
                  <View className="items-center">
                      <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">{t('dashboard.goal')}</Text>
                      <Text className="text-lg font-black text-white">{dailyGoal}</Text>

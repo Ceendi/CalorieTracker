@@ -18,4 +18,9 @@ export const foodService = {
     const response = await apiClient.post<FoodProduct>(`/api/v1/foods/custom`, food);
     return response.data;
   },
+
+  async getFoodById(id: string): Promise<FoodProduct> {
+    const response = await apiClient.get<FoodProduct>(`/api/v1/foods/${id}`);
+    return response.data;
+  },
 };
