@@ -51,7 +51,7 @@ const MAPPING: Record<string, MaterialIconName> = {
   'checkmark.seal.fill': 'verified',
 };
 
-type IconSymbolName = keyof typeof MAPPING;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.

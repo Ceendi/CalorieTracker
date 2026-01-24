@@ -179,13 +179,57 @@ export const translations = {
         },
         placeholders: {
             voiceTitle: "Voice Entry",
-            voiceDesc: "Record your meal description to log it automatically. Coming soon!",
+            voiceDesc: "Record your meal description to log it automatically. Example: \"Chicken breast 200g and rice\"",
             photoTitle: "Photo Entry",
             photoDesc: "Snap a photo of your meal for instant analysis. Coming soon!",
             barcodeTitle: "Barcode Scanner",
             barcodeDesc: "Scan product barcode to find it instantly."
         },
-        manualEntry: "Manual Entry"
+        voiceButton: {
+            record: "Record",
+            processing: "Processing...",
+            success: "Done!",
+            error: "Error",
+            hold: "Hold to record",
+            release: "Release to stop",
+            permission: "Enable microphone access in settings",
+            noPermission: "Microphone access denied"
+        },
+        voiceTip: "💡 Tip: Say quantity in grams or use units like \"slice\", \"cup\", \"spoon\"",
+        confirmTitle: "Confirm Meal",
+        transcriptionLabel: "I heard:",
+        productsLabel: "Products",
+        summaryTitle: "Summary",
+        processedTime: "Processed in",
+        tapToChange: "Tap to change",
+        manualEntry: "Manual Entry",
+        searchToConfirm: "Add Product",
+        editInfo: "Edit",
+        editInfoDesc: "Add products manually or record again",
+        voiceError: "Voice Error",
+        mealAdded: "Added!",
+        mealAddedDesc: "Meal added to diary",
+        addingToDiary: "Adding to diary...",
+        summary: {
+            kcal: "kcal",
+            protein: "Protein",
+            fat: "Fat",
+            carbs: "Carbs"
+        },
+        buttons: {
+            edit: "Edit",
+            addToDiary: "Add to Diary"
+        }
+    },
+    common: {
+        errors: {
+            processingFailed: "Processing failed",
+            transcriptionFailed: "Transcription failed",
+            micAccess: "Failed to access microphone",
+            startRecording: "Failed to start recording",
+            noRecording: "No audio recording found",
+            unknown: "Unknown error"
+        }
     },
     scanner: {
         permissionTitle: "Camera Access Required",
@@ -226,13 +270,18 @@ export const translations = {
         grams: "Grams",
         macroP: "P",
         macroF: "F",
-        macroC: "C"
+        macroC: "C",
+        protein: "Protein",
+        fat: "Fat",
+        carbs: "Carbs"
     },
     meals: {
         breakfast: "Breakfast",
         lunch: "Lunch",
         snack: "Snack",
-        dinner: "Dinner"
+        dinner: "Dinner",
+        second_breakfast: "2nd Breakfast",
+        tea: "Tea"
     },
     dashboard: {
         welcome: "Welcome back,",
@@ -426,13 +475,57 @@ export const translations = {
         },
         placeholders: {
             voiceTitle: "Wprowadzanie głosowe",
-            voiceDesc: "Nagraj opis posiłku, aby dodać go automatycznie. Wkrótce!",
+            voiceDesc: "Nagraj opis posiłku, aby dodać go automatycznie. Np. \"Pierś z kurczaka 200g i ryż\"",
             photoTitle: "Zdjęcie posiłku",
             photoDesc: "Zrób zdjęcie posiłku dla natychmiastowej analizy. Wkrótce!",
             barcodeTitle: "Skaner Kodów",
             barcodeDesc: "Zeskanuj kod kreskowy produktu, aby go znaleźć."
         },
-        manualEntry: "Ręczne wprowadzanie"
+        voiceButton: {
+            record: "Nagraj",
+            processing: "Przetwarzanie...",
+            success: "Gotowe!",
+            error: "Błąd",
+            hold: "Przytrzymaj, aby nagrać",
+            release: "Puść, aby zakończyć",
+            permission: "Włącz dostęp do mikrofonu w ustawieniach",
+            noPermission: "Brak dostępu do mikrofonu"
+        },
+        voiceTip: "💡 Wskazówka: Podaj ilość w gramach lub użyj miar jak \"sztuka\", \"łyżka\", \"szklanka\"",
+        confirmTitle: "Potwierdź posiłek",
+        transcriptionLabel: "Usłyszałem:",
+        productsLabel: "Produkty",
+        summaryTitle: "Podsumowanie",
+        processedTime: "Przetworzono w",
+        tapToChange: "Dotknij, aby zmienić",
+        manualEntry: "Ręczne wprowadzanie",
+        searchToConfirm: "Dodaj produkt",
+        editInfo: "Edycja",
+        editInfoDesc: "Dodaj produkty ręcznie lub nagraj ponownie",
+        voiceError: "Błąd głosowy",
+        mealAdded: "Dodano!",
+        mealAddedDesc: "Posiłek dodany do dziennika",
+        addingToDiary: "Dodawanie do dziennika...",
+        summary: {
+            kcal: "kcal",
+            protein: "Białko",
+            fat: "Tłuszcz",
+            carbs: "Węgle"
+        },
+        buttons: {
+            edit: "Edytuj",
+            addToDiary: "Dodaj do dziennika"
+        }
+    },
+    common: {
+        errors: {
+            processingFailed: "Przetwarzanie nie powiodło się",
+            transcriptionFailed: "Transkrypcja nie powiodła się",
+            micAccess: "Nie udało się uzyskać dostępu do mikrofonu",
+            startRecording: "Nie udało się rozpocząć nagrywania",
+            noRecording: "Brak nagrania audio",
+            unknown: "Nieznany błąd"
+        }
     },
     scanner: {
         permissionTitle: "Wymagany dostęp do kamery",
@@ -473,13 +566,18 @@ export const translations = {
         grams: "Gramy",
         macroP: "B",
         macroF: "T",
-        macroC: "W"
+        macroC: "W",
+        protein: "Białko",
+        fat: "Tłuszcz",
+        carbs: "Węglowodany"
     },
     meals: {
         breakfast: "Śniadanie",
         lunch: "Obiad",
         snack: "Przekąska",
-        dinner: "Kolacja"
+        dinner: "Kolacja",
+        second_breakfast: "II Śniadanie",
+        tea: "Podwieczorek"
     },
     dashboard: {
         welcome: "Witaj,",
