@@ -22,10 +22,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
-    # AI Processing Settings
-    OPENAI_API_KEY: Optional[str] = None  # Optional: for GPT-4o fallback
-    WHISPER_MODEL_SIZE: str = "medium"  # tiny, base, small, medium, large
-    NER_CONFIDENCE_THRESHOLD: float = 0.65  # Threshold for LLM fallback
+    WHISPER_MODEL_SIZE: str = "small"  # tiny, base, small, medium, large
 
     @computed_field
     @property

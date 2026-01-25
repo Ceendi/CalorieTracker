@@ -142,3 +142,6 @@ cython_debug/
 
 # AI Models
 models/
+local_wheels/
+
+uv.toml
