@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -25,6 +25,7 @@ export default function TabLayout() {
           elevation: 0,
           height: 90,
           paddingBottom: 30,
+          backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
         },
       }}>
       <Tabs.Screen
@@ -55,7 +56,7 @@ export default function TabLayout() {
                 style={styles.customButtonContainer}
               >
                 <LinearGradient
-                  colors={['#4F46E5', '#4338CA']}
+                  colors={[Colors.light.tint, '#4338CA']}
                   style={styles.customButton}
                 >
                   <IconSymbol size={30} name="plus" color="#FFFFFF" />

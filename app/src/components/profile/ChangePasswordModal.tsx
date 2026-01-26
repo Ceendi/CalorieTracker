@@ -64,14 +64,14 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-gray-50 dark:bg-slate-900">
-        <View className="flex-row justify-center items-center p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 relative">
-          <Text className="text-xl font-bold text-gray-900 dark:text-white">{t('changePassword.title')}</Text>
+      <View className="flex-1 bg-background">
+        <View className="flex-row justify-center items-center p-4 border-b border-border bg-background relative">
+          <Text className="text-xl font-bold text-foreground">{t('changePassword.title')}</Text>
           <TouchableOpacity 
             onPress={handleClose} 
-            className="p-2 bg-gray-100 dark:bg-slate-800 rounded-full absolute right-4"
+            className="p-2 bg-muted/50 rounded-full absolute right-4"
           >
-            <IconSymbol name="xmark" size={20} color="#6B7280" />
+            <IconSymbol name="xmark" size={20} color={Platform.OS === 'ios' ? '#94a3b8' : '#6B7280'} />
           </TouchableOpacity>
         </View>
 
@@ -81,14 +81,14 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
         >
           <ScrollView className="flex-1 p-6">
             <View className="mb-6">
-              <Text className="text-gray-500 dark:text-gray-400">
+              <Text className="text-muted-foreground">
                 {t('changePassword.description')}
               </Text>
             </View>
 
             {errorMsg && (
-              <View className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-900 rounded-lg">
-                <Text className="text-red-700 dark:text-red-300 text-center">{errorMsg}</Text>
+              <View className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
+                <Text className="text-destructive text-center">{errorMsg}</Text>
               </View>
             )}
 
@@ -120,7 +120,7 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
             />
 
             <TouchableOpacity 
-              className="mt-8 bg-indigo-600 dark:bg-indigo-500 p-4 rounded-xl items-center shadow-sm"
+              className="mt-8 bg-primary p-4 rounded-xl items-center shadow-sm"
               onPress={handleSubmit(onSubmit)}
               disabled={isLoading}
             >

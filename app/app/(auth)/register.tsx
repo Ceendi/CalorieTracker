@@ -13,6 +13,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SettingsModal } from '@/components/profile/SettingsModal';
+import { Colors } from '@/constants/theme';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -67,7 +68,7 @@ export default function RegisterScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -78,9 +79,9 @@ export default function RegisterScreen() {
       <View style={{ position: 'absolute', top: insets.top + 10, right: 20, zIndex: 10 }}>
         <TouchableOpacity 
           onPress={() => setSettingsVisible(true)} 
-          className="p-2 bg-white/80 dark:bg-slate-800/80 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+          className="p-2 bg-card rounded-full border border-border shadow-sm"
         >
-          <IconSymbol name="gear" size={24} color={colorScheme === 'dark' ? '#fff' : '#4B5563'} />
+          <IconSymbol name="gear" size={24} color={Colors[colorScheme ?? 'light'].tint} />
         </TouchableOpacity>
       </View>
 
@@ -91,13 +92,13 @@ export default function RegisterScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} className="px-6" keyboardShouldPersistTaps="handled">
             <View className="mb-8">
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white">{t('auth.createAccount')}</Text>
-              <Text className="text-gray-500 dark:text-gray-400 mt-2">{t('auth.signUpSubtitle')}</Text>
+              <Text className="text-3xl font-bold text-foreground">{t('auth.createAccount')}</Text>
+              <Text className="text-muted-foreground mt-2">{t('auth.signUpSubtitle')}</Text>
             </View>
 
             {errorMsg && (
-                <View className="mb-4 p-3 bg-red-100 border border-red-400 rounded-lg">
-                    <Text className="text-red-700 text-center">{errorMsg}</Text>
+                <View className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
+                    <Text className="text-destructive text-center">{errorMsg}</Text>
                 </View>
             )}
 
@@ -135,11 +136,11 @@ export default function RegisterScreen() {
               disabled={isLoading}
             >
               <LinearGradient
-                colors={['#4F46E5', '#4338CA']}
+                colors={[Colors.light.tint, '#4338CA']}
                 className="rounded-xl p-4 items-center"
               >
                {isLoading ? (
-                 <ActivityIndicator color="white" />
+                 <ActivityIndicator color={Colors.light.tint} />
                ) : (
                  <Text className="text-white font-semibold text-lg">{t('auth.signUp')}</Text>
                )}
@@ -147,9 +148,9 @@ export default function RegisterScreen() {
             </TouchableOpacity>
 
             <View className="flex-row justify-center mt-4 mb-8">
-              <Text className="text-gray-600 dark:text-gray-400">{t('auth.alreadyHaveAccount')} </Text>
+              <Text className="text-muted-foreground">{t('auth.alreadyHaveAccount')} </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-                <Text className="text-indigo-600 dark:text-indigo-400 font-semibold">{t('auth.signIn')}</Text>
+                <Text className="text-primary font-semibold">{t('auth.signIn')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

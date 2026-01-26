@@ -26,6 +26,7 @@ export function useColorScheme() {
     const newScheme = colorScheme === 'dark' ? 'light' : 'dark';
     setColorScheme(newScheme);
     await storageService.setTheme(newScheme);
+    return newScheme;
   };
 
   const setColorSchemeWithPersist = async (scheme: 'light' | 'dark' | 'system') => {

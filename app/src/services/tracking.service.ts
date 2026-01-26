@@ -1,9 +1,14 @@
 import { apiClient } from './api.client';
-import { CreateEntryDto, DailyLog, MealEntry } from '@/types/food';
+import { CreateEntryDto, DailyLog, MealEntry, CreateBulkEntryDto } from '@/types/food';
 
 export const trackingService = {
   async logEntry(entry: CreateEntryDto): Promise<DailyLog> {
     const response = await apiClient.post('/api/v1/tracking/entries', entry);
+    return response.data;
+  },
+
+  async logEntriesBulk(bulkData: CreateBulkEntryDto): Promise<DailyLog> {
+    const response = await apiClient.post('/api/v1/tracking/bulk-entries', bulkData);
     return response.data;
   },
 

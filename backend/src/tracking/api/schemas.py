@@ -7,15 +7,23 @@ from pydantic import BaseModel
 from src.tracking.domain.entities import MealType
 
 
-class MealEntryCreate(BaseModel):
-    date: date
-    meal_type: MealType
+class MealEntryBase(BaseModel):
     product_id: UUID
     amount_grams: float
-
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
+
+
+class MealEntryCreate(MealEntryBase):
+    date: date
+    meal_type: MealType
+
+
+class MealBulkCreate(BaseModel):
+    date: date
+    meal_type: MealType
+    items: List[MealEntryBase]
 
 
 class MealEntryUpdate(BaseModel):

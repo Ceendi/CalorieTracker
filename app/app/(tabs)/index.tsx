@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDiary } from '@/hooks/useDiary';
 import { calculateDailyGoal } from '@/utils/calculations';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 import { DateStrip } from '@/components/diary/DateStrip';
 import { NutrientRing } from '@/components/diary/NutrientRing';
 import { MealSection } from '@/components/diary/MealSection';
@@ -69,7 +70,7 @@ export default function HomeScreen() {
   const mealTypes = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView 
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
@@ -77,8 +78,8 @@ export default function HomeScreen() {
         
         <View className="flex-row justify-between items-center mb-2">
           <View>
-            <Text className="text-gray-500 dark:text-gray-400 text-sm font-medium">{t('dashboard.welcome')}</Text>
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white capitalize">{userName}</Text>
+            <Text className="text-muted-foreground text-sm font-medium">{t('dashboard.welcome')}</Text>
+            <Text className="text-2xl font-bold text-foreground capitalize">{userName}</Text>
           </View>
         </View>
 
@@ -86,7 +87,7 @@ export default function HomeScreen() {
         <DateStrip selectedDate={date} onSelectDate={setDate} />
 
         <LinearGradient
-          colors={['#4F46E5', '#4338CA']}
+          colors={[Colors.light.tint, '#4338CA']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="rounded-[32px] p-5 mb-5 shadow-md"
@@ -105,10 +106,10 @@ export default function HomeScreen() {
                     trackColor="rgba(255,255,255,0.15)"
                 >
                     <View className="items-center justify-center">
-                        <Text className={`text-4xl font-black tracking-tight leading-tight ${isOverGoal ? 'text-red-300' : 'text-white'}`}>
+                        <Text className={`text-4xl font-black tracking-tight leading-tight ${isOverGoal ? 'text-destructive-light' : 'text-primary-foreground'}`}>
                             {isOverGoal ? `${Math.abs(Math.round(remaining))}` : Math.round(remaining)}
                         </Text>
-                        <Text className={`text-xs font-medium uppercase tracking-widest mt-1 ${isOverGoal ? 'text-red-200' : 'text-indigo-200'}`}>
+                        <Text className={`text-xs font-medium uppercase tracking-widest mt-1 ${isOverGoal ? 'text-destructive-light opacity-80' : 'text-primary-muted'}`}>
                             {isOverGoal ? t('dashboard.over') : t('dashboard.remaining')}
                         </Text>
                     </View>
@@ -118,12 +119,12 @@ export default function HomeScreen() {
             <View className="flex-row justify-around px-4 bg-indigo-950/20 rounded-2xl py-3 mx-2 border border-indigo-400/10 mb-1">
                  <View className="items-center">
                      <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">{t('dashboard.eaten')}</Text>
-                     <Text className="text-lg font-black text-white">{Math.round(consumed)}</Text>
+                     <Text className="text-lg font-black text-primary-foreground">{Math.round(consumed)}</Text>
                  </View>
                  <View className="w-[1px] bg-indigo-400/30 h-10" />
                  <View className="items-center">
                      <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wider mb-0.5">{t('dashboard.goal')}</Text>
-                     <Text className="text-lg font-black text-white">{dailyGoal}</Text>
+                     <Text className="text-lg font-black text-primary-foreground">{dailyGoal}</Text>
                  </View>
             </View>
         </LinearGradient>
@@ -156,7 +157,7 @@ export default function HomeScreen() {
         </View>
 
         {isLoading && !dailyLog ? (
-            <ActivityIndicator size="large" color="#4F46E5" />
+            <ActivityIndicator size="large" color={Colors.light.tint} />
         ) : (
             <>
                 {mealTypes.map(type => (
@@ -173,8 +174,8 @@ export default function HomeScreen() {
                 {(!dailyLog?.entries || dailyLog.entries.length === 0) && (
                     <View className="items-center py-10 opacity-50">
                         <IconSymbol name="fork.knife" size={48} color="#9CA3AF" />
-                        <Text className="text-gray-500 mt-4 text-center">{t('dashboard.noEntries')}</Text>
-                        <Text className="text-gray-400 text-sm text-center">{t('dashboard.addFirst')}</Text>
+                        <Text className="text-muted-foreground mt-4 text-center">{t('dashboard.noEntries')}</Text>
+                        <Text className="text-muted-foreground text-sm text-center">{t('dashboard.addFirst')}</Text>
                     </View>
                 )}
             </>

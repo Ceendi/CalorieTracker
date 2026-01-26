@@ -16,7 +16,7 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
 
     const renderRightActions = () => (
         <TouchableOpacity 
-            className="bg-red-500 justify-center items-center w-20 h-full rounded-xl ml-2"
+            className="bg-destructive justify-center items-center w-20 h-full rounded-xl ml-2"
             onPress={() => onDelete(entry.id)}
         >
             <IconSymbol name="trash.fill" size={24} color="white" />
@@ -29,18 +29,18 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
                 <TouchableOpacity 
                     activeOpacity={0.7}
                     onPress={() => onPress(entry)}
-                    className="flex-row justify-between items-center py-3 bg-white dark:bg-slate-800 px-4 rounded-xl border border-gray-100 dark:border-slate-700"
+                    className="flex-row justify-between items-center py-3 bg-card px-4 rounded-xl border border-border"
                 >
                     <View className="flex-1">
-                        <Text className="text-gray-900 dark:text-white font-medium text-base">
+                        <Text className="text-foreground font-medium text-base">
                             {entry.product?.name || t('foodDetails.unknownProduct')}
                         </Text>
-                        <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                        <Text className="text-muted-foreground text-sm">
                             {entry.amount_grams}g • {Math.round(entry.calories)} kcal
                         </Text>
                     </View>
                     <View>
-                        <Text className="text-gray-400 dark:text-gray-500 text-xs">
+                        <Text className="text-muted-foreground text-xs">
                             {t('foodDetails.macroP')}: {Math.round(entry.protein)} {t('foodDetails.macroF')}: {Math.round(entry.fat)} {t('foodDetails.macroC')}: {Math.round(entry.carbs)}
                         </Text>
                     </View>

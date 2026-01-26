@@ -53,6 +53,56 @@ class TrackingService:
         
         return await self.tracking_repo.get_daily_log(user_id, log_date)
 
+    async def add_meal_entries_bulk(
+        self,
+        user_id: uuid.UUID,
+        log_date: date,
+        meal_type: MealType,
+        items: List[dict]
+    ) -> DailyLog:
+        if not items:
+            raise ValueError("At least one item is required")
+
+        daily_log = await self.tracking_repo.get_or_create_daily_log(user_id, log_date)
+        entries_to_add = []
+
+        try:
+            for item_data in items:
+                product_id = item_data['product_id']
+                product = await self.food_repo.get_by_id(product_id)
+                if not product:
+                    raise ProductNotFoundInTrackingError(str(product_id))
+
+                entry_domain = MealEntry(
+                    id=uuid.uuid4(),
+                    daily_log_id=daily_log.id,
+                    meal_type=meal_type,
+                    product_id=product.id,
+                    product_name=product.name,
+                    amount_grams=item_data['amount_grams'],
+                    unit_label=item_data.get('unit_label'),
+                    unit_grams=item_data.get('unit_grams'),
+                    unit_quantity=item_data.get('unit_quantity'),
+                    kcal_per_100g=int(product.nutrition.calories_per_100g),
+                    prot_per_100g=product.nutrition.protein_per_100g,
+                    fat_per_100g=product.nutrition.fat_per_100g,
+                    carb_per_100g=product.nutrition.carbs_per_100g
+                )
+                entries_to_add.append(entry_domain)
+
+            await self.tracking_repo.add_entries_bulk(user_id, entries_to_add)
+            await self.tracking_repo.recalculate_totals(daily_log.id)
+            await self.tracking_repo.commit()
+            
+            return await self.tracking_repo.get_daily_log(user_id, log_date)
+            
+        except Exception as e:
+            # SQLAlchemy AsyncSession rollback is usually handled by the context manager 
+            # or explicitly if we managed it. Since we are calling commit() manually in other methods,
+            # we should also handle exception here if we want explicit rollback or just let it propagate.
+            # In FastAPI it's often handled in middleware if it fails.
+            raise e
+
     async def get_daily_log(self, user_id: uuid.UUID, log_date: date) -> Optional[DailyLog]:
         return await self.tracking_repo.get_daily_log(user_id, log_date)
 

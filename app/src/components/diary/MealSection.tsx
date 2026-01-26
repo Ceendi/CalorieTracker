@@ -4,6 +4,7 @@ import { MealType, MealEntry } from '@/types/food';
 import { FoodEntryItem } from './FoodEntryItem';
 import { useLanguage } from '@/hooks/useLanguage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Colors } from '@/constants/theme';
 
 interface MealSectionProps {
   type: MealType;
@@ -21,10 +22,10 @@ export function MealSection({ type, entries, onAdd, onDeleteEntry, onEditEntry }
   return (
     <View className="mb-6">
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+        <Text className="text-lg font-bold text-foreground capitalize">
             {t(`meals.${type}`)}
         </Text>
-        <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <Text className="text-sm font-medium text-muted-foreground">
             {Math.round(totalCalories)} kcal
         </Text>
       </View>
@@ -42,8 +43,8 @@ export function MealSection({ type, entries, onAdd, onDeleteEntry, onEditEntry }
         onPress={() => onAdd(type)}
         className="flex-row items-center py-2"
       >
-        <IconSymbol name="plus.circle.fill" size={20} color="#4F46E5" />
-        <Text className="text-indigo-600 font-medium ml-2">{t('dashboard.quickAdd')}</Text>
+        <IconSymbol name="plus.circle.fill" size={20} color={Colors.light.tint} />
+        <Text className="text-primary font-medium ml-2">{t('dashboard.quickAdd')}</Text>
       </TouchableOpacity>
     </View>
   );

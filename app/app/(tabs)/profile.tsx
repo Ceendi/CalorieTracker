@@ -10,6 +10,7 @@ import { SelectionModal } from '@/components/profile/SelectionModal';
 import { SettingsModal } from '@/components/profile/SettingsModal';
 import { GOAL_OPTIONS, ACTIVITY_OPTIONS, GENDER_OPTIONS } from '@/constants/options';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 import { calculateDailyGoal } from '@/utils/calculations';
 import { User } from '@/utils/validators';
 
@@ -130,14 +131,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 120 }}>
         
         <View className="flex-row justify-between items-center mb-6 h-12">
            <View className="min-w-[60px] items-start justify-center">
              {isEditing && (
                <TouchableOpacity onPress={() => setIsEditing(false)} className="py-2">
-                 <Text className="text-gray-500 font-medium text-lg">{t('profile.cancel')}</Text>
+                 <Text className="text-muted-foreground font-medium text-lg">{t('profile.cancel')}</Text>
                </TouchableOpacity>
              )}
            </View>
@@ -145,37 +146,37 @@ export default function ProfileScreen() {
            <View className="min-w-[60px] items-end justify-center">
              {isEditing ? (
                <TouchableOpacity onPress={handleSave} disabled={isLoading} className="py-2">
-                  <Text className="text-indigo-600 font-bold text-lg">{t('profile.done')}</Text>
+                  <Text className="text-primary font-bold text-lg">{t('profile.done')}</Text>
                </TouchableOpacity>
              ) : (
-               <TouchableOpacity onPress={() => setSettingsVisible(true)} className="p-2 bg-white dark:bg-slate-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
-                 <IconSymbol name="gear" size={24} color={colorScheme === 'dark' ? '#fff' : '#4B5563'} /> 
+               <TouchableOpacity onPress={() => setSettingsVisible(true)} className="p-2 bg-card rounded-full border border-border shadow-sm">
+                 <IconSymbol name="gear" size={24} color={Colors[colorScheme ?? 'light'].tint} /> 
                </TouchableOpacity>
              )}
            </View>
         </View>
 
         <View className="items-center mb-8 -mt-6">
-          <View className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900 rounded-full items-center justify-center mb-4 border-4 border-white dark:border-slate-800 shadow-sm">
-            <Text className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+          <View className="w-24 h-24 bg-muted rounded-full items-center justify-center mb-4 shadow-sm">
+            <Text className="text-3xl font-bold text-foreground opacity-60">
               {user?.email?.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+          <Text className="text-2xl font-bold text-foreground mb-1">
             {user?.email?.split('@')[0]}
           </Text>
-          <Text className="text-gray-500 dark:text-gray-400 mb-3">{user?.email}</Text>
+          <Text className="text-muted-foreground mb-3">{user?.email}</Text>
           
           <TouchableOpacity 
             onPress={toggleEdit} 
             disabled={isEditing}
-            className={`bg-indigo-50 dark:bg-indigo-900/30 px-5 py-2 rounded-full border border-indigo-100 dark:border-indigo-800 ${isEditing ? 'opacity-0' : 'opacity-100'}`}
+            className={`bg-card px-6 py-2.5 rounded-full border border-border shadow-sm active:bg-muted ${isEditing ? 'opacity-0' : 'opacity-100'}`}
           >
-              <Text className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm">{t('profile.editProfile')}</Text>
+              <Text className="text-foreground font-semibold text-sm">{t('profile.editProfile')}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t('profile.yourStats')}</Text>
+        <Text className="text-lg font-bold text-foreground mb-4">{t('profile.yourStats')}</Text>
         
         <InfoItem 
           label={t('profile.height')}
@@ -237,36 +238,36 @@ export default function ProfileScreen() {
           onOpenSelection={() => openSelection('activity_level')}
         />
 
-        <View className="p-4 bg-indigo-50 dark:bg-slate-800 rounded-2xl mb-3 border border-indigo-100 dark:border-indigo-500/30">
+        <View className="p-4 bg-card rounded-2xl mb-3 border border-border">
              <View className="flex-row items-center justify-between mb-3">
                  <View className="flex-row items-center gap-3">
-                    <View className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
-                        <IconSymbol name="flame.fill" size={20} color={colorScheme === 'dark' ? '#818CF8' : '#4F46E5'} />
+                    <View className="p-2 bg-primary/10 rounded-full">
+                        <IconSymbol name="flame.fill" size={20} color={Colors[colorScheme ?? 'light'].tint} />
                     </View>
                     <View>
-                        <Text className="text-gray-900 dark:text-white font-bold text-base">{t('dashboard.goal')}</Text>
-                        <Text className="text-xs text-gray-500 dark:text-gray-400">{t('profile.recommended')}</Text>
+                        <Text className="text-foreground font-bold text-base">{t('dashboard.goal')}</Text>
+                        <Text className="text-xs text-muted-foreground">{t('profile.recommended')}</Text>
                     </View>
                  </View>
-                 <Text className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                 <Text className="text-2xl font-bold text-primary">
                     {currentCalories.calories} kcal
                  </Text>
              </View>
              
-             <View className="flex-row justify-between pt-3 border-t border-indigo-100 dark:border-gray-700">
+             <View className="flex-row justify-between pt-3 border-t border-border">
                 <View className="items-center flex-1">
-                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.protein')}</Text>
-                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.protein}g</Text>
+                    <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.protein')}</Text>
+                    <Text className="text-sm font-bold text-foreground">{currentCalories.protein}g</Text>
                 </View>
-                <View className="w-px h-8 bg-indigo-100 dark:bg-gray-700" />
+                <View className="w-px h-8 bg-border" />
                 <View className="items-center flex-1">
-                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.fat')}</Text>
-                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.fat}g</Text>
+                    <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.fat')}</Text>
+                    <Text className="text-sm font-bold text-foreground">{currentCalories.fat}g</Text>
                 </View>
-                <View className="w-px h-8 bg-indigo-100 dark:bg-gray-700" />
+                <View className="w-px h-8 bg-border" />
                 <View className="items-center flex-1">
-                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{t('manualEntry.carbs')}</Text>
-                    <Text className="text-sm font-bold text-gray-900 dark:text-white">{currentCalories.carbs}g</Text>
+                    <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.carbs')}</Text>
+                    <Text className="text-sm font-bold text-foreground">{currentCalories.carbs}g</Text>
                 </View>
              </View>
         </View>
@@ -286,7 +287,7 @@ export default function ProfileScreen() {
 
 
 
-        <Text className="text-center text-gray-400 dark:text-gray-600 mt-8 text-sm">
+        <Text className="text-center text-muted-foreground mt-8 text-sm">
           {t('profile.version')} 1.0.0
         </Text>
 

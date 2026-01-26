@@ -6,7 +6,6 @@ import {
   Animated,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -113,38 +112,56 @@ export function VoiceInputButton({
       case 'idle':
         return { icon: 'mic.fill', color: primaryColor, label: t('addFood.voiceButton.record') };
       case 'recording':
-        return { icon: 'stop', color: '#FF3B30', label: formatDuration(recordingDuration) };
+        return { icon: 'stop', color: '#ef4444', label: formatDuration(recordingDuration) }; // red-500
       case 'processing':
-        return { icon: 'hourglass', color: '#FF9500', label: t('addFood.voiceButton.processing') };
+        return { icon: 'hourglass', color: '#f59e0b', label: t('addFood.voiceButton.processing') }; // amber-500
       case 'success':
-        return { icon: 'checkmark', color: '#34C759', label: t('addFood.voiceButton.success') };
+        return { icon: 'checkmark', color: '#10b981', label: t('addFood.voiceButton.success') }; // emerald-500
       case 'error':
-        return { icon: 'alert', color: '#FF3B30', label: t('addFood.voiceButton.error') };
+        return { icon: 'alert', color: '#ef4444', label: t('addFood.voiceButton.error') }; // red-500
       default: 
         return { icon: 'mic', color: primaryColor, label: t('addFood.voiceButton.record') };
     }
   };
 
   const config = getStateConfig();
-  const isIconSymbolCompatible = config.icon === 'mic.fill'; 
+
+  const getOpticalOffsets = (currentState: string) => {
+    switch (currentState) {
+        case 'idle': 
+            return { transform: [{ translateY: 0}, {translateX: 0}] }; 
+        case 'processing': 
+             return { transform: [{ translateY: 2}, {translateX: 1.5}] };
+        case 'success':
+             return { transform: [{ translateX: 0 }, { translateY: 0 }] };
+        case 'recording':
+            return { transform: [{ translateY: 0 }, {translateX: 0}] };
+        default:
+            return { transform: [{ translateY: 0 }, {translateX: 0}] };
+    }
+  };
+
+  const currentOffset = getOpticalOffsets(state);
 
   return (
     <View className="items-center py-4">
       <Animated.View
         style={{
           transform: [{ scale: pulseAnim }],
+          width: buttonSize,
+          height: buttonSize,
+          borderRadius: buttonSize / 2,
         }}
         className="shadow-sm shadow-black/30 elevation-8"
       >
         <Pressable
-          className="items-center justify-center"
           style={{
              width: buttonSize,
              height: buttonSize,
              borderRadius: buttonSize / 2,
              backgroundColor: config.color,
-             padding: 0,
-             margin: 0,
+             alignItems: 'center',
+             justifyContent: 'center',
           }}
           onPressIn={async () => {
              if (state === 'idle' || state === 'error' || state === 'success') {
@@ -165,25 +182,23 @@ export function VoiceInputButton({
           }}
           disabled={state === 'processing'}
         >
-          {state === 'processing' ? (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-              <ActivityIndicator size="large" color="#FFFFFF" />
-            </View>
-          ) : (
-             isIconSymbolCompatible ? (
+          <View style={{ 
+                width: iconSize, 
+                height: iconSize, 
+                justifyContent: 'center', 
+                alignItems: 'center',
+            }}>
+            {state === 'processing' ? (
+                <ActivityIndicator size="large" color="#FFFFFF" style={currentOffset} />
+            ) : (
                 <IconSymbol
-                  name={config.icon as IconSymbolName}
-                  size={iconSize}
-                  color="#FFFFFF"
+                name={config.icon as IconSymbolName}
+                size={iconSize}
+                color="#FFFFFF"
+                style={currentOffset}
                 />
-             ) : (
-                <Ionicons
-                  name={config.icon as any}
-                  size={iconSize}
-                  color="#FFFFFF"
-                />
-             )
-          )}
+            )}
+          </View>
         </Pressable>
       </Animated.View>
 
@@ -192,19 +207,19 @@ export function VoiceInputButton({
       </Text>
 
       {state === 'idle' && (
-        <Text className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <Text className="mt-2 text-xs text-muted-foreground">
           {t('addFood.voiceButton.hold')}
         </Text>
       )}
 
       {state === 'recording' && (
-        <Text className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <Text className="mt-2 text-xs text-muted-foreground">
           {t('addFood.voiceButton.release')}
         </Text>
       )}
 
       {permissionStatus === 'denied' && (
-        <Text className="mt-2 text-center text-xs text-red-500">
+        <Text className="mt-2 text-center text-xs text-destructive">
           {t('addFood.voiceButton.permission')}
         </Text>
       )}

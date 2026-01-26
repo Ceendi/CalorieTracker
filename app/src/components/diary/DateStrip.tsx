@@ -4,6 +4,7 @@ import { format, addDays, isSameDay, startOfDay } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
 interface DateStripProps {
   selectedDate: Date;
@@ -63,7 +64,7 @@ export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
             borderRadius: 18,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isSelected ? '#4F46E5' : 'transparent',
+            backgroundColor: isSelected ? Colors.light.tint : 'transparent',
             ...(isSelected ? {
                 shadowColor: '#312E81', 
                 shadowOffset: { width: 0, height: 4 }, 
@@ -84,7 +85,7 @@ export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
             <Text style={{
                 fontSize: 20, 
                 fontWeight: '800', 
-                color: isSelected ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#1F2937')
+                color: isSelected ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#020617') // Matches --foreground
             }}>
                 {format(item, 'd')}
             </Text>

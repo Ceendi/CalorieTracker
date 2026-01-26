@@ -112,7 +112,7 @@ class MealRecognitionService:
 
             if candidate_scores:
                 best_match = candidate_scores[0][1]
-                best_match.score = min(1.0, candidate_scores[0][0])
+                best_match.score = max(0.0, min(1.0, candidate_scores[0][0]))
 
             if best_match:
                 final_confidence = best_match.score * (0.85 if not best_match.passed_guard else 1.0)

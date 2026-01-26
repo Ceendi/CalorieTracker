@@ -21,17 +21,17 @@ export function DateNavigator({ date, onDateChange }: DateNavigatorProps) {
 
   return (
     <View className="flex-row items-center justify-between mb-6">
-      <TouchableOpacity onPress={handlePrev} className="p-2 rounded-full bg-gray-100 dark:bg-slate-800">
+      <TouchableOpacity onPress={handlePrev} className="p-2 rounded-full bg-secondary">
         <IconSymbol name="chevron.left" size={20} color="#6B7280" />
       </TouchableOpacity>
       
       <View className="items-center">
-        <Text className="text-lg font-bold text-gray-900 dark:text-white capitalize">
+        <Text className="text-lg font-bold text-foreground capitalize">
           {isToday ? (language === 'pl' ? 'Dzisiaj' : 'Today') : format(date, 'EEEE, d MMM', { locale })}
         </Text>
       </View>
 
-      <TouchableOpacity onPress={handleNext} className="p-2 rounded-full bg-gray-100 dark:bg-slate-800">
+      <TouchableOpacity onPress={handleNext} className="p-2 rounded-full bg-secondary">
         <IconSymbol name="chevron.right" size={20} color="#6B7280" />
       </TouchableOpacity>
     </View>

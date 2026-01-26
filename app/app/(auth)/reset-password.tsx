@@ -9,15 +9,16 @@ import { authService } from '@/services/auth.service';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/hooks/useLanguage';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+// import { IconSymbol } from '@/components/ui/IconSymbol';
+// import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const { token } = useLocalSearchParams<{ token: string }>();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
-  const { colorScheme } = useColorScheme();
+  // const { colorScheme } = useColorScheme();
   
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,10 +53,10 @@ export default function ResetPasswordScreen() {
 
   if (!token) {
     return (
-        <View className="flex-1 bg-gray-50 dark:bg-slate-900 justify-center items-center px-6">
-            <Text className="text-gray-500 text-center mb-6">Invalid or missing reset token.</Text>
+        <View className="flex-1 bg-background justify-center items-center px-6">
+            <Text className="text-muted-foreground text-center mb-6">Invalid or missing reset token.</Text>
             <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-                <Text className="text-indigo-600 font-bold">Back to Login</Text>
+                <Text className="text-primary font-bold">Back to Login</Text>
             </TouchableOpacity>
         </View>
     );
@@ -63,7 +64,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -78,8 +79,8 @@ export default function ResetPasswordScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 justify-center">
             <View className="mb-8">
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white">{t('auth.resetPasswordTitle')}</Text>
-              <Text className="text-gray-500 dark:text-gray-400 mt-2">{t('changePassword.description')}</Text>
+              <Text className="text-3xl font-bold text-foreground">{t('auth.resetPasswordTitle')}</Text>
+              <Text className="text-muted-foreground mt-2">{t('changePassword.description')}</Text>
             </View>
 
             <ControlledInput
@@ -106,11 +107,11 @@ export default function ResetPasswordScreen() {
               disabled={isLoading}
             >
               <LinearGradient
-                colors={['#4F46E5', '#4338CA']}
+                colors={[Colors.light.tint, '#4338CA']}
                 className="rounded-xl p-4 items-center"
               >
                {isLoading ? (
-                 <ActivityIndicator color="white" />
+                 <ActivityIndicator color={Colors.light.tint} />
                ) : (
                  <Text className="text-white font-semibold text-lg">{t('changePassword.updatePassword')}</Text>
                )}

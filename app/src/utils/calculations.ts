@@ -64,3 +64,34 @@ export const calculateDailyGoal = (profile: Partial<User>) => {
 
     return { calories, protein, fat, carbs };
 };
+
+export const summarizeMealMacros = (items: { kcal: number; protein: number; fat: number; carbs: number }[]) => {
+    return items.reduce(
+        (acc, item) => ({
+            kcal: acc.kcal + item.kcal,
+            protein: acc.protein + item.protein,
+            fat: acc.fat + item.fat,
+            carbs: acc.carbs + item.carbs,
+        }),
+        { kcal: 0, protein: 0, fat: 0, carbs: 0 }
+    );
+};
+
+export const calculateItemMacros = (
+    currentMacros: { kcal: number; protein: number; fat: number; carbs: number },
+    originalGrams: number,
+    newQuantity: number,
+    gramsPerUnit: number = 1
+) => {
+    if (newQuantity < 0) return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+    
+    const totalGrams = newQuantity * gramsPerUnit;
+    const ratio = totalGrams / (originalGrams || 100);
+
+    return {
+        kcal: Math.round(currentMacros.kcal * ratio),
+        protein: currentMacros.protein * ratio,
+        fat: currentMacros.fat * ratio,
+        carbs: currentMacros.carbs * ratio,
+    };
+};

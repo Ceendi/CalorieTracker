@@ -81,6 +81,28 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
         self.db.add(orm_entry)
         await self.db.flush()
 
+    async def add_entries_bulk(self, user_id: UUID, entries: List[MealEntry]) -> None:
+        orm_entries = [
+            TrackingMealEntry(
+                id=entry.id,
+                daily_log_id=entry.daily_log_id,
+                product_id=entry.product_id,
+                product_name=entry.product_name,
+                meal_type=entry.meal_type.value,
+                amount_grams=entry.amount_grams,
+                unit_label=entry.unit_label,
+                unit_grams=entry.unit_grams,
+                unit_quantity=entry.unit_quantity,
+                kcal_per_100g=entry.kcal_per_100g,
+                prot_per_100g=entry.prot_per_100g,
+                fat_per_100g=entry.fat_per_100g,
+                carb_per_100g=entry.carb_per_100g
+            )
+            for entry in entries
+        ]
+        self.db.add_all(orm_entries)
+        await self.db.flush()
+
     async def delete_entry(self, entry_id: UUID, user_id: UUID) -> bool:
         stmt = select(TrackingMealEntry).join(TrackingDailyLog).where(
             and_(

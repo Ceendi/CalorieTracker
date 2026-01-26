@@ -21,9 +21,9 @@ export const SelectionModal = ({ visible, title, options, selectedValue, onSelec
   return (
     <View className="absolute top-0 bottom-0 left-0 right-0 justify-center items-center z-50">
       <TouchableOpacity className="absolute inset-0 bg-black/50" onPress={onClose} />
-      <View className="bg-white dark:bg-slate-800 w-[80%] rounded-2xl overflow-hidden">
-        <View className="p-4 border-b border-gray-100 dark:border-gray-700">
-          <Text className="text-lg font-bold text-center text-gray-900 dark:text-white">
+      <View className="bg-card w-[80%] rounded-2xl overflow-hidden border border-border">
+        <View className="p-4 border-b border-border">
+          <Text className="text-lg font-bold text-center text-foreground">
             {title}
           </Text>
         </View>
@@ -31,9 +31,9 @@ export const SelectionModal = ({ visible, title, options, selectedValue, onSelec
           <TouchableOpacity 
             key={option.value} 
             onPress={() => onSelect(option.value)}
-            className="p-4 border-b border-gray-100 dark:border-gray-700 last:border-0 active:bg-gray-50 dark:active:bg-slate-700"
+            className="p-4 border-b border-border last:border-0 active:bg-muted"
           >
-            <Text className={`text-center text-base ${selectedValue === option.value ? 'text-indigo-600 font-bold' : 'text-gray-700 dark:text-gray-300'}`}>
+            <Text className={`text-center text-base ${selectedValue === option.value ? 'text-primary font-bold' : 'text-foreground'}`}>
               {option.label}
             </Text>
           </TouchableOpacity>

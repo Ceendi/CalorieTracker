@@ -20,6 +20,10 @@ class TrackingRepositoryPort(ABC):
         pass
 
     @abstractmethod
+    async def add_entries_bulk(self, user_id: uuid.UUID, entries: List[MealEntry]) -> None:
+        pass
+
+    @abstractmethod
     async def delete_entry(self, entry_id: uuid.UUID, user_id: uuid.UUID) -> bool:
         pass
 

@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -16,31 +17,31 @@ export default function ScannerScreen() {
 
   if (!permission) {
     return (
-        <View className="flex-1 justify-center items-center bg-gray-50 dark:bg-slate-900">
-            <ActivityIndicator size="large" color="#4F46E5" />
+        <View className="flex-1 justify-center items-center bg-background">
+            <ActivityIndicator size="large" color={Colors.light.tint} />
         </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <View className="flex-1 bg-gray-50 dark:bg-slate-900 justify-center items-center p-6">
+      <View className="flex-1 bg-background justify-center items-center p-6">
         <Stack.Screen options={{ title: t('addFood.modes.scan'), headerBackTitle: t('settings.cancel') }} />
-        <View className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm items-center w-full max-w-sm">
-            <View className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full items-center justify-center mb-6">
-                 <IconSymbol name="camera.fill" size={32} color="#4F46E5" />
+        <View className="bg-card p-8 rounded-3xl shadow-sm items-center w-full max-w-sm border border-border">
+            <View className="w-16 h-16 bg-primary/10 rounded-full items-center justify-center mb-6">
+                 <IconSymbol name="camera.fill" size={32} color={Colors[colorScheme ?? 'light'].tint} />
             </View>
-            <Text className="text-xl font-bold text-gray-900 dark:text-white text-center mb-3">
+            <Text className="text-xl font-bold text-foreground text-center mb-3">
                 {t('scanner.permissionTitle')}
             </Text>
-            <Text className="text-base text-gray-500 dark:text-gray-400 text-center mb-8 leading-6">
+            <Text className="text-base text-muted-foreground text-center mb-8 leading-6">
                  {t('scanner.permissionMessage')}
             </Text>
             <TouchableOpacity 
                 onPress={requestPermission} 
-                className="bg-indigo-600 w-full py-4 rounded-xl items-center shadow-lg shadow-indigo-200 dark:shadow-none"
+                className="bg-primary w-full py-4 rounded-xl items-center shadow-lg shadow-primary/20"
             >
-                <Text className="text-white text-lg font-bold">{t('scanner.grantPermission')}</Text>
+                <Text className="text-primary-foreground text-lg font-bold">{t('scanner.grantPermission')}</Text>
             </TouchableOpacity>
         </View>
       </View>
@@ -76,10 +77,10 @@ export default function ScannerScreen() {
 
             <View className="flex-1 justify-center items-center">
                 <View className="w-64 h-64 border-2 border-white/50 rounded-3xl items-center justify-center relative">
-                     <View className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-indigo-500 rounded-tl-2xl -mt-0.5 -ml-0.5" />
-                     <View className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-indigo-500 rounded-tr-2xl -mt-0.5 -mr-0.5" />
-                     <View className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-indigo-500 rounded-bl-2xl -mb-0.5 -ml-0.5" />
-                     <View className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-indigo-500 rounded-br-2xl -mb-0.5 -mr-0.5" />
+                     <View className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-2xl -mt-0.5 -ml-0.5" />
+                     <View className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-2xl -mt-0.5 -mr-0.5" />
+                     <View className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-2xl -mb-0.5 -ml-0.5" />
+                     <View className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-2xl -mb-0.5 -mr-0.5" />
                 </View>
                 <Text className="text-white/80 font-medium text-lg mt-8 bg-black/50 px-6 py-2 rounded-full overflow-hidden">
                     {t('scanner.scanInstruction')}

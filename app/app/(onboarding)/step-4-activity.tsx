@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useOnboarding, ActivityLevel } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 
 export default function ActivityScreen() {
-  const router = useRouter();
   const { data, setData, submitOnboarding, isLoading } = useOnboarding();
   const [level, setLevel] = useState<ActivityLevel | undefined>(data.activityLevel);
   const insets = useSafeAreaInsets();
@@ -33,7 +32,7 @@ export default function ActivityScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -42,9 +41,9 @@ export default function ActivityScreen() {
       }}
     >
       <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 40 }}>
-        <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step4')}</Text>
-        <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.activity')}</Text>
-        <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.activitySubtitle')}</Text>
+        <Text className="text-sm font-bold text-primary mb-2">{t('onboarding.step4')}</Text>
+        <Text className="text-3xl font-bold text-foreground mb-4">{t('onboarding.activity')}</Text>
+        <Text className="text-muted-foreground mb-8">{t('onboarding.activitySubtitle')}</Text>
 
         <View className="mb-6">
           {activities.map((item) => (
@@ -53,16 +52,16 @@ export default function ActivityScreen() {
               onPress={() => setLevel(item.id)}
               className={`mb-3 p-4 rounded-xl border ${
                 level === item.id 
-                  ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
-                  : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
+                  ? 'bg-primary/10 border-primary' 
+                  : 'bg-card border-border'
               }`}
             >
                <Text className={`font-semibold text-lg ${
-                  level === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-white'
+                  level === item.id ? 'text-primary' : 'text-foreground'
                 }`}>
                   {item.label}
                 </Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">{item.desc}</Text>
+                <Text className="text-muted-foreground text-sm mt-1">{item.desc}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -73,7 +72,7 @@ export default function ActivityScreen() {
             disabled={!level || isLoading}
           >
             <LinearGradient
-              colors={['#4F46E5', '#4338CA']}
+              colors={[Colors.light.tint, '#4338CA']}
               className={`rounded-xl p-4 items-center ${(!level || isLoading) ? 'opacity-50' : ''}`}
             >
               {isLoading ? (

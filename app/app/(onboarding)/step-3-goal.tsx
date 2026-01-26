@@ -5,6 +5,7 @@ import { useOnboarding, Goal } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 
 export default function GoalScreen() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function GoalScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -37,9 +38,9 @@ export default function GoalScreen() {
     >
       <View className="flex-1 px-6 pt-10">
         <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-          <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step3')}</Text>
-          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.goal')}</Text>
-          <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.goalSubtitle')}</Text>
+          <Text className="text-sm font-bold text-primary mb-2">{t('onboarding.step3')}</Text>
+          <Text className="text-3xl font-bold text-foreground mb-4">{t('onboarding.goal')}</Text>
+          <Text className="text-muted-foreground mb-8">{t('onboarding.goalSubtitle')}</Text>
 
           <View className="mb-6">
             {goals.map((item) => (
@@ -48,13 +49,13 @@ export default function GoalScreen() {
                 onPress={() => setGoal(item.id)}
                 className={`mb-3 p-4 rounded-xl border flex-row items-center ${
                   goal === item.id 
-                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
-                    : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
+                    ? 'bg-primary/10 border-primary' 
+                    : 'bg-card border-border'
                 }`}
               >
                 <View className="ml-2">
                    <Text className={`font-semibold text-lg ${
-                    goal === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-white'
+                    goal === item.id ? 'text-primary' : 'text-foreground'
                   }`}>
                     {item.label}
                   </Text>
@@ -70,7 +71,7 @@ export default function GoalScreen() {
             disabled={!goal}
           >
             <LinearGradient
-              colors={['#4F46E5', '#4338CA']}
+              colors={[Colors.light.tint, '#4338CA']}
               className={`rounded-xl p-4 items-center ${(!goal) ? 'opacity-50' : ''}`}
             >
               <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

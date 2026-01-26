@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import Animated, { useSharedValue, useAnimatedProps, withTiming } from 'react-native-reanimated';
+import { Colors } from '@/constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -18,7 +19,7 @@ export function CircularProgress({
   size = 100,
   strokeWidth = 10,
   progress,
-  color = '#4F46E5',
+  color = Colors.light.tint,
   bgColor = '#E5E7EB',
   children
 }: CircularProgressProps) {

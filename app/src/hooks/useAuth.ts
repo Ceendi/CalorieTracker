@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { storageService } from '../services/storage.service';
 import { authService } from '../services/auth.service';
 import { User, LoginInput, RegisterInput } from '../utils/validators';
-import { router } from 'expo-router';
+import { setOnUnauthorizedCallback } from '../services/api.client';
 
 interface AuthState {
   user: User | null;
@@ -32,10 +32,6 @@ export const useAuth = create<AuthState>((set, get) => ({
 
       const user = await authService.getMe();
       set({ user, isSignout: false });
-      
-      if (user) { 
-        router.replace('/(tabs)'); 
-      }
     } catch (error) {
       throw error;
     }
@@ -57,8 +53,6 @@ export const useAuth = create<AuthState>((set, get) => ({
 
       const user = await authService.getMe();
       set({ user });
-      
-      router.replace({ pathname: '/(auth)/verify-email', params: { email: data.email } });
     } catch (error) {
       throw error;
     }
@@ -72,7 +66,6 @@ export const useAuth = create<AuthState>((set, get) => ({
     }
     await storageService.clearAll();
     set({ user: null, isSignout: true });
-    router.replace('/(auth)/login');
   },
 
   checkSession: async () => {
@@ -99,3 +92,10 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
   }
 }));
+
+setOnUnauthorizedCallback(() => {
+  const { user } = useAuth.getState();
+  if (user) {
+    useAuth.setState({ user: null, isSignout: true });
+  }
+});

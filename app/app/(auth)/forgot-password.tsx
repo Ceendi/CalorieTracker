@@ -11,12 +11,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/hooks/useLanguage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -48,7 +50,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -59,9 +61,9 @@ export default function ForgotPasswordScreen() {
       <View style={{ position: 'absolute', top: insets.top + 10, left: 20, zIndex: 10 }}>
         <TouchableOpacity 
           onPress={() => router.back()} 
-          className="p-2 bg-white/80 dark:bg-slate-800/80 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+          className="p-2 bg-background/80 rounded-full border border-border shadow-sm"
         >
-          <IconSymbol name="chevron.left" size={24} color={colorScheme === 'dark' ? '#fff' : '#4B5563'} />
+          <IconSymbol name="chevron.left" size={24} color={Colors[theme].tint} />
         </TouchableOpacity>
       </View>
 
@@ -73,16 +75,16 @@ export default function ForgotPasswordScreen() {
           <View className="flex-1 px-8 justify-center">
             {isSent ? (
               <View className="items-center w-full">
-                <View className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/40 rounded-full items-center justify-center mb-8 shadow-sm">
-                    <IconSymbol name="envelope.fill" size={48} color="#10B981" />
+                <View className="w-24 h-24 bg-primary/10 rounded-full items-center justify-center mb-8 shadow-sm">
+                    <IconSymbol name="envelope.fill" size={48} color={Colors[theme].tint} />
                 </View>
-                <Text className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-3">
+                <Text className="text-3xl font-bold text-foreground text-center mb-3">
                   {t('auth.checkEmail')}
                 </Text>
                 <View className="px-2">
-                  <Text className="text-gray-500 dark:text-gray-400 text-center text-lg leading-6">
+                  <Text className="text-muted-foreground text-center text-lg leading-6">
                     {t('auth.checkEmailSubtitle')}{'\n'}
-                    <Text className="font-bold text-gray-900 dark:text-white">
+                    <Text className="font-bold text-foreground">
                       {getValues('email')}
                     </Text>
                   </Text>
@@ -93,7 +95,7 @@ export default function ForgotPasswordScreen() {
                   onPress={() => router.replace('/(auth)/login')}
                 >
                    <LinearGradient
-                    colors={['#4F46E5', '#4338CA']}
+                    colors={[Colors[theme].tint, '#4338CA']}
                     className="rounded-xl p-4 items-center shadow-md"
                   >
                     <Text className="text-white font-bold text-lg">
@@ -105,8 +107,8 @@ export default function ForgotPasswordScreen() {
             ) : (
               <>
                 <View className="mb-8">
-                  <Text className="text-3xl font-bold text-gray-900 dark:text-white">{t('auth.resetPasswordTitle')}</Text>
-                  <Text className="text-gray-500 dark:text-gray-400 mt-2">{t('auth.resetPasswordSubtitle')}</Text>
+                  <Text className="text-3xl font-bold text-foreground">{t('auth.resetPasswordTitle')}</Text>
+                  <Text className="text-muted-foreground mt-2">{t('auth.resetPasswordSubtitle')}</Text>
                 </View>
 
                 <ControlledInput
@@ -125,7 +127,7 @@ export default function ForgotPasswordScreen() {
                   disabled={isLoading}
                 >
                   <LinearGradient
-                    colors={['#4F46E5', '#4338CA']}
+                    colors={[Colors[theme].tint, '#4338CA']}
                     className="rounded-xl p-4 items-center"
                   >
                    {isLoading ? (

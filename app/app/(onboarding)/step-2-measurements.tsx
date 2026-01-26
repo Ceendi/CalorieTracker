@@ -5,6 +5,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 
 export default function MeasurementsScreen() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function MeasurementsScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -37,16 +38,16 @@ export default function MeasurementsScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 pt-10">
             <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-              <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step2')}</Text>
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.measurements')}</Text>
-              <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.measurementsSubtitle')}</Text>
+              <Text className="text-sm font-bold text-primary mb-2">{t('onboarding.step2')}</Text>
+              <Text className="text-3xl font-bold text-foreground mb-4">{t('onboarding.measurements')}</Text>
+              <Text className="text-muted-foreground mb-8">{t('onboarding.measurementsSubtitle')}</Text>
 
               <View className="mb-6">
-                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.height')}</Text>
+                <Text className="text-foreground font-medium mb-2">{t('profile.height')}</Text>
                 <View className="flex-row items-center">
-                  <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                  <View className="flex-1 bg-card border border-border rounded-lg h-14 justify-center px-3">
                     <TextInput
-                      className="text-gray-900 dark:text-white flex-1 h-full"
+                      className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="175"
                       placeholderTextColor="#9CA3AF"
@@ -55,16 +56,16 @@ export default function MeasurementsScreen() {
                       onChangeText={setHeight}
                     />
                   </View>
-                  <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">cm</Text>
+                  <Text className="ml-3 text-muted-foreground font-medium text-lg">cm</Text>
                 </View>
               </View>
 
               <View className="mb-6">
-                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.weight')}</Text>
+                <Text className="text-foreground font-medium mb-2">{t('profile.weight')}</Text>
                 <View className="flex-row items-center">
-                  <View className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                  <View className="flex-1 bg-card border border-border rounded-lg h-14 justify-center px-3">
                     <TextInput
-                      className="text-gray-900 dark:text-white flex-1 h-full"
+                      className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="70"
                       placeholderTextColor="#9CA3AF"
@@ -73,7 +74,7 @@ export default function MeasurementsScreen() {
                       onChangeText={setWeight}
                     />
                   </View>
-                  <Text className="ml-3 text-gray-500 dark:text-gray-400 font-medium text-lg">kg</Text>
+                  <Text className="ml-3 text-muted-foreground font-medium text-lg">kg</Text>
                 </View>
               </View>
             </ScrollView>
@@ -84,7 +85,7 @@ export default function MeasurementsScreen() {
                 disabled={!height || !weight}
               >
                 <LinearGradient
-                  colors={['#4F46E5', '#4338CA']}
+                  colors={[Colors.light.tint, '#4338CA']}
                   className={`rounded-xl p-4 items-center ${(!height || !weight) ? 'opacity-50' : ''}`}
                 >
                   <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Alert, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,8 +11,9 @@ import { ProcessedMeal } from '@/hooks/useVoiceInput';
 import { trackingService } from '@/services/tracking.service';
 import { foodService } from '@/services/food.service';
 import { ProductSearchMode } from '@/components/add/ProductSearchMode';
-import { AudioEntryMode } from '@/components/add/AudioEntryMode';
 import { PlaceholderMode } from '@/components/add/PlaceholderMode';
+import { AudioEntryMode } from '@/components/add/AudioEntryMode';
+import { Colors } from '@/constants/theme';
 
 type EntryMode = 'product' | 'audio' | 'photo' | 'barcode';
 
@@ -40,7 +41,14 @@ export default function AddScreen() {
     const [processedMeal, setProcessedMeal] = useState<ProcessedMeal | null>(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [isAddingToDiary, setIsAddingToDiary] = useState(false);
+    
+    const theme = colorScheme ?? 'light';
+    const cardColor = Colors[theme].card;
+    const tintColor = Colors[theme].tint;
+    const iconColor = Colors[theme].icon;
 
+    // Removed dynamic tab bar style modification to prevent navigation context issues.
+    
     const handleItemPress = (item: FoodProduct) => {
         router.push({
             pathname: '/food-details',
@@ -72,9 +80,10 @@ export default function AddScreen() {
         setIsAddingToDiary(true);
         try {
             const mealType = MEAL_TYPE_MAP[mealToLog.meal_type] || MealType.SNACK;
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-            for (const item of mealToLog.items) {
+            const bulkItems = await Promise.all(mealToLog.items.map(async (item) => {
                 if (item.status === 'matched' && item.product_id) {
                     let productId = String(item.product_id);
                     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
@@ -92,27 +101,37 @@ export default function AddScreen() {
                             console.warn("Failed to resolve UUID for product", item.name);
                         }
                     }
+
+                    let unitGrams = 1;
+                    if (item.unit_matched !== 'g' && item.unit_matched !== 'gram' && item.units) {
+                        const unit = item.units.find(u => u.label === item.unit_matched);
+                        if (unit) unitGrams = unit.grams;
+                    }
                     
-                    await trackingService.logEntry({
-                        date: today,
+                    return {
                         product_id: productId,
                         amount_grams: item.quantity_grams,
-                        meal_type: mealType,
-                    });
+                        unit_label: item.unit_matched,
+                        unit_grams: unitGrams,
+                        unit_quantity: item.quantity_unit_value
+                    };
                 }
+                return null;
+            }));
+
+            const validItems = bulkItems.filter((item): item is NonNullable<typeof item> => item !== null);
+
+            if (validItems.length > 0) {
+                await trackingService.logEntriesBulk({
+                    date: today,
+                    meal_type: mealType,
+                    items: validItems,
+                });
             }
 
             setShowConfirmation(false);
             setProcessedMeal(null);
-
-            Alert.alert(
-                '✅ ' + t('addFood.mealAdded'),
-                t('addFood.mealAddedDesc'),
-                [{
-                    text: 'OK',
-                    onPress: () => router.push('/(tabs)')
-                }]
-            );
+            router.replace('/(tabs)');
         } catch (error) {
             console.error('Failed to add meal:', error);
             const msg = error instanceof Error ? error.message : t('common.errors.unknown');
@@ -147,36 +166,45 @@ export default function AddScreen() {
     ];
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-slate-900" edges={['top']}> 
-
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}> 
             <View className="px-5 pt-2 pb-4">
-                 <Text className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{t('addFood.title')}</Text>
-                 <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">
+                 <Text className="text-3xl font-bold text-foreground tracking-tight">{t('addFood.title')}</Text>
+                 <Text className="text-muted-foreground text-sm mt-1 font-medium">
                      {new Date().toLocaleDateString(language === 'pl' ? 'pl-PL' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                  </Text>
             </View>
 
             <View className="px-5 mb-2">
-                <View className="flex-row bg-gray-200 dark:bg-slate-800 p-1 rounded-2xl h-12">
+                <View className="flex-row bg-muted p-1 rounded-2xl h-12">
                     {modes.map((mode) => {
                         const isActive = activeMode === mode.id;
+                        
                         return (
                             <TouchableOpacity
                                 key={mode.id}
-                                className={`flex-1 flex-row items-center justify-center rounded-[12px] gap-2 ${
-                                    isActive 
-                                        ? (colorScheme === 'dark' ? 'bg-slate-700' : 'bg-white shadow-sm') 
-                                        : 'bg-transparent'
-                                }`}
+                                style={{
+                                  flex: 1,
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: 12,
+                                  gap: 8,
+                                  backgroundColor: isActive ? Colors[theme].card : 'transparent',
+                                  shadowColor: isActive ? '#000' : undefined,
+                                  shadowOffset: isActive ? { width: 0, height: 1 } : undefined,
+                                  shadowOpacity: isActive ? 0.05 : 0,
+                                  shadowRadius: isActive ? 2 : 0,
+                                  elevation: isActive ? 1 : 0
+                                }}
                                 onPress={() => setActiveMode(mode.id)}
                             >
                                 <IconSymbol 
                                     name={mode.icon as any} 
                                     size={16} 
-                                    color={isActive ? (colorScheme === 'dark' ? '#fff' : '#4F46E5') : '#9CA3AF'} 
+                                    color={isActive ? tintColor : iconColor} 
                                 />
                                 {isActive && (
-                                    <Text className="text-xs font-bold text-gray-900 dark:text-white">
+                                    <Text className="text-xs font-bold text-foreground">
                                         {mode.label}
                                     </Text>
                                 )}
@@ -223,12 +251,13 @@ export default function AddScreen() {
                 onConfirm={handleConfirmMeal}
                 onEdit={handleEditMeal}
                 onCancel={handleCancelConfirmation}
+                isLoading={isAddingToDiary}
             />
 
             {isAddingToDiary && (
                 <View className="absolute inset-0 bg-black/50 items-center justify-center">
-                    <View className="bg-white dark:bg-slate-800 p-6 rounded-2xl items-center">
-                        <Text className="text-gray-900 dark:text-white mt-4 font-medium">
+                    <View className="bg-card p-6 rounded-2xl items-center">
+                        <Text className="text-foreground mt-4 font-medium">
                             {t('addFood.addingToDiary')}
                         </Text>
                     </View>

@@ -42,6 +42,20 @@ export interface CreateEntryDto {
   unit_quantity?: number;
 }
 
+export interface BulkMealItem {
+  product_id: string;
+  amount_grams: number;
+  unit_label?: string;
+  unit_grams?: number;
+  unit_quantity?: number;
+}
+
+export interface CreateBulkEntryDto {
+  date: string;
+  meal_type: MealType;
+  items: BulkMealItem[];
+}
+
 export interface CreateFoodDto {
   name: string;
   barcode?: string;

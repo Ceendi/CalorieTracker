@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/hooks/useAuth';
+import { Colors } from '@/constants/theme';
 import { View, ActivityIndicator } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -31,8 +32,11 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     checkSession();
   }, []);
 
+  const navigationState = useRootNavigationState();
+
   useEffect(() => {
     if (isLoading) return;
+    if (!navigationState?.key) return;
     
     if (!segments || (segments as string[]).length === 0) return;
 
@@ -57,12 +61,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     } else if (user && inOnboardingGroup && user.is_onboarded) {
          router.replace('/(tabs)');
     }
-  }, [user, isLoading, segments]);
+  }, [user, segments, isLoading, navigationState?.key]);
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-white dark:bg-black justify-center items-center">
-         <ActivityIndicator size="large" color="#4F46E5" />
+      <View className="flex-1 bg-background justify-center items-center">
+         <ActivityIndicator size="large" color={Colors.light.tint} />
       </View>
     );
   }
@@ -70,18 +74,28 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function RootNavigation() {
+function ThemeLayout({ children }: { children: React.ReactNode }) {
   const { colorScheme } = useColorScheme();
-  
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <View className={`flex-1 ${colorScheme === 'dark' ? 'dark' : ''}`}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        {children}
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </View>
+  );
+}
+
+function RootNavigation() {
+  return (
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+      <Stack.Screen name="scanner" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="food-details" options={{ headerShown: true, presentation: 'card' }} />
+      <Stack.Screen name="manual-entry" options={{ headerShown: true, presentation: 'card' }} />
+    </Stack>
   );
 }
 
@@ -90,7 +104,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <AuthGuard>
-          <RootNavigation />
+          <ThemeLayout>
+             <RootNavigation />
+          </ThemeLayout>
         </AuthGuard>
       </QueryClientProvider>
     </GestureHandlerRootView>

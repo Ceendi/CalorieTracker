@@ -273,7 +273,8 @@ export const translations = {
         macroC: "C",
         protein: "Protein",
         fat: "Fat",
-        carbs: "Carbs"
+        carbs: "Carbs",
+        quantity: "Quantity"
     },
     meals: {
         breakfast: "Breakfast",
@@ -569,7 +570,8 @@ export const translations = {
         macroC: "W",
         protein: "Białko",
         fat: "Tłuszcz",
-        carbs: "Węglowodany"
+        carbs: "Węglowodany",
+        quantity: "Ilość"
     },
     meals: {
         breakfast: "Śniadanie",

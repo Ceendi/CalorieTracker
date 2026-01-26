@@ -7,12 +7,31 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from src.users.api.routes import current_active_user
 from src.users.domain.models import User
 from src.tracking.api.dependencies import get_tracking_service
-from src.tracking.api.schemas import DailyLogRead, MealEntryCreate, MealEntryUpdate
+from src.tracking.api.schemas import DailyLogRead, MealEntryCreate, MealEntryUpdate, MealBulkCreate
 from src.tracking.application.services import TrackingService
 from src.tracking.domain.exceptions import ProductNotFoundInTrackingError, MealEntryNotFoundError
 
 
 router = APIRouter()
+
+
+@router.post("/bulk-entries", response_model=DailyLogRead, status_code=status.HTTP_201_CREATED)
+async def add_entries_bulk(
+    bulk_data: MealBulkCreate,
+    service: TrackingService = Depends(get_tracking_service),
+    user: User = Depends(current_active_user)
+):
+    try:
+        return await service.add_meal_entries_bulk(
+            user_id=user.id,
+            log_date=bulk_data.date,
+            meal_type=bulk_data.meal_type,
+            items=[item.model_dump() for item in bulk_data.items]
+        )
+    except ProductNotFoundInTrackingError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.post("/entries", response_model=DailyLogRead, status_code=status.HTTP_201_CREATED)

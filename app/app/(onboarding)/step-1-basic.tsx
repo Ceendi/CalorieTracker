@@ -5,6 +5,7 @@ import { useOnboarding, Gender } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Colors } from '@/constants/theme';
 
 export default function BasicInfoScreen() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function BasicInfoScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50 dark:bg-slate-900"
+      className="flex-1 bg-background"
       style={{
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -47,18 +48,18 @@ export default function BasicInfoScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 pt-10">
             <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-              <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-2">{t('onboarding.step1')}</Text>
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('onboarding.basicDetails')}</Text>
-              <Text className="text-gray-500 dark:text-gray-400 mb-8">{t('onboarding.basicDetailsSubtitle')}</Text>
+              <Text className="text-sm font-bold text-primary mb-2">{t('onboarding.step1')}</Text>
+              <Text className="text-3xl font-bold text-foreground mb-4">{t('onboarding.basicDetails')}</Text>
+              <Text className="text-muted-foreground mb-8">{t('onboarding.basicDetailsSubtitle')}</Text>
 
               <View className="mb-6">
-                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('profile.age')}</Text>
-                <View className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 rounded-lg h-14 justify-center px-3">
+                <Text className="text-foreground font-medium mb-2">{t('profile.age')}</Text>
+                <View className="bg-card border border-border rounded-lg h-14 justify-center px-3">
                   <TextInput
-                    className="text-gray-900 dark:text-white flex-1 h-full"
+                    className="text-foreground flex-1 h-full"
                     style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                     placeholder={t('onboarding.agePlaceholder')}
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor="#64748b"
                     keyboardType="number-pad"
                     value={age}
                     onChangeText={setAge}
@@ -67,7 +68,7 @@ export default function BasicInfoScreen() {
               </View>
 
               <View className="mb-10">
-                <Text className="text-gray-700 dark:text-gray-300 font-medium mb-2">{t('onboarding.gender')}</Text>
+                <Text className="text-foreground font-medium mb-2">{t('onboarding.gender')}</Text>
                 <View className="flex-row justify-between">
                   {genders.map((g) => (
                     <TouchableOpacity
@@ -75,13 +76,13 @@ export default function BasicInfoScreen() {
                       onPress={() => setGender(g)}
                       className={`flex-1 mx-1 p-3 rounded-xl border ${
                         gender === g 
-                          ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400' 
-                          : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-gray-700'
+                          ? 'bg-primary/10 border-primary' 
+                          : 'bg-card border-border'
                       } items-center`}
                     >
                       <Text
                         className={`font-semibold ${
-                          gender === g ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'
+                          gender === g ? 'text-primary' : 'text-muted-foreground'
                         }`}
                       >
                         {getGenderLabel(g)}
@@ -98,7 +99,7 @@ export default function BasicInfoScreen() {
                 disabled={!age || !gender}
               >
                 <LinearGradient
-                  colors={['#4F46E5', '#4338CA']}
+                  colors={[Colors.light.tint, '#4338CA']}
                   className={`rounded-xl p-4 items-center ${(!age || !gender) ? 'opacity-50' : ''}`}
                 >
                   <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

@@ -12,14 +12,14 @@ interface ControlledInputProps extends TextInputProps {
 export const ControlledInput = ({ control, name, label, error, style, ...textInputProps }: ControlledInputProps) => {
   return (
     <View className="mb-4">
-      {label && <Text className="text-gray-700 dark:text-gray-300 font-medium mb-1">{label}</Text>}
+      {label && <Text className="text-foreground font-medium mb-1">{label}</Text>}
       <Controller
         control={control}
         name={name}
         render={({ field: { onChange, onBlur, value } }) => (
-          <View className={`bg-white dark:bg-slate-800 border rounded-lg h-12 justify-center px-3 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}>
+          <View className={`bg-card border rounded-lg h-12 justify-center px-3 ${error ? 'border-destructive' : 'border-border'}`}>
             <TextInput
-              className="text-gray-900 dark:text-white flex-1"
+              className="text-foreground flex-1"
               style={{ fontSize: 16, paddingVertical: 0, includeFontPadding: false }}
               placeholderTextColor="#9CA3AF"
               onBlur={onBlur}
@@ -30,7 +30,7 @@ export const ControlledInput = ({ control, name, label, error, style, ...textInp
           </View>
         )}
       />
-      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+      {error && <Text className="text-destructive text-sm mt-1">{error}</Text>}
     </View>
   );
 };

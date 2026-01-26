@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { useFoodSearch } from '@/hooks/useFood';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { FoodProduct } from '@/types/food';
+import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface ProductSearchModeProps {
   onItemPress: (item: FoodProduct) => void;
@@ -22,7 +22,9 @@ interface ProductSearchModeProps {
 
 export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchModeProps) {
   const { t } = useLanguage();
-  const { colorScheme } = useColorScheme();
+  const tintColor = useThemeColor({}, 'tint');
+  const iconColor = useThemeColor({}, 'icon');
+  const placeholderColor = useThemeColor({}, 'tabIconDefault'); 
   const [searchQuery, setSearchQuery] = useState('');
   const { data: searchResults, isLoading, refetch, isRefetching } = useFoodSearch(searchQuery);
 
@@ -30,33 +32,32 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
 
   const renderItem = ({ item }: { item: FoodProduct }) => (
     <TouchableOpacity
-      className="bg-white dark:bg-[#283548] p-3 rounded-2xl mb-2 shadow-sm border border-gray-100 dark:border-slate-700/50"
+      className="bg-card p-3 rounded-2xl mb-2 shadow-sm border border-border"
       onPress={() => onItemPress(item)}
     >
       <View className="flex-row items-center justify-between mb-1">
         <View className="flex-1 mr-2">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+          <Text className="text-base font-semibold text-foreground pt-1" numberOfLines={2} style={{ lineHeight: 22 }}>
             {item.name}
             {item.source === 'fineli' && (
-              <>
-                {' '}
-                <IconSymbol name="checkmark.seal.fill" size={16} color="#6366f1" style={{ transform: [{ translateY: 4 }] }} />
-              </>
+              <Text style={{ lineHeight: 22 }}>
+                {' '}<IconSymbol name="checkmark.seal.fill" size={16} color="#6366f1" />
+              </Text>
             )}
           </Text>
           {item.brand && item.brand.length > 0 && (
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{item.brand}</Text>
+            <Text className="text-sm text-muted-foreground mt-0.5">{item.brand}</Text>
           )}
         </View>
-        <IconSymbol name="plus.circle.fill" size={28} color="#4F46E5" />
+        <IconSymbol name="plus.circle.fill" size={28} color={tintColor} />
       </View>
 
-      <View className="flex-row items-baseline pt-1 border-t border-gray-50 dark:border-slate-700/50">
-        <Text className="text-base font-bold text-indigo-600 dark:text-indigo-400">
-          {Math.round(item.nutrition?.calories_per_100g || 0)} {t('addFood.summary.kcal')} <Text className="text-xs font-normal text-gray-400">/ 100g</Text>
+      <View className="flex-row items-baseline pt-1 border-t border-gray-200 dark:border-gray-800">
+        <Text className="text-base font-bold text-primary">
+          {Math.round(item.nutrition?.calories_per_100g || 0)} {t('addFood.summary.kcal')} <Text className="text-xs font-normal text-muted-foreground">/ 100g</Text>
         </Text>
-        <Text className="text-sm text-gray-400 ml-3">
-          {t('foodDetails.macroP')}:{(item.nutrition?.protein_per_100g || 0).toFixed(1)} {t('foodDetails.macroF')}:{(item.nutrition?.fat_per_100g || 0).toFixed(1)} {t('foodDetails.macroC')}:{(item.nutrition?.carbs_per_100g || 0).toFixed(1)}
+        <Text className="text-sm text-muted-foreground ml-3">
+          {t('foodDetails.macroP')}: {(item.nutrition?.protein_per_100g || 0).toFixed(1)}  {t('foodDetails.macroF')}: {(item.nutrition?.fat_per_100g || 0).toFixed(1)}  {t('foodDetails.macroC')}: {(item.nutrition?.carbs_per_100g || 0).toFixed(1)}
         </Text>
       </View>
     </TouchableOpacity>
@@ -64,25 +65,25 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
 
   return (
     <View className="flex-1 px-5 mt-4">
-      <View className="flex-row items-center bg-white dark:bg-slate-800 rounded-xl px-4 border border-gray-200 dark:border-slate-700 shadow-sm mb-4 h-14">
-        <IconSymbol name="magnifyingglass" size={20} color={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'} />
+      <View className="flex-row items-center bg-card rounded-xl px-4 border border-border shadow-sm mb-4 h-14">
+        <IconSymbol name="magnifyingglass" size={20} color={iconColor} />
         <TextInput
-          className="flex-1 ml-3 text-gray-900 dark:text-white text-base h-full py-0"
+          className="flex-1 ml-3 text-foreground text-base h-full py-0"
           placeholder={t('addFood.searchPlaceholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholderTextColor={colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'}
+          placeholderTextColor={placeholderColor}
           autoCapitalize="none"
           returnKeyType="search"
           onSubmitEditing={dismissKeyboard}
         />
         {searchQuery.length > 0 ? (
           <TouchableOpacity onPress={() => { setSearchQuery(''); dismissKeyboard(); }}>
-            <IconSymbol name="xmark.circle.fill" size={20} color={colorScheme === 'dark' ? '#6B7280' : '#9CA3AF'} />
+            <IconSymbol name="xmark.circle.fill" size={20} color={iconColor} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={onManualPress}>
-            <IconSymbol name="pencil.circle.fill" size={24} color="#4F46E5" />
+            <IconSymbol name="pencil.circle.fill" size={24} color={tintColor} />
           </TouchableOpacity>
         )}
       </View>
@@ -90,7 +91,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
       {isLoading && (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
           <View className="mt-12 items-center flex-1">
-            <ActivityIndicator size="large" color="#4F46E5" />
+            <ActivityIndicator size="large" color={tintColor} />
           </View>
         </TouchableWithoutFeedback>
       )}
@@ -109,7 +110,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
           ListEmptyComponent={
             <TouchableWithoutFeedback onPress={dismissKeyboard}>
               <View className="flex-1 items-center justify-center pt-16 h-full">
-                <Text className="text-gray-400 text-base">{t('addFood.noResults')}</Text>
+                <Text className="text-muted-foreground text-base">{t('addFood.noResults')}</Text>
               </View>
             </TouchableWithoutFeedback>
           }
@@ -119,8 +120,8 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
       {!isLoading && (!searchResults || searchResults.length === 0) && searchQuery.length < 3 && (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
           <View className="flex-1 items-center justify-center pt-20 px-10">
-            <IconSymbol name="magnifyingglass" size={48} color={colorScheme === 'dark' ? '#334155' : '#E2E8F0'} />
-            <Text className="text-gray-400 dark:text-gray-500 text-center mt-4">
+            <IconSymbol name="magnifyingglass" size={48} color={iconColor} />
+            <Text className="text-muted-foreground text-center mt-4">
               {t('addFood.emptyState')}
             </Text>
           </View>
