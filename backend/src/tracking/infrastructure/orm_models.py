@@ -48,8 +48,8 @@ class TrackingMealEntry(UUIDModel):
     unit_quantity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     
     kcal_per_100g: Mapped[int] = mapped_column(Integer, nullable=False)
-    prot_per_100g: Mapped[float] = mapped_column(Float, nullable=False)
+    protein_per_100g: Mapped[float] = mapped_column(Float, nullable=False)
     fat_per_100g: Mapped[float] = mapped_column(Float, nullable=False)
-    carb_per_100g: Mapped[float] = mapped_column(Float, nullable=False)
+    carbs_per_100g: Mapped[float] = mapped_column(Float, nullable=False)
     
     daily_log: Mapped["TrackingDailyLog"] = relationship("TrackingDailyLog", back_populates="entries")

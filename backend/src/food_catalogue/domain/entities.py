@@ -15,10 +15,20 @@ class UnitInfo:
 
 @dataclass(frozen=True)
 class Nutrition:
-    calories_per_100g: float
+    kcal_per_100g: float
     protein_per_100g: float
     fat_per_100g: float
     carbs_per_100g: float
+
+    def __post_init__(self):
+        if self.kcal_per_100g < 0:
+            raise ValueError("kcal_per_100g cannot be negative")
+        if self.protein_per_100g < 0:
+            raise ValueError("protein_per_100g cannot be negative")
+        if self.fat_per_100g < 0:
+            raise ValueError("fat_per_100g cannot be negative")
+        if self.carbs_per_100g < 0:
+            raise ValueError("carbs_per_100g cannot be negative")
 
 
 @dataclass
@@ -32,3 +42,7 @@ class Food:
     units: Optional[List[UnitInfo]] = field(default_factory=list)
     owner_id: Optional[uuid.UUID] = None
     source: Optional[str] = None  # 'public', 'base_db', 'openfoodfacts', 'user'
+
+    def __post_init__(self):
+        if not self.name or not self.name.strip():
+            raise ValueError("name cannot be empty")

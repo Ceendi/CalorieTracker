@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from typing import List
 from uuid import UUID
@@ -62,9 +63,8 @@ async def get_daily_log(
     user: User = Depends(current_active_user)
 ):
     log = await service.get_daily_log(user.id, log_date)
-    
+
     if not log:
-        import uuid
         return DailyLogRead(
             id=uuid.uuid4(),
             date=log_date,

@@ -14,7 +14,7 @@ class UnitInfoSchema(BaseModel):
 
 
 class NutritionSchema(BaseModel):
-    calories_per_100g: float
+    kcal_per_100g: float
     protein_per_100g: float
     fat_per_100g: float
     carbs_per_100g: float

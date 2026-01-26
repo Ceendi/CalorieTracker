@@ -6,11 +6,12 @@ from loguru import logger
 from src.ai.infrastructure.nlu.base import BaseNLUExtractor
 from src.ai.infrastructure.nlu.slm_loader import SLMLoader
 from src.ai.domain.models import (
-    MealExtraction, 
-    ExtractedFoodItem, 
+    MealExtraction,
+    ExtractedFoodItem,
     MealType,
     ExtractionMethod
 )
+from src.ai.config import SLM_SYSTEM_PROMPT, SLM_MAX_TOKENS, SLM_TEMPERATURE
 
 try:
     from llama_cpp import Llama, LlamaGrammar
@@ -83,10 +84,10 @@ class SLMExtractor(BaseNLUExtractor):
         output = await asyncio.to_thread(
             model_any.create_completion,
             prompt=prompt,
-            max_tokens=512,
-            temperature=0.1,
+            max_tokens=SLM_MAX_TOKENS,
+            temperature=SLM_TEMPERATURE,
             grammar=grammar,
-            stop=["<|eot_id|>"] 
+            stop=["<|eot_id|>"]
         )
         
         text_response = output['choices'][0]['text']
@@ -105,21 +106,8 @@ class SLMExtractor(BaseNLUExtractor):
             ), 0.0
 
     def _build_prompt(self, text: str) -> str:
-        system_prompt = (
-            "Jesteś precyzyjnym asystentem dietetycznym. Twoim zadaniem jest ekstrakcja składników posiłków z tekstu "
-            "w formacie JSON.\n"
-            "Zasady:\n"
-            "1. Rozbijaj dania składane (np. 'kanapka z serem' -> chleb, masło, ser). NIE rozbijaj dań gotowych (np. "
-            "'Bigos', 'Pierogi', 'Mizeria').\n"
-            "2. Ignoruj składniki wykluczone (np. 'bez cukru' -> nie dodawaj cukru).\n"
-            "3. Zamieniaj liczebniki słowne na liczby (np. 'dwa' -> 2, 'pół' -> 0.5).\n"
-            "4. Domyślne ilości: 'trochę' = 50g, 'dużo' = 150g, 'szklanka' = 250ml, 'łyżka' = 15g, 'łyżeczka' = 5g.\n"
-            "5. Dla 'ziemniaków' bez formy przyjmij 'ziemniak gotowany'. 'Omlet' to jajka i masło.\n"
-            "6. Typ posiłku: śniadanie, drugie_śniadanie, obiad, podwieczorek, kolacja, lub przekąska."
-        )
-        
         return (
-            f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|>"
+            f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{SLM_SYSTEM_PROMPT}<|eot_id|>"
             f"<|start_header_id|>user<|end_header_id|>\n\n{text}<|eot_id|>"
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )

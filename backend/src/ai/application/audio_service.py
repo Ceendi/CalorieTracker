@@ -1,5 +1,5 @@
 import time
-from typing import List
+from typing import List, Optional
 from loguru import logger
 
 from src.ai.domain.models import (
@@ -9,12 +9,14 @@ from src.ai.domain.exceptions import (
     AudioProcessingException,
     TranscriptionFailedException
 )
+from src.ai.application.ports import STTPort, SearchEnginePort, NLUProcessorPort, NLUExtractorPort
 from src.ai.infrastructure.stt.whisper_local import WhisperLocalClient
 from src.ai.infrastructure.matching.vector_engine import HybridSearchEngine
 from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
 from src.ai.application.meal_service import MealRecognitionService
 from src.ai.application.dto import ProcessedMealDTO, ProcessedFoodItemDTO
 from src.ai.infrastructure.nlu.slm_extractor import SLMExtractor
+from src.ai.config import MEAL_TYPE_KEYWORDS, DEFAULT_MEAL_TYPE
 
 
 class AudioProcessingService:
@@ -22,16 +24,22 @@ class AudioProcessingService:
         self,
         fineli_products: List[dict],
         whisper_model_size: str = "medium",
+        stt_client: Optional[STTPort] = None,
+        vector_engine: Optional[SearchEnginePort] = None,
+        nlu_processor: Optional[NLUProcessorPort] = None,
+        slm_extractor: Optional[NLUExtractorPort] = None,
     ):
         self.fineli_products = fineli_products
-        
-        self.stt_client = WhisperLocalClient(model_size=whisper_model_size)
-        
-        self.vector_engine = HybridSearchEngine()
-        self.nlu_processor = NaturalLanguageProcessor()
-        
-        self.slm_extractor = SLMExtractor() if SLMExtractor.is_available() else None
-        
+
+        self.stt_client: STTPort = stt_client or WhisperLocalClient(model_size=whisper_model_size)
+        self.vector_engine: SearchEnginePort = vector_engine or HybridSearchEngine()
+        self.nlu_processor: NLUProcessorPort = nlu_processor or NaturalLanguageProcessor()
+
+        if slm_extractor is not None:
+            self.slm_extractor: Optional[NLUExtractorPort] = slm_extractor
+        else:
+            self.slm_extractor = SLMExtractor() if SLMExtractor.is_available() else None
+
         self.meal_service = MealRecognitionService(
             vector_engine=self.vector_engine,
             nlu_processor=self.nlu_processor,
@@ -147,13 +155,10 @@ class AudioProcessingService:
     
     def _detect_meal_type_simple(self, text: str) -> str:
         text_lower = text.lower()
-        if "śniadanie" in text_lower:
-            return "breakfast"
-        if "obiad" in text_lower or "zup" in text_lower:
-            return "lunch"
-        if "kolacj" in text_lower:
-            return "dinner"
-        return "snack"
+        for keyword, meal_type in MEAL_TYPE_KEYWORDS.items():
+            if keyword in text_lower:
+                return meal_type
+        return DEFAULT_MEAL_TYPE
 
     async def transcribe_only(
         self, 

@@ -99,7 +99,7 @@ async def create_custom_product(
         svc: FoodService = Depends(get_food_service)
 ):
     domain_nutrition = Nutrition(
-        calories_per_100g=payload.nutrition.calories_per_100g,
+        kcal_per_100g=payload.nutrition.kcal_per_100g,
         protein_per_100g=payload.nutrition.protein_per_100g,
         fat_per_100g=payload.nutrition.fat_per_100g,
         carbs_per_100g=payload.nutrition.carbs_per_100g,

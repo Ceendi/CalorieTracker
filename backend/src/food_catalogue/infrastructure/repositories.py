@@ -17,7 +17,7 @@ class SqlAlchemyFoodRepository:
             return None
 
         nutrition = Nutrition(
-            calories_per_100g=model.calories,
+            kcal_per_100g=model.calories,
             protein_per_100g=model.protein,
             fat_per_100g=model.fat,
             carbs_per_100g=model.carbs,
@@ -100,7 +100,7 @@ class SqlAlchemyFoodRepository:
             default_unit=food.default_unit,
             units=orm_units,
             owner_id=food.owner_id,
-            calories=food.nutrition.calories_per_100g,
+            calories=food.nutrition.kcal_per_100g,
             protein=food.nutrition.protein_per_100g,
             fat=food.nutrition.fat_per_100g,
             carbs=food.nutrition.carbs_per_100g,

@@ -21,15 +21,29 @@ class MealEntry:
     amount_grams: float
 
     kcal_per_100g: int
-    prot_per_100g: float
+    protein_per_100g: float
     fat_per_100g: float
-    carb_per_100g: float
+    carbs_per_100g: float
 
     product_id: Optional[UUID] = None
-    
+
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
+
+    def __post_init__(self):
+        if self.amount_grams < 0:
+            raise ValueError("amount_grams cannot be negative")
+        if self.kcal_per_100g < 0:
+            raise ValueError("kcal_per_100g cannot be negative")
+        if self.protein_per_100g < 0:
+            raise ValueError("protein_per_100g cannot be negative")
+        if self.fat_per_100g < 0:
+            raise ValueError("fat_per_100g cannot be negative")
+        if self.carbs_per_100g < 0:
+            raise ValueError("carbs_per_100g cannot be negative")
+        if not self.product_name or not self.product_name.strip():
+            raise ValueError("product_name cannot be empty")
 
     @property
     def computed_kcal(self) -> int:
@@ -37,7 +51,7 @@ class MealEntry:
 
     @property
     def computed_protein(self) -> float:
-        return (self.amount_grams / 100) * self.prot_per_100g
+        return (self.amount_grams / 100) * self.protein_per_100g
 
     @property
     def computed_fat(self) -> float:
@@ -45,7 +59,7 @@ class MealEntry:
 
     @property
     def computed_carbs(self) -> float:
-        return (self.amount_grams / 100) * self.carb_per_100g
+        return (self.amount_grams / 100) * self.carbs_per_100g
 
 
 @dataclass

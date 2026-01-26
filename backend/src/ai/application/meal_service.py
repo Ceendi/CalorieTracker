@@ -1,3 +1,4 @@
+import re
 import time
 from typing import List, Optional, Dict
 from loguru import logger
@@ -9,26 +10,23 @@ from src.ai.domain.models import (
     MealRecognitionResult,
     ExtractedFoodItem
 )
-from src.ai.infrastructure.matching.vector_engine import HybridSearchEngine
-from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
+from src.ai.application.ports import SearchEnginePort, NLUProcessorPort, NLUExtractorPort
+from src.ai.config import (
+    DERIVATIVE_KEYWORDS,
+    FRESH_CATEGORIES,
+    DEFAULT_UNIT_GRAMS,
+    DEFAULT_PORTION_GRAMS,
+    MEAL_RECOGNITION_CONFIG as CONFIG
+)
 
 
 class MealRecognitionService:
-    DERIVATIVE_KEYWORDS = {
-        "mąka", "skrobia", "płatki", "chleb", "bułka", "puree", "placki", "chipsy", "frytki",
-        "halloumi", "białko", "białka", "żółtko", "żółtka", "proszek", "pasta", "mix",
-        "czekolada", "czekoladowe", "wanilia", "waniliowe", "truskawka", "truskawkowe", "kakao", "kakaowe",
-        "topiony", "wędzony"
-    }
-
-    FRESH_CATEGORIES = {
-        "VEGFRESH", "FRUIFRESH", "DAI", "EGGS", "MEAT", "VEGPOT", "VEGROOT", "FISH"
-    }
-
-    def __init__(self,
-                 vector_engine: HybridSearchEngine,
-                 nlu_processor: NaturalLanguageProcessor,
-                 slm_extractor=None):
+    def __init__(
+        self,
+        vector_engine: SearchEnginePort,
+        nlu_processor: NLUProcessorPort,
+        slm_extractor: Optional[NLUExtractorPort] = None
+    ):
         self.engine = vector_engine
         self.nlu = nlu_processor
         self.slm_extractor = slm_extractor
@@ -66,7 +64,7 @@ class MealRecognitionService:
         unmatched_chunks: List[str] = []
 
         for chunk in chunks:
-            candidates = self.engine.search(chunk.text_for_search, top_k=20, alpha=0.2)
+            candidates = self.engine.search(chunk.text_for_search, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
 
             best_match: Optional[SearchCandidate] = None
 
@@ -81,27 +79,27 @@ class MealRecognitionService:
                 current_score = candidate.score
 
                 if q_norm == c_norm:
-                    current_score += 3.0
+                    current_score += CONFIG.EXACT_MATCH_BOOST
                 elif q_norm in c_norm.split():
-                    current_score += 1.0
+                    current_score += CONFIG.TOKEN_MATCH_BOOST
 
                 if c_norm.startswith(q_norm):
-                    current_score += 0.5
+                    current_score += CONFIG.PREFIX_MATCH_BOOST
 
                 if len(q_tokens) == 1 and len(c_tokens) > 2:
-                    current_score -= 0.5
+                    current_score -= CONFIG.MULTI_TOKEN_PENALTY
 
-                derivative_in_product = self.DERIVATIVE_KEYWORDS.intersection(c_tokens)
-                derivative_in_query = self.DERIVATIVE_KEYWORDS.intersection(q_tokens)
+                derivative_in_product = DERIVATIVE_KEYWORDS.intersection(c_tokens)
+                derivative_in_query = DERIVATIVE_KEYWORDS.intersection(q_tokens)
 
                 if derivative_in_product and not derivative_in_query:
-                    current_score *= 0.3
+                    current_score *= CONFIG.DERIVATIVE_PENALTY_MULTIPLIER
 
-                if len(q_tokens) <= 2 and candidate.category in self.FRESH_CATEGORIES:
-                    current_score += 0.3
+                if len(q_tokens) <= 2 and candidate.category in FRESH_CATEGORIES:
+                    current_score += CONFIG.FRESH_CATEGORY_BOOST
 
                 if not self.nlu.verify_keyword_consistency(chunk.text_for_search, candidate.name):
-                    current_score *= 0.4
+                    current_score *= CONFIG.GUARD_FAIL_MULTIPLIER
                     candidate.passed_guard = False
                 else:
                     candidate.passed_guard = True
@@ -115,7 +113,8 @@ class MealRecognitionService:
                 best_match.score = max(0.0, min(1.0, candidate_scores[0][0]))
 
             if best_match:
-                final_confidence = best_match.score * (0.85 if not best_match.passed_guard else 1.0)
+                confidence_multiplier = CONFIG.GUARD_FAIL_CONFIDENCE_MULTIPLIER if not best_match.passed_guard else 1.0
+                final_confidence = best_match.score * confidence_multiplier
                 raw_product = self.engine.get_product_by_id(best_match.product_id)
 
                 temp_item = ExtractedFoodItem(
@@ -177,14 +176,14 @@ class MealRecognitionService:
 
     def _calculate_grams(self, item: ExtractedFoodItem, product: Optional[Dict]) -> float:
         if not product:
-            return 100.0
+            return DEFAULT_PORTION_GRAMS
 
         unit = item.quantity_unit.lower()
         val = item.quantity_value
 
-        if any(u in unit for u in ["g", "gram", "ml", "mililitr"]):
+        if re.match(r'^(g|gramy?|gram[óo]w|ml|mililitr[óy]?|mililit(?:rów)?)$', unit, re.IGNORECASE):
             return val
-        if "kg" in unit:
+        if re.match(r'^kg$', unit, re.IGNORECASE):
             return val * 1000
 
         if "units" in product:
@@ -193,18 +192,8 @@ class MealRecognitionService:
                 if unit == u_name or unit in u_name:
                     return u["weight_g"] * val
 
-        defaults = {
-            "szklanka": 250.0, "szklankę": 250.0,
-            "łyżka": 15.0, "łyżkę": 15.0,
-            "łyżeczka": 5.0, "łyżeczkę": 5.0,
-            "kromka": 35.0, "kromkę": 35.0,
-            "plaster": 20.0, "plastry": 20.0,
-            "sztuka": 100.0, "sztuki": 100.0, "szt": 100.0,
-            "garść": 30.0, "porcja": 150.0
-        }
+        for keyword, grams in DEFAULT_UNIT_GRAMS.items():
+            if keyword in unit:
+                return grams * val
 
-        for k, v in defaults.items():
-            if k in unit:
-                return v * val
-
-        return 100.0 * val
+        return DEFAULT_PORTION_GRAMS * val

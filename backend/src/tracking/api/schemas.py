@@ -44,9 +44,9 @@ class MealEntryRead(BaseModel):
     computed_carbs: float
 
     kcal_per_100g: Optional[int] = None
-    prot_per_100g: Optional[float] = None
+    protein_per_100g: Optional[float] = None
     fat_per_100g: Optional[float] = None
-    carb_per_100g: Optional[float] = None
+    carbs_per_100g: Optional[float] = None
 
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None

@@ -6,6 +6,7 @@ from loguru import logger
 
 from src.ai.infrastructure.stt.base import BaseSTTClient
 from src.ai.domain.exceptions import TranscriptionFailedException, AudioFormatError
+from src.ai.config import WHISPER_INITIAL_PROMPT, WHISPER_CONFIG
 
 _whisper_model = None
 _model_lock = asyncio.Lock()
@@ -68,13 +69,8 @@ class WhisperLocalClient(BaseSTTClient):
                 model_any.transcribe,
                 audio=temp_path,
                 language=language,
-                fp16=False,
-                verbose=False,
-                initial_prompt="Opis posiłku po polsku. Zjadłem na śniadanie kanapkę z szynką i serem, obiad, "
-                               "kolację.",
-                beam_size=5,
-                best_of=5,
-                temperature=0.0
+                initial_prompt=WHISPER_INITIAL_PROMPT,
+                **WHISPER_CONFIG
             )
             
             transcription = result.get("text", "").strip()

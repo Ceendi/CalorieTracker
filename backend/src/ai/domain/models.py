@@ -5,8 +5,7 @@ from src.tracking.domain.entities import MealType
 
 __all__ = [
     'MealType', 'ExtractionMethod', 'ExtractedFoodItem', 'MealExtraction',
-    'SearchCandidate', 'MatchedProduct', 'ProcessingResult',
-    'IngredientChunk', 'MealRecognitionResult'
+    'SearchCandidate', 'MatchedProduct', 'IngredientChunk', 'MealRecognitionResult'
 ]
 
 
@@ -34,7 +33,7 @@ class MealExtraction(BaseModel):
 
 
 class SearchCandidate(BaseModel):
-    product_id: int
+    product_id: str = Field(..., description="Product ID (string for UUID compatibility)")
     name: str = Field(..., description="Product name from the database")
     score: float = Field(..., description="Cosine similarity score (0.0 to 1.0)")
     category: Optional[str] = Field(None, description="Product category for heuristic boosting")
@@ -43,7 +42,7 @@ class SearchCandidate(BaseModel):
 
 
 class MatchedProduct(BaseModel):
-    product_id: int
+    product_id: str = Field(..., description="Product ID (string for UUID compatibility)")
     name_pl: str
     name_en: str = ""
     quantity_grams: float = 0.0
@@ -68,13 +67,6 @@ class MatchedProduct(BaseModel):
     @property
     def confidence(self) -> float:
         return self.match_confidence
-
-
-class ProcessingResult(BaseModel):
-    matched_products: List[MatchedProduct]
-    unmatched_items: List[ExtractedFoodItem] = Field(default_factory=list)
-    overall_confidence: float = 0.0
-    processing_time_ms: float = 0.0
 
 
 class IngredientChunk(BaseModel):

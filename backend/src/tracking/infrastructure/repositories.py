@@ -15,6 +15,42 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    @staticmethod
+    def _orm_entry_to_domain(orm_entry: TrackingMealEntry) -> MealEntry:
+        return MealEntry(
+            id=orm_entry.id,
+            daily_log_id=orm_entry.daily_log_id,
+            meal_type=MealType(orm_entry.meal_type),
+            product_id=orm_entry.product_id,
+            product_name=orm_entry.product_name,
+            amount_grams=orm_entry.amount_grams,
+            unit_label=orm_entry.unit_label,
+            unit_grams=orm_entry.unit_grams,
+            unit_quantity=orm_entry.unit_quantity,
+            kcal_per_100g=orm_entry.kcal_per_100g,
+            protein_per_100g=orm_entry.protein_per_100g,
+            fat_per_100g=orm_entry.fat_per_100g,
+            carbs_per_100g=orm_entry.carbs_per_100g
+        )
+
+    @staticmethod
+    def _domain_entry_to_orm(entry: MealEntry) -> TrackingMealEntry:
+        return TrackingMealEntry(
+            id=entry.id,
+            daily_log_id=entry.daily_log_id,
+            product_id=entry.product_id,
+            product_name=entry.product_name,
+            meal_type=entry.meal_type.value,
+            amount_grams=entry.amount_grams,
+            unit_label=entry.unit_label,
+            unit_grams=entry.unit_grams,
+            unit_quantity=entry.unit_quantity,
+            kcal_per_100g=entry.kcal_per_100g,
+            protein_per_100g=entry.protein_per_100g,
+            fat_per_100g=entry.fat_per_100g,
+            carbs_per_100g=entry.carbs_per_100g
+        )
+
     async def get_daily_log(self, user_id: UUID, log_date: date) -> Optional[DailyLog]:
         stmt = (
             select(TrackingDailyLog)
@@ -63,43 +99,12 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
         return self._to_domain(daily_log)
 
     async def add_entry(self, user_id: UUID, entry: MealEntry) -> None:
-        orm_entry = TrackingMealEntry(
-            id=entry.id,
-            daily_log_id=entry.daily_log_id,
-            product_id=entry.product_id,
-            product_name=entry.product_name,
-            meal_type=entry.meal_type.value,
-            amount_grams=entry.amount_grams,
-            unit_label=entry.unit_label,
-            unit_grams=entry.unit_grams,
-            unit_quantity=entry.unit_quantity,
-            kcal_per_100g=entry.kcal_per_100g,
-            prot_per_100g=entry.prot_per_100g,
-            fat_per_100g=entry.fat_per_100g,
-            carb_per_100g=entry.carb_per_100g
-        )
+        orm_entry = self._domain_entry_to_orm(entry)
         self.db.add(orm_entry)
         await self.db.flush()
 
     async def add_entries_bulk(self, user_id: UUID, entries: List[MealEntry]) -> None:
-        orm_entries = [
-            TrackingMealEntry(
-                id=entry.id,
-                daily_log_id=entry.daily_log_id,
-                product_id=entry.product_id,
-                product_name=entry.product_name,
-                meal_type=entry.meal_type.value,
-                amount_grams=entry.amount_grams,
-                unit_label=entry.unit_label,
-                unit_grams=entry.unit_grams,
-                unit_quantity=entry.unit_quantity,
-                kcal_per_100g=entry.kcal_per_100g,
-                prot_per_100g=entry.prot_per_100g,
-                fat_per_100g=entry.fat_per_100g,
-                carb_per_100g=entry.carb_per_100g
-            )
-            for entry in entries
-        ]
+        orm_entries = [self._domain_entry_to_orm(entry) for entry in entries]
         self.db.add_all(orm_entries)
         await self.db.flush()
 
@@ -131,25 +136,11 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
         )
         result = await self.db.execute(stmt)
         orm_entry = result.scalar_one_or_none()
-        
+
         if not orm_entry:
             return None
-            
-        return MealEntry(
-            id=orm_entry.id,
-            daily_log_id=orm_entry.daily_log_id,
-            meal_type=MealType(orm_entry.meal_type),
-            product_id=orm_entry.product_id,
-            product_name=orm_entry.product_name,
-            amount_grams=orm_entry.amount_grams,
-            unit_label=orm_entry.unit_label,
-            unit_grams=orm_entry.unit_grams,
-            unit_quantity=orm_entry.unit_quantity,
-            kcal_per_100g=orm_entry.kcal_per_100g,
-            prot_per_100g=orm_entry.prot_per_100g,
-            fat_per_100g=orm_entry.fat_per_100g,
-            carb_per_100g=orm_entry.carb_per_100g
-        )
+
+        return self._orm_entry_to_domain(orm_entry)
 
     async def update_entry(self, entry: MealEntry) -> None:
         stmt = (
@@ -202,9 +193,9 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             for e in daily_log.entries:
                 ratio = e.amount_grams / 100
                 total_kcal += int(e.kcal_per_100g * ratio)
-                total_protein += e.prot_per_100g * ratio
+                total_protein += e.protein_per_100g * ratio
                 total_fat += e.fat_per_100g * ratio
-                total_carbs += e.carb_per_100g * ratio
+                total_carbs += e.carbs_per_100g * ratio
             
             daily_log.total_kcal = total_kcal
             daily_log.total_protein = total_protein
@@ -220,22 +211,5 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             id=orm_log.id,
             user_id=orm_log.user_id,
             date=orm_log.date,
-            entries=[
-                MealEntry(
-                    id=e.id,
-                    daily_log_id=e.daily_log_id,
-                    meal_type=MealType(e.meal_type),
-                    product_id=e.product_id,
-                    product_name=e.product_name,
-                    amount_grams=e.amount_grams,
-                    unit_label=e.unit_label,
-                    unit_grams=e.unit_grams,
-                    unit_quantity=e.unit_quantity,
-                    kcal_per_100g=e.kcal_per_100g,
-                    prot_per_100g=e.prot_per_100g,
-                    fat_per_100g=e.fat_per_100g,
-                    carb_per_100g=e.carb_per_100g
-                )
-                for e in orm_log.entries
-            ]
+            entries=[self._orm_entry_to_domain(e) for e in orm_log.entries]
         )

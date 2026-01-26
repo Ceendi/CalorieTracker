@@ -54,7 +54,7 @@ class OpenFoodFactsAdapter(ExternalFoodProviderPort):
                 calories = round(kj / 4.184, 1)
 
         return Nutrition(
-            calories_per_100g=calories,
+            kcal_per_100g=calories,
             protein_per_100g=self._safe_float(nutr.get("proteins_100g")),
             fat_per_100g=self._safe_float(nutr.get("fat_100g")),
             carbs_per_100g=self._safe_float(nutr.get("carbohydrates_100g")),

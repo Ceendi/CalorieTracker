@@ -12,7 +12,7 @@ from src.ai.domain.models import SearchCandidate
 
 class HybridSearchEngine:
     def __init__(self, model_name: str = "intfloat/multilingual-e5-large"):
-        self.device = "cpu" if torch.cuda.is_available() else "cpu"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         logger.info(f"Initializing HybridSearchEngine on device: {self.device}")
 
         try:
@@ -23,6 +23,7 @@ class HybridSearchEngine:
             raise RuntimeError(f"Semantic model loading failed: {e}")
 
         self.products: List[Dict] = []
+        self.products_by_id: Dict[str, Dict] = {}
         self.embeddings: Optional[torch.Tensor] = None
         self.bm25: Optional[BM25Okapi] = None
 
@@ -35,6 +36,7 @@ class HybridSearchEngine:
             return
 
         self.products = products
+        self.products_by_id = {str(p['id']): p for p in products}
 
         logger.info(f"Starting HYBRID indexing for {len(products)} products...")
         start_time = time.time()
@@ -103,7 +105,7 @@ class HybridSearchEngine:
             debug_info = f"Hybrid(V={vector_norm[idx]:.2f}, B={bm25_norm[idx]:.2f}, Final={final_scores[idx]:.2f})"
 
             results.append(SearchCandidate(
-                product_id=product['id'],
+                product_id=str(product['id']),
                 name=product['name_pl'],
                 category=product.get('category', 'UNKNOWN'),
                 score=float(final_scores[idx]),
@@ -113,8 +115,5 @@ class HybridSearchEngine:
 
         return results
 
-    def get_product_by_id(self, product_id: int) -> Optional[Dict]:
-        for p in self.products:
-            if p['id'] == product_id:
-                return p
-        return None
+    def get_product_by_id(self, product_id: str) -> Optional[Dict]:
+        return self.products_by_id.get(str(product_id))
