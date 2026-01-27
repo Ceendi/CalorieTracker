@@ -18,6 +18,7 @@ import src.users.domain.models
 import src.users.infrastructure.models
 import src.food_catalogue.infrastructure.orm_models
 import src.tracking.infrastructure.orm_models
+import src.meal_planning.infrastructure.orm_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
