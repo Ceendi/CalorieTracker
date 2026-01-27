@@ -1,6 +1,21 @@
 import { User } from './validators';
 
 /**
+ * Clamp a number between min and max values
+ */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Round a number to specified decimal places
+ */
+export function roundTo(value: number, decimals: number = 1): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+}
+
+/**
  * Calculates the Basal Metabolic Rate (BMR) using the Mifflin-St Jeor equation.
  */
 export const calculateBMR = (
