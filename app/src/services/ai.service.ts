@@ -56,17 +56,17 @@ class AIService {
   }
 
   private async _uploadAudio<T>(endpoint: string, audioUri: string, language: string): Promise<T> {
-    const formData = new FormData();
+    const token = await storageService.getAccessToken();
     const fileExtension = audioUri.split('.').pop()?.toLowerCase() || 'm4a';
     const mimeType = this.getMimeType(fileExtension);
     
+    const formData = new FormData();
     formData.append('audio', {
       uri: audioUri,
       type: mimeType,
       name: `recording.${fileExtension}`,
     } as any);
 
-    const token = await storageService.getAccessToken();
     const response = await fetch(`${CONFIG.API_URL}${endpoint}?language=${language}`, {
       method: 'POST',
       headers: {

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   useAudioRecorder as useExpoAudioRecorder,
   AudioModule,
-  RecordingOptions,
   RecordingPresets,
 } from 'expo-audio';
 import { useLanguage } from './useLanguage';
@@ -75,12 +74,18 @@ export function useAudioRecorder(): UseAudioRecorderResult {
         }
       }
 
+      await AudioModule.setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+      });
+
+      await audioRecorder.prepareToRecordAsync();
       audioRecorder.record();
+      
       setRecordingStatus('recording');
       setRecordingDuration(0);
       startTimeRef.current = Date.now();
 
-      // Update duration every 100ms
       durationIntervalRef.current = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
         setRecordingDuration(elapsed);
@@ -107,7 +112,13 @@ export function useAudioRecorder(): UseAudioRecorderResult {
       }
 
       await audioRecorder.stop();
+      
       const uri = audioRecorder.uri;
+
+      await AudioModule.setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: false,
+      });
 
       setRecordingStatus('idle');
 

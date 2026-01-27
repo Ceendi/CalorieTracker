@@ -18,6 +18,7 @@ export const UserResponseSchema = z.object({
   email: z.string().email(),
   is_active: z.boolean().optional().default(true),
   is_verified: z.boolean().optional().default(false),
+  is_onboarded: z.boolean().optional().default(false),
   weight: z.number().nullable().optional(),
   height: z.number().nullable().optional(),
   age: z.number().nullable().optional(),

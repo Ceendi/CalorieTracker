@@ -12,7 +12,7 @@ from src.ai.domain.models import SearchCandidate
 
 class HybridSearchEngine:
     def __init__(self, model_name: str = "intfloat/multilingual-e5-large"):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cpu" if torch.cuda.is_available() else "cpu"
         logger.info(f"Initializing HybridSearchEngine on device: {self.device}")
 
         try:

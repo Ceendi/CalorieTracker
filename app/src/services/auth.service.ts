@@ -12,6 +12,7 @@ function mapUser(apiUser: ReturnType<typeof UserResponseSchema.parse>): User {
     email: apiUser.email,
     is_active: apiUser.is_active,
     is_verified: apiUser.is_verified,
+    is_onboarded: apiUser.is_onboarded,
     weight: apiUser.weight ?? undefined,
     height: apiUser.height ?? undefined,
     age: apiUser.age ?? undefined,
