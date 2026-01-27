@@ -1,0 +1,556 @@
+"""
+Bielik LLM Adapter for meal plan generation.
+
+Implements MealPlannerPort using the existing Bielik 4.5B model.
+Uses lazy loading and singleton pattern via SLMLoader.
+"""
+
+import asyncio
+import json
+import re
+from typing import Any, Dict, List, Optional
+from uuid import UUID
+
+from loguru import logger
+
+from src.meal_planning.domain.ports import MealPlannerPort
+from src.meal_planning.domain.entities import (
+    UserProfile,
+    MealTemplate,
+    GeneratedMeal,
+    GeneratedIngredient,
+    GeneratedDay,
+)
+from src.meal_planning.config import (
+    MEAL_PLANNER_SYSTEM_PROMPT,
+    TEMPLATE_GENERATION_PROMPT,
+    MEAL_GENERATION_PROMPT,
+    MAX_TOKENS_TEMPLATES,
+    MAX_TOKENS_MEAL,
+    TEMPERATURE,
+    MAX_PRODUCTS_IN_PROMPT,
+    MAX_USED_INGREDIENTS_IN_PROMPT,
+)
+
+
+class BielikMealPlannerAdapter(MealPlannerPort):
+    """
+    Meal planner adapter using existing Bielik 4.5B model.
+
+    Uses lazy loading to defer model initialization until first use.
+    The model is a singleton managed by SLMLoader.
+    """
+
+    # Meal distribution for calculating per-meal macro targets
+    MEAL_DISTRIBUTION: Dict[str, float] = {
+        "breakfast": 0.25,
+        "second_breakfast": 0.10,
+        "lunch": 0.35,
+        "snack": 0.10,
+        "dinner": 0.20,
+    }
+
+    def __init__(self) -> None:
+        """Initialize adapter with lazy model loading."""
+        self._model: Any = None
+
+    def _get_model(self) -> Any:
+        """
+        Get the Bielik model instance (lazy loading).
+
+        Uses SLMLoader singleton to avoid multiple model instances.
+
+        Returns:
+            Llama model instance
+        """
+        if self._model is None:
+            from src.ai.infrastructure.nlu.slm_loader import SLMLoader
+
+            self._model = SLMLoader.get_model()
+            logger.info("BielikMealPlannerAdapter: Model loaded via SLMLoader")
+        return self._model
+
+    def _build_prompt(self, system: str, user: str) -> str:
+        """
+        Build prompt in Bielik instruction format.
+
+        Uses Llama 2 style: <s>[INST] system + user [/INST]
+
+        Args:
+            system: System prompt with instructions
+            user: User prompt with specific request
+
+        Returns:
+            Formatted prompt string
+        """
+        return f"<s>[INST] {system}\n\n{user} [/INST]"
+
+    async def generate_meal_templates(
+        self,
+        profile: UserProfile,
+        days: int = 7
+    ) -> List[List[MealTemplate]]:
+        """
+        Generate meal structure templates for each day.
+
+        Args:
+            profile: User profile with daily targets and preferences
+            days: Number of days to generate
+
+        Returns:
+            List of days, each containing list of meal templates
+        """
+        model = self._get_model()
+
+        # Build the user prompt
+        user_prompt = TEMPLATE_GENERATION_PROMPT.format(
+            days=days,
+            kcal=profile.daily_kcal,
+            breakfast_kcal=int(profile.daily_kcal * 0.25),
+            snack1_kcal=int(profile.daily_kcal * 0.10),
+            lunch_kcal=int(profile.daily_kcal * 0.35),
+            snack2_kcal=int(profile.daily_kcal * 0.10),
+            dinner_kcal=int(profile.daily_kcal * 0.20),
+            preferences=self._format_preferences(profile.preferences),
+        )
+
+        full_prompt = self._build_prompt(MEAL_PLANNER_SYSTEM_PROMPT, user_prompt)
+
+        logger.debug(f"Template generation prompt length: {len(full_prompt)}")
+
+        # Call model in thread pool (llama-cpp is sync)
+        response = await asyncio.to_thread(
+            model,
+            full_prompt,
+            max_tokens=MAX_TOKENS_TEMPLATES,
+            temperature=TEMPERATURE,
+            stop=["</s>", "[INST]"],
+        )
+
+        response_text = response["choices"][0]["text"]
+        logger.debug(f"Template generation response: {response_text[:500]}...")
+
+        return self._parse_templates(response_text, profile, days)
+
+    async def generate_meal(
+        self,
+        template: MealTemplate,
+        profile: UserProfile,
+        used_ingredients: List[str],
+        available_products: List[dict]
+    ) -> GeneratedMeal:
+        """
+        Generate a single meal with ingredients from available products.
+
+        Args:
+            template: Meal template to fill with ingredients
+            profile: User profile for preferences
+            used_ingredients: Recently used ingredient names (for variety)
+            available_products: Products from RAG search
+
+        Returns:
+            Complete meal with ingredients and calculated nutrition
+        """
+        model = self._get_model()
+
+        # Format products list (limit to context size)
+        products_limited = available_products[:MAX_PRODUCTS_IN_PROMPT]
+        products_text = "\n".join([
+            f"- {p['name']}: {p.get('kcal_per_100g', 0):.0f} kcal/100g, "
+            f"B:{p.get('protein_per_100g', 0):.1f}g, "
+            f"T:{p.get('fat_per_100g', 0):.1f}g, "
+            f"W:{p.get('carbs_per_100g', 0):.1f}g"
+            for p in products_limited
+        ])
+
+        # Format used ingredients (limit for context)
+        used_limited = used_ingredients[-MAX_USED_INGREDIENTS_IN_PROMPT:]
+        used_text = ", ".join(used_limited) if used_limited else "brak"
+
+        user_prompt = MEAL_GENERATION_PROMPT.format(
+            description=template.description,
+            target_kcal=template.target_kcal,
+            target_protein=template.target_protein,
+            target_fat=template.target_fat,
+            target_carbs=template.target_carbs,
+            products=products_text,
+            used=used_text,
+        )
+
+        full_prompt = self._build_prompt(MEAL_PLANNER_SYSTEM_PROMPT, user_prompt)
+
+        logger.debug(f"Meal generation prompt length: {len(full_prompt)}")
+
+        # Call model in thread pool
+        response = await asyncio.to_thread(
+            model,
+            full_prompt,
+            max_tokens=MAX_TOKENS_MEAL,
+            temperature=TEMPERATURE,
+            stop=["</s>", "[INST]"],
+        )
+
+        response_text = response["choices"][0]["text"]
+        logger.debug(f"Meal generation response: {response_text[:300]}...")
+
+        return self._parse_meal(response_text, template, available_products)
+
+    async def optimize_plan(
+        self,
+        days: List[GeneratedDay],
+        profile: UserProfile
+    ) -> List[GeneratedDay]:
+        """
+        Optimize the complete plan for nutritional balance.
+
+        Adjusts portions to better hit macro targets. This is done
+        programmatically without additional LLM calls for efficiency.
+
+        Args:
+            days: Generated days to optimize
+            profile: User profile with target macros
+
+        Returns:
+            Optimized list of days with adjusted portions
+        """
+        for day in days:
+            day_kcal = day.total_kcal
+
+            if day_kcal > 0:
+                # Calculate ratio to target
+                ratio = profile.daily_kcal / day_kcal
+
+                # Only adjust if significantly off (>10%)
+                if abs(ratio - 1.0) > 0.1:
+                    # Limit scaling to reasonable range
+                    scale = min(max(ratio, 0.85), 1.15)
+
+                    logger.debug(
+                        f"Day {day.day_number}: scaling by {scale:.2f} "
+                        f"(current {day_kcal:.0f} kcal, target {profile.daily_kcal})"
+                    )
+
+                    for meal in day.meals:
+                        for ing in meal.ingredients:
+                            ing.amount_grams *= scale
+                            ing.kcal *= scale
+                            ing.protein *= scale
+                            ing.fat *= scale
+                            ing.carbs *= scale
+
+                        meal.total_kcal *= scale
+                        meal.total_protein *= scale
+                        meal.total_fat *= scale
+                        meal.total_carbs *= scale
+
+        return days
+
+    def _format_preferences(self, preferences: dict) -> str:
+        """
+        Format preferences dictionary into human-readable string.
+
+        Args:
+            preferences: User preferences dict
+
+        Returns:
+            Formatted string for prompt
+        """
+        parts = []
+
+        if preferences.get("diet"):
+            diets = {
+                "vegetarian": "wegetarianska",
+                "vegan": "weganska",
+                "keto": "ketogeniczna",
+            }
+            parts.append(f"dieta {diets.get(preferences['diet'], preferences['diet'])}")
+
+        if preferences.get("allergies"):
+            parts.append(f"bez: {', '.join(preferences['allergies'])}")
+
+        if preferences.get("cuisine_preferences"):
+            parts.append(f"kuchnia: {', '.join(preferences['cuisine_preferences'])}")
+
+        if preferences.get("excluded_ingredients"):
+            parts.append(f"wykluczone: {', '.join(preferences['excluded_ingredients'])}")
+
+        return ", ".join(parts) if parts else "standardowa polska kuchnia"
+
+    def _extract_json(self, text: str) -> str:
+        """
+        Extract JSON from LLM response.
+
+        Handles both code-block wrapped JSON and raw JSON.
+
+        Args:
+            text: Raw LLM response text
+
+        Returns:
+            JSON string
+
+        Raises:
+            ValueError: If no valid JSON found
+        """
+        # Try code block first (```json ... ``` or ``` ... ```)
+        match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if match:
+            return match.group(1)
+
+        # Try raw JSON object
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return match.group(0)
+
+        raise ValueError(f"No JSON found in response: {text[:200]}...")
+
+    def _parse_templates(
+        self,
+        response: str,
+        profile: UserProfile,
+        expected_days: int
+    ) -> List[List[MealTemplate]]:
+        """
+        Parse LLM response into meal templates.
+
+        Args:
+            response: Raw LLM response
+            profile: User profile for macro calculations
+            expected_days: Expected number of days
+
+        Returns:
+            List of days with meal templates
+        """
+        try:
+            json_str = self._extract_json(response)
+            data = json.loads(json_str)
+        except (ValueError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to parse templates JSON: {e}")
+            # Return default templates as fallback
+            return self._generate_default_templates(profile, expected_days)
+
+        templates: List[List[MealTemplate]] = []
+
+        for day_data in data.get("days", []):
+            day_templates: List[MealTemplate] = []
+
+            for meal_data in day_data.get("meals", []):
+                meal_type = meal_data.get("type", "snack")
+                ratio = self.MEAL_DISTRIBUTION.get(meal_type, 0.20)
+
+                template = MealTemplate(
+                    meal_type=meal_type,
+                    target_kcal=int(profile.daily_kcal * ratio),
+                    target_protein=round(profile.daily_protein * ratio, 1),
+                    target_fat=round(profile.daily_fat * ratio, 1),
+                    target_carbs=round(profile.daily_carbs * ratio, 1),
+                    description=meal_data.get("description", f"Posilek {meal_type}"),
+                )
+                day_templates.append(template)
+
+            templates.append(day_templates)
+
+        # Pad with defaults if not enough days generated
+        while len(templates) < expected_days:
+            templates.append(self._generate_default_day_templates(profile))
+
+        return templates[:expected_days]
+
+    def _generate_default_templates(
+        self,
+        profile: UserProfile,
+        days: int
+    ) -> List[List[MealTemplate]]:
+        """
+        Generate default templates when LLM parsing fails.
+
+        Args:
+            profile: User profile
+            days: Number of days
+
+        Returns:
+            Default templates for all days
+        """
+        return [self._generate_default_day_templates(profile) for _ in range(days)]
+
+    def _generate_default_day_templates(self, profile: UserProfile) -> List[MealTemplate]:
+        """
+        Generate default templates for a single day.
+
+        Args:
+            profile: User profile
+
+        Returns:
+            List of default meal templates
+        """
+        default_descriptions = {
+            "breakfast": "Sniadanie",
+            "second_breakfast": "Drugie sniadanie",
+            "lunch": "Obiad",
+            "snack": "Podwieczorek",
+            "dinner": "Kolacja",
+        }
+
+        templates = []
+        for meal_type, ratio in self.MEAL_DISTRIBUTION.items():
+            templates.append(MealTemplate(
+                meal_type=meal_type,
+                target_kcal=int(profile.daily_kcal * ratio),
+                target_protein=round(profile.daily_protein * ratio, 1),
+                target_fat=round(profile.daily_fat * ratio, 1),
+                target_carbs=round(profile.daily_carbs * ratio, 1),
+                description=default_descriptions.get(meal_type, "Posilek"),
+            ))
+        return templates
+
+    def _parse_meal(
+        self,
+        response: str,
+        template: MealTemplate,
+        available_products: List[dict]
+    ) -> GeneratedMeal:
+        """
+        Parse LLM response into a meal with ingredients.
+
+        Args:
+            response: Raw LLM response
+            template: Original meal template
+            available_products: Available products for matching
+
+        Returns:
+            Generated meal with ingredients
+        """
+        try:
+            json_str = self._extract_json(response)
+            data = json.loads(json_str)
+        except (ValueError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to parse meal JSON: {e}")
+            # Return a minimal meal as fallback
+            return self._generate_fallback_meal(template)
+
+        # Build product lookup (lowercase name -> product dict)
+        product_lookup = {p["name"].lower(): p for p in available_products}
+
+        ingredients: List[GeneratedIngredient] = []
+        total_kcal = 0.0
+        total_protein = 0.0
+        total_fat = 0.0
+        total_carbs = 0.0
+
+        for ing_data in data.get("ingredients", []):
+            name = ing_data.get("name", "Skladnik")
+            amount = float(ing_data.get("amount_grams", 100))
+
+            # Find matching product
+            product = self._find_product(name, product_lookup)
+
+            if product:
+                factor = amount / 100.0
+                kcal = product.get("kcal_per_100g", 0) * factor
+                protein = product.get("protein_per_100g", 0) * factor
+                fat = product.get("fat_per_100g", 0) * factor
+                carbs = product.get("carbs_per_100g", 0) * factor
+                food_id = product.get("id")
+
+                # Convert string UUID to UUID object if needed
+                if food_id and isinstance(food_id, str):
+                    try:
+                        food_id = UUID(food_id)
+                    except ValueError:
+                        food_id = None
+            else:
+                # Fallback estimates when product not found
+                logger.debug(f"Product not found: {name}, using estimates")
+                kcal = amount * 1.2
+                protein = amount * 0.08
+                fat = amount * 0.05
+                carbs = amount * 0.15
+                food_id = None
+
+            ingredient = GeneratedIngredient(
+                food_id=food_id,
+                name=name,
+                amount_grams=round(amount, 1),
+                unit_label=ing_data.get("unit_label"),
+                kcal=round(kcal, 1),
+                protein=round(protein, 1),
+                fat=round(fat, 1),
+                carbs=round(carbs, 1),
+            )
+            ingredients.append(ingredient)
+
+            total_kcal += kcal
+            total_protein += protein
+            total_fat += fat
+            total_carbs += carbs
+
+        return GeneratedMeal(
+            meal_type=template.meal_type,
+            name=data.get("name", template.description),
+            description=data.get("description", ""),
+            preparation_time_minutes=data.get("preparation_time", 20),
+            ingredients=ingredients,
+            total_kcal=round(total_kcal, 1),
+            total_protein=round(total_protein, 1),
+            total_fat=round(total_fat, 1),
+            total_carbs=round(total_carbs, 1),
+        )
+
+    def _find_product(
+        self,
+        name: str,
+        lookup: Dict[str, dict]
+    ) -> Optional[dict]:
+        """
+        Find product by name with fuzzy matching.
+
+        First tries exact match, then partial match.
+
+        Args:
+            name: Ingredient name from LLM
+            lookup: Dict of lowercase product names to product dicts
+
+        Returns:
+            Product dict or None if not found
+        """
+        name_lower = name.lower()
+
+        # Exact match
+        if name_lower in lookup:
+            return lookup[name_lower]
+
+        # Partial match (name contains product name or vice versa)
+        for product_name, product in lookup.items():
+            if name_lower in product_name or product_name in name_lower:
+                return product
+
+        # Word-based partial match
+        name_words = set(name_lower.split())
+        for product_name, product in lookup.items():
+            product_words = set(product_name.split())
+            # If any significant word matches
+            if name_words & product_words:
+                return product
+
+        return None
+
+    def _generate_fallback_meal(self, template: MealTemplate) -> GeneratedMeal:
+        """
+        Generate a minimal fallback meal when parsing fails.
+
+        Args:
+            template: Original meal template
+
+        Returns:
+            Basic generated meal
+        """
+        return GeneratedMeal(
+            meal_type=template.meal_type,
+            name=template.description,
+            description="Posilek wygenerowany automatycznie",
+            preparation_time_minutes=15,
+            ingredients=[],
+            total_kcal=0.0,
+            total_protein=0.0,
+            total_fat=0.0,
+            total_carbs=0.0,
+        )
