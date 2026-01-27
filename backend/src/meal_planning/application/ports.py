@@ -105,3 +105,49 @@ class MealPlanRepositoryPort(ABC):
     async def commit(self) -> None:
         """Commit the current transaction."""
         pass
+
+
+class FoodSearchPort(ABC):
+    """
+    Port for searching food products.
+
+    Provides abstraction for searching the food catalogue,
+    used by the meal plan service for RAG-based ingredient selection.
+    """
+
+    @abstractmethod
+    async def search_products(
+        self,
+        query: str,
+        limit: int = 20
+    ) -> List[dict]:
+        """
+        Search for food products by name.
+
+        Args:
+            query: Search query (ingredient name or description)
+            limit: Maximum number of results
+
+        Returns:
+            List of product dicts with keys: id, name, kcal_per_100g,
+            protein_per_100g, fat_per_100g, carbs_per_100g, category
+        """
+        pass
+
+    @abstractmethod
+    async def get_products_by_category(
+        self,
+        category: str,
+        limit: int = 50
+    ) -> List[dict]:
+        """
+        Get products by category.
+
+        Args:
+            category: Food category to filter by
+            limit: Maximum number of results
+
+        Returns:
+            List of product dicts
+        """
+        pass

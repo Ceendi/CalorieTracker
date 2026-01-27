@@ -6,6 +6,7 @@ from src.meal_planning.infrastructure.orm_models import (
     MealPlanIngredientModel,
 )
 from src.meal_planning.infrastructure.repository import MealPlanRepository
+from src.meal_planning.infrastructure.food_search_adapter import SqlAlchemyFoodSearchAdapter
 
 __all__ = [
     "MealPlanModel",
@@ -13,4 +14,5 @@ __all__ = [
     "MealPlanMealModel",
     "MealPlanIngredientModel",
     "MealPlanRepository",
+    "SqlAlchemyFoodSearchAdapter",
 ]

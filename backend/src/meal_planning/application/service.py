@@ -4,16 +4,20 @@ Service layer for meal planning module.
 Contains business logic for meal plan generation and management,
 including BMR/CPM calculations and macro targets.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import date
-from typing import Any, List, Optional
+from typing import Any, Callable, Awaitable, List, Optional
 from uuid import UUID
 
-from src.meal_planning.application.ports import MealPlanRepositoryPort
+from loguru import logger
+
+from src.meal_planning.application.ports import MealPlanRepositoryPort, FoodSearchPort
 from src.meal_planning.domain.entities import (
     UserProfile,
     PlanPreferences,
     GeneratedPlan,
+    GeneratedDay,
+    ProgressCallback,
 )
 from src.meal_planning.domain.ports import MealPlannerPort
 
@@ -87,6 +91,7 @@ class MealPlanService:
         self,
         repository: MealPlanRepositoryPort,
         planner: Optional[MealPlannerPort] = None,
+        food_search: Optional[FoodSearchPort] = None,
     ):
         """
         Initialize the meal plan service.
@@ -94,9 +99,11 @@ class MealPlanService:
         Args:
             repository: Repository port for meal plan persistence
             planner: Optional meal planner port for generation (injected later)
+            food_search: Optional food search port for RAG-based ingredient selection
         """
         self._repo = repository
         self._planner = planner
+        self._food_search = food_search
 
     def calculate_daily_targets(
         self,
@@ -305,3 +312,221 @@ class MealPlanService:
             await self._repo.commit()
             return result
         return False
+
+    async def generate_plan(
+        self,
+        user: UserData,
+        preferences: PlanPreferences,
+        start_date: date,
+        days: int = 7,
+        progress_callback: Optional[ProgressCallback] = None
+    ) -> GeneratedPlan:
+        """
+        Generate a complete meal plan using the LLM planner.
+
+        This orchestrates the full generation flow:
+        1. Build user profile with calculated targets
+        2. Generate meal templates (structure) from LLM
+        3. For each meal: search products (RAG) and generate with ingredients
+        4. Optimize the complete plan
+
+        Args:
+            user: User data for target calculation
+            preferences: Generation preferences (diet, allergies, etc.)
+            start_date: Start date of the plan
+            days: Number of days to generate (1-14)
+            progress_callback: Optional async callback for progress updates
+
+        Returns:
+            Complete generated meal plan
+
+        Raises:
+            RuntimeError: If meal planner is not configured
+        """
+        if not self._planner:
+            raise RuntimeError("Meal planner not configured")
+
+        # 1. Build profile with calculated targets
+        profile = self.build_user_profile(user, preferences)
+        logger.info(
+            f"Generating {days}-day plan for user {user.id}, "
+            f"target: {profile.daily_kcal} kcal"
+        )
+
+        if progress_callback:
+            await progress_callback({
+                "stage": "profile",
+                "progress": 5,
+                "message": "Obliczono cele dzienne"
+            })
+
+        # 2. Generate meal templates (structure for each day)
+        logger.debug("Generating meal templates...")
+        templates = await self._planner.generate_meal_templates(profile, days)
+        logger.debug(f"Generated templates for {len(templates)} days")
+
+        if progress_callback:
+            await progress_callback({
+                "stage": "templates",
+                "progress": 15,
+                "message": "Wygenerowano struktury posilkow"
+            })
+
+        # 3. Generate each meal with ingredients
+        generated_days: List[GeneratedDay] = []
+        used_ingredients: List[str] = []
+
+        total_meals = sum(len(day_templates) for day_templates in templates)
+        meals_done = 0
+
+        for day_idx, day_templates in enumerate(templates):
+            day_meals = []
+
+            for template in day_templates:
+                # Search for relevant products (RAG)
+                products = await self._search_products_for_meal(template, preferences)
+
+                # Generate meal with ingredients
+                meal = await self._planner.generate_meal(
+                    template=template,
+                    profile=profile,
+                    used_ingredients=used_ingredients,
+                    available_products=products
+                )
+
+                day_meals.append(meal)
+
+                # Track used ingredients for variety
+                for ing in meal.ingredients:
+                    if ing.name not in used_ingredients:
+                        used_ingredients.append(ing.name)
+
+                meals_done += 1
+
+                # Report progress during meal generation
+                if progress_callback:
+                    progress = 15 + int((meals_done / total_meals) * 70)
+                    await progress_callback({
+                        "stage": "generating",
+                        "day": day_idx + 1,
+                        "meal": template.meal_type,
+                        "progress": progress,
+                        "message": f"Dzien {day_idx + 1}: {template.description}"
+                    })
+
+            generated_days.append(GeneratedDay(
+                day_number=day_idx + 1,
+                meals=day_meals
+            ))
+
+            logger.debug(
+                f"Day {day_idx + 1}: {len(day_meals)} meals, "
+                f"{generated_days[-1].total_kcal:.0f} kcal"
+            )
+
+        # 4. Optimize the plan (adjust portions)
+        if progress_callback:
+            await progress_callback({
+                "stage": "optimizing",
+                "progress": 90,
+                "message": "Optymalizacja planu"
+            })
+
+        optimized = await self._planner.optimize_plan(generated_days, profile)
+
+        if progress_callback:
+            await progress_callback({
+                "stage": "complete",
+                "progress": 100,
+                "message": "Plan gotowy"
+            })
+
+        # Build preferences dict for storage
+        preferences_dict = {
+            "diet": preferences.diet,
+            "allergies": preferences.allergies,
+            "cuisine_preferences": preferences.cuisine_preferences,
+            "excluded_ingredients": preferences.excluded_ingredients,
+            "max_preparation_time": preferences.max_preparation_time,
+        }
+
+        return GeneratedPlan(
+            days=optimized,
+            preferences_applied=preferences_dict,
+            generation_metadata={
+                "daily_targets": {
+                    "kcal": profile.daily_kcal,
+                    "protein": profile.daily_protein,
+                    "fat": profile.daily_fat,
+                    "carbs": profile.daily_carbs,
+                },
+                "days_generated": days,
+                "start_date": str(start_date),
+            }
+        )
+
+    async def _search_products_for_meal(
+        self,
+        template,
+        preferences: PlanPreferences,
+        limit: int = 15
+    ) -> List[dict]:
+        """
+        Search for relevant products for a meal template.
+
+        Uses the meal description to search for relevant products,
+        then filters based on user preferences (allergies, diet).
+
+        Args:
+            template: Meal template with description
+            preferences: User preferences for filtering
+            limit: Maximum products to return
+
+        Returns:
+            List of product dicts suitable for the meal
+        """
+        if not self._food_search:
+            logger.warning("Food search not configured, returning empty products")
+            return []
+
+        # Build search query from meal description
+        query = template.description
+
+        # Search for products
+        products = await self._food_search.search_products(query, limit=limit * 2)
+
+        # Filter based on preferences
+        filtered = []
+        for product in products:
+            # Skip if matches any allergy
+            product_name = product.get("name", "").lower()
+            if any(allergy.lower() in product_name for allergy in preferences.allergies):
+                continue
+
+            # Skip meat/fish for vegetarians
+            category = product.get("category", "").upper() if product.get("category") else ""
+            if preferences.diet == "vegetarian" and category in ["MEAT", "FISH", "MIESO", "RYBY"]:
+                continue
+
+            # Skip animal products for vegans
+            if preferences.diet == "vegan" and category in [
+                "MEAT", "FISH", "DAIRY", "EGGS",
+                "MIESO", "RYBY", "NABIAL", "JAJA"
+            ]:
+                continue
+
+            # Skip excluded ingredients
+            if any(excl.lower() in product_name for excl in preferences.excluded_ingredients):
+                continue
+
+            filtered.append(product)
+
+            if len(filtered) >= limit:
+                break
+
+        logger.debug(
+            f"Product search for '{query}': {len(products)} found, "
+            f"{len(filtered)} after filtering"
+        )
+
+        return filtered
