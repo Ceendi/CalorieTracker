@@ -1,13 +1,13 @@
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { format } from 'date-fns';
-import { useForm, Control, SubmitHandler, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { useForm, Control, SubmitHandler, UseFormSetValue, UseFormWatch, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useLanguage } from '@/hooks/useLanguage';
 import { useLogEntry, useCreateFood } from '@/hooks/useFood';
 import { CreateFoodDto, CreateEntryDto, MealType } from '@/types/food';
 import { manualFoodSchema, ManualFoodFormValues } from '@/schemas/food';
+import { formatDateForApi } from '@/utils/date';
 
 export type ManualEntryHookResult = {
   control: Control<ManualFoodFormValues>;
@@ -31,7 +31,7 @@ export function useManualEntry() {
   };
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ManualFoodFormValues>({
-    resolver: zodResolver(manualFoodSchema) as any,
+    resolver: zodResolver(manualFoodSchema) as Resolver<ManualFoodFormValues>,
     defaultValues: {
       name: '',
       calories: 0,
@@ -50,23 +50,25 @@ export function useManualEntry() {
 
   const onSubmit: SubmitHandler<ManualFoodFormValues> = async (data) => {
       try {
+          // Ensure numeric values are valid numbers
           const newFoodPayload: CreateFoodDto = {
-              name: data.name,
+              name: data.name.trim(),
               nutrition: {
-                  calories_per_100g: data.calories,
-                  protein_per_100g: data.protein,
-                  fat_per_100g: data.fat,
-                  carbs_per_100g: data.carbs
+                  calories_per_100g: Number(data.calories) || 0,
+                  protein_per_100g: Number(data.protein) || 0,
+                  fat_per_100g: Number(data.fat) || 0,
+                  carbs_per_100g: Number(data.carbs) || 0
               }
           };
-          
-          let productId;
+
+          let productId: string;
           try {
               const createdFood = await createFood(newFoodPayload);
-              productId = createdFood.id;
-          } catch (err) {
+              productId = createdFood.id!;
+          } catch (err: any) {
               console.error("Create manual food failed", err);
-              Alert.alert(t('manualEntry.error'), t('manualEntry.createFailed'));
+              const errorMsg = err?.response?.data?.detail || t('manualEntry.createFailed');
+              Alert.alert(t('manualEntry.error'), errorMsg);
               return;
           }
 
@@ -76,10 +78,10 @@ export function useManualEntry() {
           }
 
           const entry: CreateEntryDto = {
-              date: format(new Date(), 'yyyy-MM-dd'),
-              meal_type: data.mealType, 
+              date: formatDateForApi(),
+              meal_type: data.mealType,
               product_id: productId,
-              amount_grams: data.weight
+              amount_grams: Number(data.weight) || 100
           };
 
           logEntry(entry, {
@@ -87,20 +89,22 @@ export function useManualEntry() {
                   router.dismissAll();
                   router.replace('/(tabs)');
               },
-              onError: (err) => {
-                  Alert.alert(t('manualEntry.error'), "Failed to add entry. Please try again.");
+              onError: (err: any) => {
+                  const errorMsg = err?.response?.data?.detail || "Failed to add entry. Please try again.";
+                  Alert.alert(t('manualEntry.error'), errorMsg);
                   console.error(err);
               }
           });
 
-      } catch (e) {
-          Alert.alert(t('manualEntry.error'), t('auth.unexpectedError'));
+      } catch (e: any) {
+          const errorMsg = e?.response?.data?.detail || t('auth.unexpectedError');
+          Alert.alert(t('manualEntry.error'), errorMsg);
           console.error(e);
       }
   };
 
   return {
-    control,
+    control: control as Control<ManualFoodFormValues>,
     submit: handleSubmit(onSubmit),
     setValue,
     watch,

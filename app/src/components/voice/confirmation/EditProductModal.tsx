@@ -93,6 +93,21 @@ export function EditProductModal({
     }
   };
 
+  const handleIncrement = () => {
+    const current = parseFloat(quantity.replace(',', '.')) || 0;
+    const step = selectedUnit ? 1 : 10;
+    setQuantity(String(current + step));
+    Haptics.selectionAsync();
+  };
+
+  const handleDecrement = () => {
+    const current = parseFloat(quantity.replace(',', '.')) || 0;
+    const step = selectedUnit ? 1 : 10;
+    const newValue = Math.max(1, current - step);
+    setQuantity(String(newValue));
+    Haptics.selectionAsync();
+  };
+
   if (!item) return null;
 
   return (
@@ -130,7 +145,7 @@ export function EditProductModal({
                       </Text>
                     )}
                     <Text className="text-sm font-bold text-indigo-500">
-                      {Math.round((item.kcal / item.quantity_grams) * 100)} kcal / 100g
+                      {Math.round((item.kcal / Math.max(item.quantity_grams, 1)) * 100)} kcal / 100g
                     </Text>
                   </View>
                 </View>
@@ -160,25 +175,38 @@ export function EditProductModal({
                   <Text className="text-sm font-bold text-muted-foreground mb-2 ml-1">
                     {t('foodDetails.quantity')}
                   </Text>
-                  <View className="flex-row items-center gap-4">
-                    <View className="flex-1 h-16 bg-secondary/50 dark:bg-black/20 rounded-2xl border border-border px-4 justify-center">
+                  <View className="flex-row items-center gap-3">
+                    <TouchableOpacity
+                      onPress={handleDecrement}
+                      className="w-14 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl items-center justify-center border border-border"
+                    >
+                      <IconSymbol name="minus" size={24} color="#6366f1" />
+                    </TouchableOpacity>
+
+                    <View className="flex-1 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl border border-border px-4 justify-center">
                       <TextInput
-                        className="text-3xl font-black text-foreground p-0"
+                        className="text-2xl font-black text-foreground p-0 text-center"
                         value={quantity}
                         onChangeText={setQuantity}
                         keyboardType="decimal-pad"
-                        autoFocus
                         selectTextOnFocus
                         placeholder="0"
                         placeholderTextColor="#9CA3AF"
                       />
                     </View>
+
+                    <TouchableOpacity
+                      onPress={handleIncrement}
+                      className="w-14 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl items-center justify-center border border-border"
+                    >
+                      <IconSymbol name="plus" size={24} color="#6366f1" />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
                 <View className="mb-8">
                   <Text className="text-sm font-bold text-muted-foreground mb-3 ml-1">
-                    Jednostka
+                    {t('foodDetails.unit') || 'Jednostka'}
                   </Text>
                   <ScrollView 
                       horizontal 
@@ -189,13 +217,13 @@ export function EditProductModal({
                     <TouchableOpacity
                       onPress={() => handleUnitChange(null)}
                       className={`mr-2 px-5 py-3 rounded-xl border ${
-                        selectedUnit === null 
-                          ? 'bg-indigo-600 border-indigo-600' 
-                          : 'bg-muted/50 border-transparent'
+                        selectedUnit === null
+                          ? 'bg-indigo-600 border-indigo-600'
+                          : 'bg-secondary/50 dark:bg-black/20 border-transparent'
                       }`}
                     >
                       <Text className={`font-bold ${selectedUnit === null ? 'text-white' : 'text-foreground'}`}>
-                        Gramy (g)
+                        {t('foodDetails.grams')}
                       </Text>
                     </TouchableOpacity>
 
@@ -219,7 +247,9 @@ export function EditProductModal({
 
                 <View className="flex-row items-center justify-between gap-4 mt-2">
                      <View>
-                        <Text className="text-xs font-bold text-muted-foreground uppercase mb-0.5">Razem</Text>
+                        <Text className="text-xs font-bold text-muted-foreground uppercase mb-0.5">
+                          {t('addFood.summary.total') || 'Razem'}
+                        </Text>
                         <View className="flex-row items-baseline gap-1">
                             <Text className="text-3xl font-black text-indigo-600">{calculatedValues.kcal}</Text>
                             <Text className="text-sm font-bold text-indigo-400">kcal</Text>
@@ -231,13 +261,13 @@ export function EditProductModal({
                             onPress={onClose}
                             className="px-6 py-4 rounded-2xl bg-secondary"
                         >
-                            <Text className="font-bold text-foreground">Anuluj</Text>
+                            <Text className="font-bold text-foreground">{t('settings.cancel')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={handleSave}
                             className="px-8 py-4 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-300 dark:shadow-none"
                         >
-                            <Text className="font-bold text-white">Zapisz</Text>
+                            <Text className="font-bold text-white">{t('manualEntry.save')}</Text>
                         </TouchableOpacity>
                      </View>
                 </View>

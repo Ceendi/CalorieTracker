@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -29,13 +29,13 @@ export default function HomeScreen() {
   
   const { data: dailyLog, isLoading, refetch, deleteEntry } = useDiary(formattedDate);
 
-  useFocusEffect(
-    useCallback(() => {
-        refetch();
-    }, [refetch])
-  );
+  // Note: useFocusEffect removed - TanStack Query handles refetching automatically
+  // with refetchOnMount and the configured staleTime
 
-  const calculatedGoal = user ? calculateDailyGoal(user) : { calories: 2000, protein: 160, fat: 70, carbs: 250 };
+  const calculatedGoal = useMemo(() =>
+    user ? calculateDailyGoal(user) : { calories: 2000, protein: 160, fat: 70, carbs: 250 },
+    [user]
+  );
   const dailyGoal = calculatedGoal.calories;
   const consumed = dailyLog?.total_kcal || 0;
   const remaining = dailyGoal - consumed;

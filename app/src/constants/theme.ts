@@ -25,6 +25,10 @@ export const Colors = {
     muted: '#f1f5f9',
     mutedForeground: '#64748b',
     placeholder: '#94a3b8', // Tailwind slate-400 equivalent for good contrast
+    // Status colors
+    error: '#ef4444', // red-500
+    warning: '#f59e0b', // amber-500
+    success: '#10b981', // emerald-500
   },
   dark: {
     text: '#f8fafc', // foreground
@@ -38,6 +42,10 @@ export const Colors = {
     muted: '#1e293b',
     mutedForeground: '#94a3b8',
     placeholder: '#475569', // Tailwind slate-600 equivalent
+    // Status colors
+    error: '#ef4444', // red-500
+    warning: '#f59e0b', // amber-500
+    success: '#10b981', // emerald-500
   },
 };
 

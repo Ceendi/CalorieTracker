@@ -296,6 +296,12 @@ export const translations = {
         delete: "Delete",
         edit: "Edit",
         over: "Over"
+    },
+    accessibility: {
+        decreaseQuantity: "Decrease quantity",
+        increaseQuantity: "Increase quantity",
+        quantityInput: "Quantity input",
+        selectUnit: "Select unit"
     }
   },
   pl: {
@@ -593,6 +599,12 @@ export const translations = {
         delete: "Usuń",
         edit: "Edytuj",
         over: "Przekroczono"
+    },
+    accessibility: {
+        decreaseQuantity: "Zmniejsz ilość",
+        increaseQuantity: "Zwiększ ilość",
+        quantityInput: "Pole ilości",
+        selectUnit: "Wybierz jednostkę"
     }
   }
 };

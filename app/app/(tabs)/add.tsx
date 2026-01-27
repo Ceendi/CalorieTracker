@@ -1,19 +1,20 @@
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { FoodProduct, MealType } from '@/types/food';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
 import { VoiceMealConfirmation } from '@/components/voice/VoiceMealConfirmation';
 import { ProcessedMeal } from '@/hooks/useVoiceInput';
-import { trackingService } from '@/services/tracking.service';
+import { useLogEntriesBulk } from '@/hooks/useFood';
 import { foodService } from '@/services/food.service';
 import { ProductSearchMode } from '@/components/add/ProductSearchMode';
 import { PlaceholderMode } from '@/components/add/PlaceholderMode';
 import { AudioEntryMode } from '@/components/add/AudioEntryMode';
 import { Colors } from '@/constants/theme';
+import { formatDateForApi } from '@/utils/date';
 
 type EntryMode = 'product' | 'audio' | 'photo' | 'barcode';
 
@@ -37,10 +38,11 @@ export default function AddScreen() {
     const { colorScheme } = useColorScheme();
     const { t, language } = useLanguage();
     const [activeMode, setActiveMode] = useState<EntryMode>('product');
-    
+
     const [processedMeal, setProcessedMeal] = useState<ProcessedMeal | null>(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
-    const [isAddingToDiary, setIsAddingToDiary] = useState(false);
+
+    const { mutateAsync: logEntriesBulk, isPending: isAddingToDiary } = useLogEntriesBulk();
     
     const theme = colorScheme ?? 'light';
     const cardColor = Colors[theme].card;
@@ -77,37 +79,21 @@ export default function AddScreen() {
         const mealToLog = updatedMeal || processedMeal;
         if (!mealToLog) return;
 
-        setIsAddingToDiary(true);
         try {
             const mealType = MEAL_TYPE_MAP[mealToLog.meal_type] || MealType.SNACK;
-            const now = new Date();
-            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const today = formatDateForApi();
 
-            const bulkItems = await Promise.all(mealToLog.items.map(async (item) => {
-                if (item.status === 'matched' && item.product_id) {
-                    let productId = String(item.product_id);
-                    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
-                    
-                    if (!isUUID) {
-                        try {
-                            if (item.name.length > 2) {
-                                const results = await foodService.searchFoods(item.name);
-                                const match = results.find(f => f.name.toLowerCase() === item.name.toLowerCase()) || results[0];
-                                if (match && match.id) {
-                                    productId = match.id;
-                                }
-                            }
-                        } catch (err) {
-                            console.warn("Failed to resolve UUID for product", item.name);
-                        }
-                    }
+            const bulkItems = mealToLog.items
+                .filter(item => item.status === 'matched' && item.product_id)
+                .map(item => {
+                    const productId = String(item.product_id);
 
                     let unitGrams = 1;
                     if (item.unit_matched !== 'g' && item.unit_matched !== 'gram' && item.units) {
                         const unit = item.units.find(u => u.label === item.unit_matched);
                         if (unit) unitGrams = unit.grams;
                     }
-                    
+
                     return {
                         product_id: productId,
                         amount_grams: item.quantity_grams,
@@ -115,17 +101,13 @@ export default function AddScreen() {
                         unit_grams: unitGrams,
                         unit_quantity: item.quantity_unit_value
                     };
-                }
-                return null;
-            }));
+                });
 
-            const validItems = bulkItems.filter((item): item is NonNullable<typeof item> => item !== null);
-
-            if (validItems.length > 0) {
-                await trackingService.logEntriesBulk({
+            if (bulkItems.length > 0) {
+                await logEntriesBulk({
                     date: today,
                     meal_type: mealType,
-                    items: validItems,
+                    items: bulkItems,
                 });
             }
 
@@ -139,10 +121,8 @@ export default function AddScreen() {
                 t('profile.error'),
                 t('manualEntry.error') + ` (${msg})`
             );
-        } finally {
-            setIsAddingToDiary(false);
         }
-    }, [processedMeal, t, router]);
+    }, [processedMeal, t, router, logEntriesBulk]);
 
     const handleEditMeal = useCallback(() => {
         setShowConfirmation(false);

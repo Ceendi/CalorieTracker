@@ -1,5 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Audio } from 'expo-av';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useAudioRecorder as useExpoAudioRecorder,
+  AudioModule,
+  RecordingOptions,
+  RecordingPresets,
+} from 'expo-audio';
 import { useLanguage } from './useLanguage';
 
 export type RecordingStatus = 'idle' | 'recording' | 'stopping';
@@ -18,27 +23,28 @@ interface UseAudioRecorderResult {
 
 export function useAudioRecorder(): UseAudioRecorderResult {
   const { t } = useLanguage();
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle');
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>('undetermined');
   const [error, setError] = useState<string | null>(null);
-  
-  const durationInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  const audioRecorder = useExpoAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   useEffect(() => {
     checkPermission();
     return () => {
-      if (durationInterval.current) {
-        clearInterval(durationInterval.current);
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
       }
     };
   }, []);
 
   const checkPermission = async () => {
     try {
-      const { status } = await Audio.getPermissionsAsync();
-      setPermissionStatus(status === 'granted' ? 'granted' : 'undetermined');
+      const status = await AudioModule.getRecordingPermissionsAsync();
+      setPermissionStatus(status.granted ? 'granted' : 'undetermined');
     } catch (err) {
       console.error('Failed to check audio permission:', err);
     }
@@ -46,8 +52,8 @@ export function useAudioRecorder(): UseAudioRecorderResult {
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
-      const granted = status === 'granted';
+      const status = await AudioModule.requestRecordingPermissionsAsync();
+      const granted = status.granted;
       setPermissionStatus(granted ? 'granted' : 'denied');
       return granted;
     } catch (err) {
@@ -60,7 +66,7 @@ export function useAudioRecorder(): UseAudioRecorderResult {
   const startRecording = useCallback(async () => {
     try {
       setError(null);
-      
+
       if (permissionStatus !== 'granted') {
         const granted = await requestPermission();
         if (!granted) {
@@ -69,72 +75,51 @@ export function useAudioRecorder(): UseAudioRecorderResult {
         }
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-      });
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-        (status) => {
-          if (status.isRecording) {
-            setRecordingDuration(Math.floor(status.durationMillis / 1000));
-          }
-        },
-        100
-      );
-
-      setRecording(newRecording);
+      audioRecorder.record();
       setRecordingStatus('recording');
       setRecordingDuration(0);
+      startTimeRef.current = Date.now();
 
-      durationInterval.current = setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
-      }, 1000);
+      // Update duration every 100ms
+      durationIntervalRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setRecordingDuration(elapsed);
+      }, 100);
 
     } catch (err) {
       console.error('Failed to start recording:', err);
       setError(t('common.errors.startRecording'));
       setRecordingStatus('idle');
     }
-  }, [permissionStatus, requestPermission, t]);
+  }, [permissionStatus, requestPermission, t, audioRecorder]);
 
   const stopRecording = useCallback(async (): Promise<string | null> => {
-    if (!recording) {
+    if (recordingStatus !== 'recording') {
       return null;
     }
 
     try {
       setRecordingStatus('stopping');
-      
-      if (durationInterval.current) {
-        clearInterval(durationInterval.current);
-        durationInterval.current = null;
+
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
       }
 
-      await recording.stopAndUnloadAsync();
-      
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-      });
+      await audioRecorder.stop();
+      const uri = audioRecorder.uri;
 
-      const uri = recording.getURI();
-      
-      setRecording(null);
       setRecordingStatus('idle');
-      
-      return uri;
-      
+
+      return uri || null;
+
     } catch (err) {
       console.error('Failed to stop recording:', err);
       setError(t('common.errors.unknown'));
       setRecordingStatus('idle');
       return null;
     }
-  }, [recording, t]);
+  }, [recordingStatus, t, audioRecorder]);
 
   return {
     startRecording,

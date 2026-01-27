@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { IconSymbol, IconSymbolName } from '@/components/ui/IconSymbol';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface PlaceholderModeProps {
   title: string;

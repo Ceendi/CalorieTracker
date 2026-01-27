@@ -12,8 +12,9 @@ import {
 import { useFoodSearch } from '@/hooks/useFood';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 import { FoodProduct } from '@/types/food';
-import { useThemeColor } from '@/hooks/use-theme-color';
 
 interface ProductSearchModeProps {
   onItemPress: (item: FoodProduct) => void;
@@ -22,9 +23,11 @@ interface ProductSearchModeProps {
 
 export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchModeProps) {
   const { t } = useLanguage();
-  const tintColor = useThemeColor({}, 'tint');
-  const iconColor = useThemeColor({}, 'icon');
-  const placeholderColor = useThemeColor({}, 'tabIconDefault'); 
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
+  const tintColor = Colors[theme].tint;
+  const iconColor = Colors[theme].icon;
+  const placeholderColor = Colors[theme].placeholder;
   const [searchQuery, setSearchQuery] = useState('');
   const { data: searchResults, isLoading, refetch, isRefetching } = useFoodSearch(searchQuery);
 

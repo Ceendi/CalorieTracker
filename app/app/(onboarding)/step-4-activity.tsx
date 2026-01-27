@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useOnboarding, ActivityLevel } from '@/hooks/useOnboarding';
+import { useAuth } from '@/hooks/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -8,6 +9,7 @@ import { Colors } from '@/constants/theme';
 
 export default function ActivityScreen() {
   const { data, setData, submitOnboarding, isLoading } = useOnboarding();
+  const { checkSession } = useAuth();
   const [level, setLevel] = useState<ActivityLevel | undefined>(data.activityLevel);
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
@@ -16,7 +18,7 @@ export default function ActivityScreen() {
     if (!level) return;
     setData({ activityLevel: level });
     try {
-        await submitOnboarding();
+        await submitOnboarding(checkSession);
     } catch (e) {
         console.error(e);
     }

@@ -18,6 +18,7 @@ export interface ProcessedFoodItem {
   brand?: string;
   units?: UnitInfo[];
   notes?: string;
+  source?: string; // 'public' | 'fineli' | 'openfoodfacts' | 'user'
 }
 
 export interface ProcessedMeal {

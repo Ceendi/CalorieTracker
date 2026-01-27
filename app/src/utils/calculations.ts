@@ -83,10 +83,17 @@ export const calculateItemMacros = (
     newQuantity: number,
     gramsPerUnit: number = 1
 ) => {
-    if (newQuantity < 0) return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
-    
+    // Guard against invalid inputs
+    if (newQuantity < 0 || isNaN(newQuantity)) {
+        return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+    }
+    if (isNaN(currentMacros.kcal) || isNaN(currentMacros.protein)) {
+        return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+    }
+
     const totalGrams = newQuantity * gramsPerUnit;
-    const ratio = totalGrams / (originalGrams || 100);
+    const safeOriginalGrams = Math.max(originalGrams || 100, 1);
+    const ratio = totalGrams / safeOriginalGrams;
 
     return {
         kcal: Math.round(currentMacros.kcal * ratio),

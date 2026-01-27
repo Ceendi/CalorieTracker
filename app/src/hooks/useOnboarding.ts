@@ -17,7 +17,7 @@ export interface OnboardingData {
 interface OnboardingState {
   data: OnboardingData;
   setData: (data: Partial<OnboardingData>) => void;
-  submitOnboarding: () => Promise<void>;
+  submitOnboarding: (onSuccess?: () => Promise<void>) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -27,11 +27,11 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
   setData: (newData) => {
     set((state) => ({ data: { ...state.data, ...newData } }));
   },
-  submitOnboarding: async () => {
+  submitOnboarding: async (onSuccess) => {
     try {
       set({ isLoading: true });
       const { data } = get();
-      
+
       const { activityLevel, ...otherData } = data;
 
       await apiClient.patch('/users/me', {
@@ -39,10 +39,12 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
         activity_level: activityLevel,
         is_onboarded: true
       });
-      
-      const { checkSession } = require('./useAuth').useAuth.getState();
-      await checkSession();
-      
+
+      // Call the success callback (typically checkSession from useAuth)
+      if (onSuccess) {
+        await onSuccess();
+      }
+
       set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false });

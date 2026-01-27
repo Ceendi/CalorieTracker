@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
 interface InfoItemProps {

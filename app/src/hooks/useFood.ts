@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { foodService } from '@/services/food.service';
 import { trackingService } from '@/services/tracking.service';
-import { CreateEntryDto, CreateFoodDto } from '@/types/food';
+import { CreateEntryDto, CreateFoodDto, CreateBulkEntryDto } from '@/types/food';
 import { useEffect, useState } from 'react';
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -62,7 +62,7 @@ export function useUpdateEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string, amount_grams?: number, meal_type?: string, date?: string }) => 
+    mutationFn: ({ id, ...data }: { id: string, amount_grams?: number, meal_type?: string, date?: string }) =>
       trackingService.updateEntry(id, data),
     onSuccess: (data, variables) => {
       if (variables.date) {
@@ -70,6 +70,18 @@ export function useUpdateEntry() {
       } else {
           queryClient.invalidateQueries({ queryKey: ['diary'] });
       }
+    },
+  });
+}
+
+export function useLogEntriesBulk() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateBulkEntryDto) => trackingService.logEntriesBulk(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['diary'] });
+      queryClient.invalidateQueries({ queryKey: ['tracking', 'history'] });
     },
   });
 }

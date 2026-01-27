@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { UnitInfo } from '@/types/food';
 import { Colors } from '@/constants/theme';
@@ -14,12 +14,12 @@ interface QuantitySelectorProps {
   onSelectUnit: (unit: UnitInfo | null) => void;
 }
 
-export function QuantitySelector({ 
-  quantity, 
-  onChangeQuantity, 
-  selectedUnit, 
-  units, 
-  onSelectUnit 
+export function QuantitySelector({
+  quantity,
+  onChangeQuantity,
+  selectedUnit,
+  units,
+  onSelectUnit
 }: QuantitySelectorProps) {
   const { colorScheme } = useColorScheme();
   const { t } = useLanguage();
@@ -38,14 +38,33 @@ export function QuantitySelector({
     onChangeQuantity(String(newValue));
   };
 
+  const handleUnitChangeWithConversion = (newUnit: UnitInfo | null) => {
+    const currentVal = parseFloat(quantity) || 0;
+    if (currentVal <= 0) {
+      onSelectUnit(newUnit);
+      return;
+    }
+
+    const oldGramsPerUnit = selectedUnit ? selectedUnit.grams : 1;
+    const newGramsPerUnit = newUnit ? newUnit.grams : 1;
+
+    const totalGrams = currentVal * oldGramsPerUnit;
+    const newVal = Math.round((totalGrams / newGramsPerUnit) * 100) / 100;
+
+    onChangeQuantity(String(newVal));
+    onSelectUnit(newUnit);
+  };
+
   return (
     <View className="bg-card rounded-2xl p-4 mb-4 shadow-sm border border-border z-50">
       <Text className="text-sm font-medium text-muted-foreground mb-2">{t('manualEntry.quantity')}</Text>
       
       <View className="flex-row items-stretch gap-2 h-14">
-        <TouchableOpacity 
+        <TouchableOpacity
           className="w-12 bg-muted/50 rounded-xl items-center justify-center"
           onPress={handleDecrement}
+          accessibilityLabel={t('accessibility.decreaseQuantity')}
+          accessibilityRole="button"
         >
           <IconSymbol name="minus" size={20} color={Colors[theme].mutedForeground} />
         </TouchableOpacity>
@@ -60,31 +79,36 @@ export function QuantitySelector({
           keyboardType="numeric"
           placeholder="0"
           placeholderTextColor={Colors[theme].placeholder}
+          accessibilityLabel={t('accessibility.quantityInput')}
         />
         
-        <TouchableOpacity 
+        <TouchableOpacity
           className="w-12 bg-muted/50 rounded-xl items-center justify-center"
           onPress={handleIncrement}
+          accessibilityLabel={t('accessibility.increaseQuantity')}
+          accessibilityRole="button"
         >
           <IconSymbol name="plus" size={20} color={Colors[theme].mutedForeground} />
         </TouchableOpacity>
 
         {units && units.length > 0 ? (
           <View className="flex-[1.5]">
-            <TouchableOpacity 
+            <TouchableOpacity
               className="bg-background px-4 h-full rounded-xl flex-row items-center justify-between border border-border active:border-primary"
+              accessibilityLabel={t('accessibility.selectUnit')}
+              accessibilityRole="button"
               onPress={() => {
                 Alert.alert(
                   t('foodDetails.selectUnit'),
                   "",
                   [
-                    { 
-                      text: t('foodDetails.grams'), 
-                      onPress: () => onSelectUnit(null)
+                    {
+                      text: t('foodDetails.grams'),
+                      onPress: () => handleUnitChangeWithConversion(null)
                     },
                     ...(units?.map(u => ({
                       text: `${u.label} (${u.grams}g)`,
-                      onPress: () => onSelectUnit(u)
+                      onPress: () => handleUnitChangeWithConversion(u)
                     })) || []),
                     { text: t('settings.cancel'), style: "cancel" }
                   ],

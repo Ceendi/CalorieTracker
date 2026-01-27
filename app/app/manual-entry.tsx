@@ -3,7 +3,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View, ActivityIndicator,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 

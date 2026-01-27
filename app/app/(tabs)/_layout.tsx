@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 
 export default function TabLayout() {
@@ -25,7 +25,7 @@ export default function TabLayout() {
           elevation: 0,
           height: 90,
           paddingBottom: 30,
-          backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#ffffff',
+          backgroundColor: Colors[colorScheme === 'dark' ? 'dark' : 'light'].card,
         },
       }}>
       <Tabs.Screen

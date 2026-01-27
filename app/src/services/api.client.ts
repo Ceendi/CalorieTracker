@@ -10,6 +10,7 @@ let onUnauthorizedCallback: (() => void) | null = null;
 
 export const apiClient = axios.create({
   baseURL,
+  timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
   },

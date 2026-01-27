@@ -10,7 +10,7 @@ import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/hooks/useLanguage';
 // import { IconSymbol } from '@/components/ui/IconSymbol';
-// import { useColorScheme } from '@/hooks/use-color-scheme';
+// import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
 export default function ResetPasswordScreen() {

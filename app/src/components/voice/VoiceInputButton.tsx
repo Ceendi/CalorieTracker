@@ -7,8 +7,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 import { IconSymbol, IconSymbolName } from '@/components/ui/IconSymbol';
 
 interface VoiceInputButtonProps {
@@ -36,9 +37,14 @@ export function VoiceInputButton({
   } = useVoiceInput();
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  
-  const primaryColor = useThemeColor({}, 'tint');
-  const textColor = useThemeColor({}, 'text');
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
+
+  const primaryColor = Colors[theme].tint;
+  const textColor = Colors[theme].text;
+  const errorColor = Colors[theme].error;
+  const warningColor = Colors[theme].warning;
+  const successColor = Colors[theme].success;
 
   useEffect(() => {
     if (state === 'recording') {
@@ -112,14 +118,14 @@ export function VoiceInputButton({
       case 'idle':
         return { icon: 'mic.fill', color: primaryColor, label: t('addFood.voiceButton.record') };
       case 'recording':
-        return { icon: 'stop', color: '#ef4444', label: formatDuration(recordingDuration) }; // red-500
+        return { icon: 'stop', color: errorColor, label: formatDuration(recordingDuration) };
       case 'processing':
-        return { icon: 'hourglass', color: '#f59e0b', label: t('addFood.voiceButton.processing') }; // amber-500
+        return { icon: 'hourglass', color: warningColor, label: t('addFood.voiceButton.processing') };
       case 'success':
-        return { icon: 'checkmark', color: '#10b981', label: t('addFood.voiceButton.success') }; // emerald-500
+        return { icon: 'checkmark', color: successColor, label: t('addFood.voiceButton.success') };
       case 'error':
-        return { icon: 'alert', color: '#ef4444', label: t('addFood.voiceButton.error') }; // red-500
-      default: 
+        return { icon: 'alert', color: errorColor, label: t('addFood.voiceButton.error') };
+      default:
         return { icon: 'mic', color: primaryColor, label: t('addFood.voiceButton.record') };
     }
   };
@@ -163,6 +169,10 @@ export function VoiceInputButton({
              alignItems: 'center',
              justifyContent: 'center',
           }}
+          accessibilityLabel={config.label}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: state === 'processing' }}
+          accessibilityHint={state === 'idle' ? t('addFood.voiceButton.hold') : undefined}
           onPressIn={async () => {
              if (state === 'idle' || state === 'error' || state === 'success') {
                 if (permissionStatus !== 'granted') {

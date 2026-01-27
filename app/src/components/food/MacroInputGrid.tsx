@@ -3,7 +3,7 @@ import { View, Text, TextInput } from 'react-native';
 import { Control, Controller } from 'react-hook-form';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ManualFoodFormValues } from '@/schemas/food';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
 interface MacroInputGridProps {

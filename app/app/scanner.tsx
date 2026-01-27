@@ -3,7 +3,7 @@ import { Stack, useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';

@@ -1,15 +1,15 @@
 import React from 'react';
 import { View, Text, TextInput, TextInputProps } from 'react-native';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
-interface ControlledInputProps extends TextInputProps {
-  control: Control<any>;
-  name: string;
+interface ControlledInputProps<T extends FieldValues> extends TextInputProps {
+  control: Control<T>;
+  name: Path<T>;
   label?: string;
   error?: string;
 }
 
-export const ControlledInput = ({ control, name, label, error, style, ...textInputProps }: ControlledInputProps) => {
+export function ControlledInput<T extends FieldValues>({ control, name, label, error, style, ...textInputProps }: ControlledInputProps<T>) {
   return (
     <View className="mb-4">
       {label && <Text className="text-foreground font-medium mb-1">{label}</Text>}

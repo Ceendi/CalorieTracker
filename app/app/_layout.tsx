@@ -8,7 +8,7 @@ import '../global.css';
 import { cssInterop } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors } from '@/constants/theme';
 import { View, ActivityIndicator } from 'react-native';
@@ -21,7 +21,20 @@ cssInterop(LinearGradient, {
   },
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute default
+      gcTime: 1000 * 60 * 5, // 5 minutes cache
+      retry: 2,
+      refetchOnWindowFocus: false, // Important for mobile
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading, checkSession } = useAuth();

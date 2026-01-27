@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native
 import { format, addDays, isSameDay, startOfDay } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
 interface DateStripProps {

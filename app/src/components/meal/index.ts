@@ -1,0 +1,1 @@
+export { MealConfirmationModal } from './MealConfirmationModal';

@@ -1,19 +1,39 @@
 import { apiClient } from './api.client';
+import { storageService } from './storage.service';
 import { LoginInput, RegisterInput, User, ChangePasswordInput } from '@/utils/validators';
+import { TokenResponseSchema, UserResponseSchema, TokenResponse } from '@/schemas/api';
+
+/**
+ * Map API user response to frontend User type
+ */
+function mapUser(apiUser: ReturnType<typeof UserResponseSchema.parse>): User {
+  return {
+    id: apiUser.id,
+    email: apiUser.email,
+    is_active: apiUser.is_active,
+    is_verified: apiUser.is_verified,
+    weight: apiUser.weight ?? undefined,
+    height: apiUser.height ?? undefined,
+    age: apiUser.age ?? undefined,
+    gender: apiUser.gender ?? undefined,
+    activity_level: apiUser.activity_level ?? undefined,
+    goal: apiUser.goal ?? undefined,
+  };
+}
 
 export const authService = {
-  async login(data: LoginInput) {
+  async login(data: LoginInput): Promise<TokenResponse> {
     const formData = new URLSearchParams();
     formData.append('username', data.username);
     formData.append('password', data.password);
-    
+
     const response = await apiClient.post('/auth/login', formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
-    return response.data;
+    return TokenResponseSchema.parse(response.data);
   },
 
-  async register(data: RegisterInput) {
+  async register(data: RegisterInput): Promise<{ id: string; email: string }> {
     const response = await apiClient.post('/auth/register', {
       email: data.email,
       password: data.password,
@@ -21,46 +41,45 @@ export const authService = {
     return response.data;
   },
 
-  async verify(token: string) {
-    const response = await apiClient.post('/auth/verify', { token }); 
-    return response.data;
+  async verify(token: string): Promise<TokenResponse> {
+    const response = await apiClient.post('/auth/verify', { token });
+    return TokenResponseSchema.parse(response.data);
   },
 
-  async requestVerifyToken(email: string) {
-    const response = await apiClient.post('/auth/request-verify-token', { email });
-    return response.data;
+  async requestVerifyToken(email: string): Promise<void> {
+    await apiClient.post('/auth/request-verify-token', { email });
   },
 
   async getMe(): Promise<User> {
     const response = await apiClient.get('/users/me');
-    return response.data;
+    const validated = UserResponseSchema.parse(response.data);
+    return mapUser(validated);
   },
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
-        const { storageService } = require('./storage.service');
-        const refreshToken = await storageService.getRefreshToken();
-        if (refreshToken) {
-            return await apiClient.post('/auth/logout', { refresh_token: refreshToken });
-        }
+      const refreshToken = await storageService.getRefreshToken();
+      if (refreshToken) {
+        await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+      }
     } catch (e) {
-        console.error('Logout error', e);
+      // Logout errors are non-critical - user is logging out anyway
+      console.warn('Logout request failed:', e);
     }
   },
 
-  async forgotPassword(email: string) {
-    return await apiClient.post('/auth/forgot-password', { email });
+  async forgotPassword(email: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password', { email });
   },
 
-  async resetPassword(token: string, password: string) {
-    return await apiClient.post('/auth/reset-password', { token, password });
+  async resetPassword(token: string, password: string): Promise<void> {
+    await apiClient.post('/auth/reset-password', { token, password });
   },
 
-  async changePassword(data: ChangePasswordInput) {
-    const response = await apiClient.post('/users/change-password', {
+  async changePassword(data: ChangePasswordInput): Promise<void> {
+    await apiClient.post('/users/change-password', {
       old_password: data.oldPassword,
       new_password: data.newPassword,
     });
-    return response.data;
   },
 };

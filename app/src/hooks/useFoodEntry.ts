@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { format } from 'date-fns';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useLogEntry, useUpdateEntry, useCreateFood } from '@/hooks/useFood';
 import { foodService } from '@/services/food.service';
 import { FoodProduct, UnitInfo, MealType, CreateFoodDto, CreateEntryDto } from '@/types/food';
+import { formatDateForApi } from '@/utils/date';
 
 interface FoodEntryParams {
   entryId?: string;
@@ -153,7 +153,7 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
       }
 
       const entry: CreateEntryDto = {
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: formatDateForApi(),
         meal_type: selectedMeal,
         product_id: productId,
         amount_grams: currentWeight,

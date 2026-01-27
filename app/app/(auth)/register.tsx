@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { isAxiosError } from 'axios';
 import { useLanguage } from '@/hooks/useLanguage';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { SettingsModal } from '@/components/profile/SettingsModal';
 import { Colors } from '@/constants/theme';
 

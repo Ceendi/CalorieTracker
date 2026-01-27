@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useThemeColor } from '@/hooks/use-theme-color';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 import { useFoodSearch } from '@/hooks/useFood';
 import type { ProcessedMeal } from '@/services/ai.service';
 import { FoodProduct } from '@/types/food';
@@ -36,7 +37,8 @@ export function VoiceMealConfirmation({
   isLoading,
 }: VoiceMealConfirmationProps) {
   const { t } = useLanguage();
-  const textColor = useThemeColor({}, 'text');
+  const { colorScheme } = useColorScheme();
+  const textColor = Colors[colorScheme ?? 'light'].text;
   const insets = useSafeAreaInsets();
   
   const { 

@@ -21,12 +21,13 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
     return summarizeMealMacros(localMeal.items);
   }, [localMeal]);
 
-  const updateQuantity = (index: number, newValue: number, newUnit?: any) => {
+  const updateQuantity = (index: number, newValue: number, newUnit?: { grams: number; label: string } | null) => {
     if (!localMeal) return;
     const updatedItems = [...localMeal.items];
     const item = { ...updatedItems[index] };
 
-    const currentGrams = item.quantity_grams || 100;
+    // Guard against division by zero
+    const currentGrams = Math.max(item.quantity_grams || 100, 1);
     const kcalPerGram = item.kcal / currentGrams;
     const proteinPerGram = item.protein / currentGrams;
     const fatPerGram = item.fat / currentGrams;
