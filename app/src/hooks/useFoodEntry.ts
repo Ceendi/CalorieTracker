@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useLogEntry, useUpdateEntry, useCreateFood } from '@/hooks/useFood';
-import { foodService } from '@/services/food.service';
+import { useLogEntry, useUpdateEntry } from '@/hooks/useFood';
+import { ensureFoodProduct } from '@/services/food.service';
 import { FoodProduct, UnitInfo, MealType, CreateFoodDto, CreateEntryDto } from '@/types/food';
 import { formatDateForApi } from '@/utils/date';
 
@@ -95,7 +95,7 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
   // --- Mutations ---
   const { mutate: logEntry, isPending: isLogging } = useLogEntry();
   const { mutate: updateEntry, isPending: isUpdating } = useUpdateEntry();
-  const { mutateAsync: createFood, isPending: isCreating } = useCreateFood();
+  const [isCreating, setIsCreating] = useState(false);
 
   const isBusy = isLogging || isCreating || isUpdating;
 
@@ -119,31 +119,15 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
       let productId = food.id;
 
       if (!productId) {
-        // ... logic to create/resolve food ...
-        // Extracted slightly simplified logic here
-         const newFoodPayload: CreateFoodDto = {
+        setIsCreating(true);
+        try {
+          productId = await ensureFoodProduct({
             name: food.name,
             barcode: food.barcode,
             nutrition: food.nutrition
-        };
-        try {
-            const createdFood = await createFood(newFoodPayload);
-            productId = createdFood.id;
-        } catch (createError) {
-             if (food.barcode) {
-                  try {
-                       const existing = await foodService.getFoodByBarcode(food.barcode);
-                       if (existing && existing.id) {
-                           productId = existing.id;
-                       } else {
-                           throw createError;
-                       }
-                  } catch (fetchError) {
-                       throw createError;
-                  }
-             } else {
-                 throw createError;
-             }
+          });
+        } finally {
+          setIsCreating(false);
         }
       }
 

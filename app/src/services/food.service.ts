@@ -29,6 +29,30 @@ function mapFoodProduct(apiFood: FoodProductResponse): FoodProduct {
   };
 }
 
+/**
+ * Ensures a food product exists in the database.
+ * Creates it if it doesn't exist, handles conflicts by fetching existing.
+ * @returns Product ID (UUID)
+ */
+export async function ensureFoodProduct(food: CreateFoodDto): Promise<string> {
+  try {
+    const created = await foodService.createFood(food);
+    if (!created.id) throw new Error('Created food has no ID');
+    return created.id;
+  } catch (error) {
+    // If creation failed and we have a barcode, try to fetch existing
+    if (food.barcode) {
+      try {
+        const existing = await foodService.getFoodByBarcode(food.barcode);
+        if (existing?.id) return existing.id;
+      } catch {
+        // Barcode lookup failed, rethrow original error
+      }
+    }
+    throw error;
+  }
+}
+
 export const foodService = {
   async searchFoods(query: string): Promise<FoodProduct[]> {
     const response = await apiClient.get(`/api/v1/foods/search`, {
