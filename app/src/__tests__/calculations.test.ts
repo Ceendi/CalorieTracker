@@ -6,7 +6,14 @@ import {
   ActivityMultipliers,
 } from '../utils/calculations';
 
-describe('calculateBMR', () => {
+/**
+ * Note: calculateBMR, calculateDailyGoal, and ActivityMultipliers are deprecated.
+ * They are kept as fallback for when the backend API is unavailable.
+ * Prefer using useDailyTargets() hook from @/hooks/useMealPlan in components.
+ * These tests remain to ensure the fallback logic continues to work correctly.
+ */
+
+describe('calculateBMR (deprecated - fallback)', () => {
   it('calculates BMR correctly for male', () => {
     // Mifflin-St Jeor: (10 * 80) + (6.25 * 180) - (5 * 30) + 5 = 800 + 1125 - 150 + 5 = 1780
     const result = calculateBMR(80, 180, 30, 'male');
@@ -20,7 +27,7 @@ describe('calculateBMR', () => {
   });
 });
 
-describe('calculateDailyGoal', () => {
+describe('calculateDailyGoal (deprecated - fallback)', () => {
   it('returns default values when profile is incomplete', () => {
     const result = calculateDailyGoal({});
     expect(result).toEqual({
@@ -97,7 +104,7 @@ describe('calculateItemMacros', () => {
   });
 });
 
-describe('ActivityMultipliers', () => {
+describe('ActivityMultipliers (deprecated - fallback)', () => {
   it('has correct multiplier values', () => {
     expect(ActivityMultipliers.sedentary).toBe(1.2);
     expect(ActivityMultipliers.light).toBe(1.375);

@@ -438,7 +438,13 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         for ing_data in data.get("ingredients", []):
             name = ing_data.get("name", "Skladnik")
-            amount = float(ing_data.get("amount_grams", 100))
+            # Safe conversion - LLM sometimes returns text like "kilka kropli"
+            raw_amount = ing_data.get("amount_grams", 100)
+            try:
+                amount = float(raw_amount) if raw_amount else 100.0
+            except (ValueError, TypeError):
+                logger.debug(f"Non-numeric amount '{raw_amount}' for {name}, using 10g")
+                amount = 10.0  # Small default for spices/seasonings
 
             # Find matching product
             product = self._find_product(name, product_lookup)

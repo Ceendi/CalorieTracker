@@ -18,6 +18,8 @@ from src.meal_planning.domain.entities import (
     PlanPreferences,
     GeneratedPlan,
     GeneratedDay,
+    GeneratedMeal,
+    GeneratedIngredient,
     ProgressCallback,
 )
 from src.meal_planning.domain.ports import MealPlannerPort
@@ -399,6 +401,9 @@ class MealPlanService:
                     available_products=products
                 )
 
+                # Enrich ingredients that weren't found in initial search
+                meal = await self._enrich_meal_ingredients(meal)
+
                 day_meals.append(meal)
 
                 # Track used ingredients for variety
@@ -523,3 +528,79 @@ class MealPlanService:
         )
 
         return products
+
+    async def _enrich_meal_ingredients(self, meal: GeneratedMeal) -> GeneratedMeal:
+        """
+        Enrich meal ingredients by searching for products that weren't found.
+
+        When LLM generates ingredients not in the initial meal-type search,
+        we do a second pass search for each missing ingredient.
+
+        Args:
+            meal: Generated meal with potentially unmatched ingredients
+
+        Returns:
+            Meal with enriched ingredients (food_id and accurate nutrition)
+        """
+        if not self._food_search or not self._session:
+            return meal
+
+        enriched_ingredients = []
+        recalc_needed = False
+
+        for ing in meal.ingredients:
+            if ing.food_id is not None:
+                # Already matched
+                enriched_ingredients.append(ing)
+                continue
+
+            # Search for this specific ingredient
+            product = await self._food_search.find_product_by_name(
+                session=self._session,
+                name=ing.name
+            )
+
+            if product:
+                # Recalculate nutrition with actual product data
+                factor = ing.amount_grams / 100.0
+                food_id = UUID(product["id"]) if isinstance(product["id"], str) else product["id"]
+
+                enriched_ing = GeneratedIngredient(
+                    food_id=food_id,
+                    name=product["name"],  # Use DB name for consistency
+                    amount_grams=ing.amount_grams,
+                    unit_label=ing.unit_label,
+                    kcal=round(product.get("kcal_per_100g", 0) * factor, 1),
+                    protein=round(product.get("protein_per_100g", 0) * factor, 1),
+                    fat=round(product.get("fat_per_100g", 0) * factor, 1),
+                    carbs=round(product.get("carbs_per_100g", 0) * factor, 1),
+                )
+                enriched_ingredients.append(enriched_ing)
+                recalc_needed = True
+                logger.debug(f"Enriched ingredient: {ing.name} -> {product['name']}")
+            else:
+                # Still not found, keep original with estimates
+                enriched_ingredients.append(ing)
+                logger.debug(f"Ingredient not found after second search: {ing.name}")
+
+        if not recalc_needed:
+            return meal
+
+        # Recalculate meal totals
+        total_kcal = sum(i.kcal for i in enriched_ingredients)
+        total_protein = sum(i.protein for i in enriched_ingredients)
+        total_fat = sum(i.fat for i in enriched_ingredients)
+        total_carbs = sum(i.carbs for i in enriched_ingredients)
+
+        return GeneratedMeal(
+            meal_type=meal.meal_type,
+            name=meal.name,
+            description=meal.description,
+            preparation_time_minutes=meal.preparation_time_minutes,
+            instructions=meal.instructions,
+            ingredients=enriched_ingredients,
+            total_kcal=round(total_kcal, 1),
+            total_protein=round(total_protein, 1),
+            total_fat=round(total_fat, 1),
+            total_carbs=round(total_carbs, 1),
+        )

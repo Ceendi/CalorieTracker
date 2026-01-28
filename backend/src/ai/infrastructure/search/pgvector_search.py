@@ -109,11 +109,11 @@ class PgVectorSearchService:
             List of dicts with product info and nutrition data
         """
         MEAL_QUERIES = {
-            "breakfast": "sniadanie platki owsiane jajka chleb maslo ser mleko jogurt",
-            "second_breakfast": "przekaska owoce jogurt kanapka banan jablko",
-            "lunch": "obiad mieso kurczak ryba ziemniaki ryz makaron warzywa zupa",
-            "snack": "przekaska owoce orzechy jogurt baton",
-            "dinner": "kolacja kanapka salatka jajka ser wedlina warzywa lekkie"
+            "breakfast": "sniadanie platki owsiane jajka chleb maslo ser mleko jogurt twarog banan",
+            "second_breakfast": "przekaska owoce jogurt kanapka banan jablko orzechy marchew",
+            "lunch": "obiad mieso kurczak ryba ziemniaki ryz makaron warzywa zupa pomidor ogorek salata cebula",
+            "snack": "przekaska owoce orzechy jogurt baton jablko banan marchew",
+            "dinner": "kolacja kanapka salata jajka ser wedlina warzywa pomidor ogorek papryka"
         }
 
         query = MEAL_QUERIES.get(meal_type, meal_type)

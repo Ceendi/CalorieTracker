@@ -302,6 +302,57 @@ export const translations = {
         increaseQuantity: "Increase quantity",
         quantityInput: "Quantity input",
         selectUnit: "Select unit"
+    },
+    mealPlan: {
+        title: "Meal Plans",
+        subtitle: "AI-generated weekly meal plans",
+        emptyTitle: "No meal plans yet",
+        emptyDescription: "Generate your first personalized meal plan based on your goals and preferences.",
+        generateFirst: "Generate Plan",
+        newPlan: "New Meal Plan",
+        generate: "Generate",
+        generating: "Generating plan...",
+        generationComplete: "Plan generated!",
+        generationError: "Generation failed",
+        close: "Close",
+        day: "Day",
+        untitledPlan: "Untitled Plan",
+        deleteConfirmTitle: "Delete Plan",
+        deleteConfirmMessage: "Are you sure you want to delete this meal plan?",
+        planName: "Plan Name",
+        planNamePlaceholder: "e.g. Weekly Plan",
+        numberOfDays: "Number of Days",
+        dietType: "Diet Type",
+        allergies: "Allergies",
+        status: {
+            draft: "Draft",
+            active: "Active",
+            archived: "Archived"
+        },
+        diets: {
+            none: "None",
+            vegetarian: "Vegetarian",
+            vegan: "Vegan",
+            keto: "Keto",
+            mediterranean: "Mediterranean"
+        },
+        allergens: {
+            gluten: "Gluten",
+            dairy: "Dairy",
+            eggs: "Eggs",
+            nuts: "Nuts",
+            soy: "Soy",
+            shellfish: "Shellfish",
+            fish: "Fish"
+        },
+        details: {
+            title: "Meal Plan",
+            ingredients: "Ingredients",
+            preparation: "Preparation",
+            prepTime: "Prep time",
+            minutes: "min"
+        },
+        loadingTargets: "Loading..."
     }
   },
   pl: {
@@ -605,6 +656,57 @@ export const translations = {
         increaseQuantity: "Zwiększ ilość",
         quantityInput: "Pole ilości",
         selectUnit: "Wybierz jednostkę"
+    },
+    mealPlan: {
+        title: "Plany posiłków",
+        subtitle: "Tygodniowe plany generowane przez AI",
+        emptyTitle: "Brak planów",
+        emptyDescription: "Wygeneruj swój pierwszy spersonalizowany plan posiłków dopasowany do Twoich celów.",
+        generateFirst: "Wygeneruj plan",
+        newPlan: "Nowy plan posiłków",
+        generate: "Generuj",
+        generating: "Generowanie planu...",
+        generationComplete: "Plan wygenerowany!",
+        generationError: "Błąd generowania",
+        close: "Zamknij",
+        day: "Dzień",
+        untitledPlan: "Plan bez nazwy",
+        deleteConfirmTitle: "Usuń plan",
+        deleteConfirmMessage: "Czy na pewno chcesz usunąć ten plan posiłków?",
+        planName: "Nazwa planu",
+        planNamePlaceholder: "np. Plan tygodniowy",
+        numberOfDays: "Liczba dni",
+        dietType: "Rodzaj diety",
+        allergies: "Alergie",
+        status: {
+            draft: "Szkic",
+            active: "Aktywny",
+            archived: "Zarchiwizowany"
+        },
+        diets: {
+            none: "Brak",
+            vegetarian: "Wegetariańska",
+            vegan: "Wegańska",
+            keto: "Keto",
+            mediterranean: "Śródziemnomorska"
+        },
+        allergens: {
+            gluten: "Gluten",
+            dairy: "Nabiał",
+            eggs: "Jajka",
+            nuts: "Orzechy",
+            soy: "Soja",
+            shellfish: "Owoce morza",
+            fish: "Ryby"
+        },
+        details: {
+            title: "Plan posiłków",
+            ingredients: "Składniki",
+            preparation: "Przygotowanie",
+            prepTime: "Czas przygotowania",
+            minutes: "min"
+        },
+        loadingTargets: "Ładowanie..."
     }
   }
 };

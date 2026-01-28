@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -12,6 +12,7 @@ import { GOAL_OPTIONS, ACTIVITY_OPTIONS, GENDER_OPTIONS } from '@/constants/opti
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 import { calculateDailyGoal } from '@/utils/calculations';
+import { useDailyTargets } from '@/hooks/useMealPlan';
 import { User } from '@/utils/validators';
 
 export default function ProfileScreen() {
@@ -33,8 +34,23 @@ export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [activeSelectField, setActiveSelectField] = useState<'goal' | 'activity_level' | 'gender' | null>(null);
-  
+
+  // Fetch daily targets from backend
+  const { data: backendTargets, isLoading: isLoadingTargets } = useDailyTargets();
+
+  // Use backend targets if available, otherwise fall back to local calculation
   const currentCalories = React.useMemo(() => {
+    // If we have backend targets, use them (convert kcal to calories for consistency)
+    if (backendTargets) {
+      return {
+        calories: backendTargets.kcal,
+        protein: Math.round(backendTargets.protein),
+        fat: Math.round(backendTargets.fat),
+        carbs: Math.round(backendTargets.carbs),
+      };
+    }
+
+    // Fallback to local calculation
     const profile: Partial<User> = {
         weight: parseFloat(formData.weight) || 0,
         height: parseFloat(formData.height) || 0,
@@ -44,7 +60,7 @@ export default function ProfileScreen() {
         goal: formData.goal
     };
     return calculateDailyGoal(profile);
-  }, [formData]);
+  }, [backendTargets, formData]);
 
 
 
@@ -249,25 +265,41 @@ export default function ProfileScreen() {
                         <Text className="text-xs text-muted-foreground">{t('profile.recommended')}</Text>
                     </View>
                  </View>
-                 <Text className="text-2xl font-bold text-primary">
-                    {currentCalories.calories} kcal
-                 </Text>
+                 {isLoadingTargets ? (
+                    <ActivityIndicator size="small" color={Colors[colorScheme ?? 'light'].tint} />
+                 ) : (
+                    <Text className="text-2xl font-bold text-primary">
+                       {currentCalories.calories} kcal
+                    </Text>
+                 )}
              </View>
-             
+
              <View className="flex-row justify-between pt-3 border-t border-border">
                 <View className="items-center flex-1">
                     <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.protein')}</Text>
-                    <Text className="text-sm font-bold text-foreground">{currentCalories.protein}g</Text>
+                    {isLoadingTargets ? (
+                       <Text className="text-sm font-bold text-foreground">...</Text>
+                    ) : (
+                       <Text className="text-sm font-bold text-foreground">{currentCalories.protein}g</Text>
+                    )}
                 </View>
                 <View className="w-px h-8 bg-border" />
                 <View className="items-center flex-1">
                     <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.fat')}</Text>
-                    <Text className="text-sm font-bold text-foreground">{currentCalories.fat}g</Text>
+                    {isLoadingTargets ? (
+                       <Text className="text-sm font-bold text-foreground">...</Text>
+                    ) : (
+                       <Text className="text-sm font-bold text-foreground">{currentCalories.fat}g</Text>
+                    )}
                 </View>
                 <View className="w-px h-8 bg-border" />
                 <View className="items-center flex-1">
                     <Text className="text-xs text-muted-foreground mb-0.5">{t('manualEntry.carbs')}</Text>
-                    <Text className="text-sm font-bold text-foreground">{currentCalories.carbs}g</Text>
+                    {isLoadingTargets ? (
+                       <Text className="text-sm font-bold text-foreground">...</Text>
+                    ) : (
+                       <Text className="text-sm font-bold text-foreground">{currentCalories.carbs}g</Text>
+                    )}
                 </View>
              </View>
         </View>
