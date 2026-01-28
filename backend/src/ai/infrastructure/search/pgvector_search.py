@@ -1,8 +1,7 @@
 """
 PgVector-based hybrid search service combining vector similarity and full-text search.
 
-This service replaces the in-memory HybridSearchEngine with PostgreSQL-backed search
-using pgvector for vector operations and tsvector for full-text search.
+Uses pgvector for vector operations and tsvector for PostgreSQL full-text search.
 """
 
 from typing import List, Optional, Dict, Any
@@ -22,9 +21,6 @@ class PgVectorSearchService:
     - Vector similarity search (cosine distance) via pgvector
     - Full-text search (tsvector/tsquery) via PostgreSQL
     - Reciprocal Rank Fusion (RRF) for score combination
-
-    This service is designed to be injected with database sessions for each request,
-    unlike the old HybridSearchEngine which kept data in RAM.
     """
 
     def __init__(self, embedding_service: Optional[EmbeddingService] = None):
@@ -62,7 +58,7 @@ class PgVectorSearchService:
 
         # 2. Call hybrid search function
         result = await session.execute(text("""
-            SELECT * FROM hybrid_food_search(:query, :embedding::vector, :limit, :weight)
+            SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, :weight)
         """), {
             "query": query,
             "embedding": embedding_str,
@@ -127,7 +123,7 @@ class PgVectorSearchService:
         embedding_str = f"[{','.join(map(str, query_embedding.tolist()))}]"
 
         result = await session.execute(text("""
-            SELECT * FROM hybrid_food_search(:query, :embedding::vector, :limit, 0.5)
+            SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, 0.5)
         """), {
             "query": query,
             "embedding": embedding_str,
@@ -234,7 +230,7 @@ class PgVectorSearchService:
             # Get full product data
             result = await session.execute(text("""
                 SELECT id, name, category, calories, protein, fat, carbs
-                FROM foods WHERE id = :id
+                FROM foods WHERE id = :id AND source = 'fineli'
             """), {"id": results[0].product_id})
 
             row = result.fetchone()
@@ -271,7 +267,7 @@ class PgVectorSearchService:
         result = await session.execute(text("""
             SELECT id, name, category, calories, protein, fat, carbs
             FROM foods
-            WHERE category ILIKE :category
+            WHERE category ILIKE :category AND source = 'fineli'
             LIMIT :limit
         """), {
             "category": f"%{category}%",

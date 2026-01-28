@@ -23,10 +23,9 @@ from src.ai.config import (
 
 class MealRecognitionService:
     """
-    Service for recognizing food items from text using hybrid search.
+    Service for recognizing food items from text using pgvector hybrid search.
 
-    Supports both the old in-memory HybridSearchEngine (synchronous) and
-    the new PgVectorSearchAdapter (async) for database-backed search.
+    Uses PgVectorSearchAdapter for database-backed semantic search.
     """
 
     def __init__(
@@ -46,16 +45,12 @@ class MealRecognitionService:
         alpha: float = 0.3
     ) -> List[SearchCandidate]:
         """
-        Search for products, handling both sync and async search engines.
-
-        This method provides compatibility with both:
-        - HybridSearchEngine (synchronous search method)
-        - PgVectorSearchAdapter (asynchronous search method)
+        Search for products using pgvector hybrid search.
 
         Args:
             query: Search query
             top_k: Maximum results
-            alpha: Hybrid search balance (vector vs BM25/FTS)
+            alpha: Hybrid search balance (vector vs FTS)
 
         Returns:
             List of SearchCandidate objects
@@ -177,7 +172,6 @@ class MealRecognitionService:
                     quantity_unit_value=temp_item.quantity_value,
                     original_query=chunk.original_text,
                     match_strategy="semantic_search",
-                    brand=raw_product.get("brand", ""),
                     units=[
                         {
                             "label": u.get("name"),

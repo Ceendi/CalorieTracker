@@ -56,7 +56,6 @@ class MatchedProduct(BaseModel):
     original_query: str = Field(..., description="The original user chunk text")
     match_strategy: str = Field("semantic_search")
     notes: str = ""
-    brand: str = ""
     units: List[dict] = Field(default_factory=list)
     alternatives: List[SearchCandidate] = Field(default_factory=list)
 

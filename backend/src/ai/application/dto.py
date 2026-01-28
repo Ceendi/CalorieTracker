@@ -1,9 +1,10 @@
+import uuid
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, List
 
 
 class ProcessedFoodItemDTO(BaseModel):
-    product_id: Optional[int] = Field(None, description="ID of matched product")
+    product_id: Optional[uuid.UUID] = Field(None, description="ID of matched product")
     name: str = Field(description="Product name")
     quantity_grams: float = Field(description="Quantity in grams")
     kcal: float = Field(description="Calories")
@@ -14,7 +15,6 @@ class ProcessedFoodItemDTO(BaseModel):
     unit_matched: str = Field(description="Unit that was matched")
     quantity_unit_value: float = Field(1.0, description="Numeric value of the matched unit")
     status: Literal["matched", "not_found", "needs_confirmation"] = Field(description="Match status")
-    brand: Optional[str] = Field(None, description="Product brand")
     units: List[dict] = Field(default_factory=list, description="Available product units")
     notes: Optional[str] = Field(None, description="Additional notes")
 

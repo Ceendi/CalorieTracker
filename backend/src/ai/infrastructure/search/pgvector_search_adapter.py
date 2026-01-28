@@ -76,9 +76,7 @@ class PgVectorSearchAdapter:
         Returns:
             List of SearchCandidate objects sorted by relevance
         """
-        # Convert alpha to vector_weight (they're conceptually similar)
-        # alpha in HybridSearchEngine: higher = more vector weight
-        # vector_weight in PgVectorSearchService: higher = more vector weight
+        # alpha maps to vector_weight: higher = more vector weight
         vector_weight = alpha
 
         candidates = await self._search_service.search(
@@ -111,8 +109,8 @@ class PgVectorSearchAdapter:
             result = await self._session.execute(text("""
                 SELECT
                     id, name, category, calories, protein, fat, carbs,
-                    source, brand
-                FROM foods WHERE id = :id
+                    source
+                FROM foods WHERE id = :id AND source = 'fineli'
             """), {"id": product_id})
 
             row = result.fetchone()
@@ -127,7 +125,6 @@ class PgVectorSearchAdapter:
                     "fat_100g": row.fat or 0,
                     "carbs_100g": row.carbs or 0,
                     "source": row.source,
-                    "brand": row.brand or "",
                     "units": []  # TODO: Load units if available
                 }
         except Exception as e:
