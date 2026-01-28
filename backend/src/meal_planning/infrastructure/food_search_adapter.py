@@ -3,7 +3,33 @@ Food search adapter for meal planning.
 
 Implements FoodSearchPort using the existing food catalogue infrastructure.
 Provides product search functionality for RAG-based ingredient selection.
+
+.. deprecated:: 2.0.0
+    This adapter uses SQL LIKE queries which provide inferior search quality
+    compared to the new PgVectorSearchService. Use PgVectorSearchService from
+    ``src.ai.infrastructure.search`` instead, which provides:
+    - Vector similarity search via pgvector
+    - Full-text search via PostgreSQL tsvector
+    - Hybrid scoring with Reciprocal Rank Fusion (RRF)
+
+Migration guide:
+    Old:
+        food_search = SqlAlchemyFoodSearchAdapter(session)
+        products = await food_search.search_products(query)
+
+    New:
+        from src.ai.infrastructure.search import PgVectorSearchService
+        from src.ai.infrastructure.embedding import get_embedding_service
+
+        search_service = PgVectorSearchService(get_embedding_service())
+        products = await search_service.search_for_meal_planning(
+            session=session,
+            meal_type="breakfast",
+            preferences={"diet": "vegetarian"},
+            limit=40
+        )
 """
+import warnings
 from typing import List, Optional
 from uuid import UUID
 
@@ -11,16 +37,19 @@ from sqlalchemy import select, or_, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
 
-from src.meal_planning.application.ports import FoodSearchPort
 from src.food_catalogue.infrastructure.orm_models import FoodModel
 
 
-class SqlAlchemyFoodSearchAdapter(FoodSearchPort):
+class SqlAlchemyFoodSearchAdapter:
     """
     Food search adapter using SQLAlchemy.
 
     Searches the foods table for products matching a query,
     returning results in the format expected by the meal planner.
+
+    .. deprecated:: 2.0.0
+        Use PgVectorSearchService instead for better search quality.
+        See module docstring for migration guide.
     """
 
     def __init__(self, session: AsyncSession):
@@ -30,6 +59,12 @@ class SqlAlchemyFoodSearchAdapter(FoodSearchPort):
         Args:
             session: SQLAlchemy async session
         """
+        warnings.warn(
+            "SqlAlchemyFoodSearchAdapter is deprecated. "
+            "Use PgVectorSearchService from src.ai.infrastructure.search instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self._session = session
 
     def _create_fuzzy_regex(self, query: str) -> str:

@@ -10,6 +10,7 @@ from typing import Any, Callable, Awaitable, List, Optional
 from uuid import UUID
 
 from loguru import logger
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.meal_planning.application.ports import MealPlanRepositoryPort, FoodSearchPort
 from src.meal_planning.domain.entities import (
@@ -92,6 +93,7 @@ class MealPlanService:
         repository: MealPlanRepositoryPort,
         planner: Optional[MealPlannerPort] = None,
         food_search: Optional[FoodSearchPort] = None,
+        session: Optional[AsyncSession] = None,
     ):
         """
         Initialize the meal plan service.
@@ -100,10 +102,13 @@ class MealPlanService:
             repository: Repository port for meal plan persistence
             planner: Optional meal planner port for generation (injected later)
             food_search: Optional food search port for RAG-based ingredient selection
+                        (uses PgVectorSearchService for pgvector-based hybrid search)
+            session: Database session for food search queries (required for PgVectorSearchService)
         """
         self._repo = repository
         self._planner = planner
         self._food_search = food_search
+        self._session = session
 
     def calculate_daily_targets(
         self,
@@ -472,61 +477,49 @@ class MealPlanService:
         limit: int = 15
     ) -> List[dict]:
         """
-        Search for relevant products for a meal template.
+        Search for relevant products for a meal template using pgvector hybrid search.
 
-        Uses the meal description to search for relevant products,
-        then filters based on user preferences (allergies, diet).
+        Uses the new PgVectorSearchService with session-based search for better
+        semantic matching compared to the old SQL LIKE approach.
 
         Args:
-            template: Meal template with description
-            preferences: User preferences for filtering
+            template: Meal template with description and meal_type
+            preferences: User preferences for filtering (allergies, diet, exclusions)
             limit: Maximum products to return
 
         Returns:
-            List of product dicts suitable for the meal
+            List of product dicts suitable for the meal, including nutrition data
         """
         if not self._food_search:
             logger.warning("Food search not configured, returning empty products")
             return []
 
-        # Build search query from meal description
-        query = template.description
+        if not self._session:
+            logger.warning("Database session not provided, returning empty products")
+            return []
 
-        # Search for products
-        products = await self._food_search.search_products(query, limit=limit * 2)
+        # Build preferences dict for pgvector search filtering
+        preferences_dict = {
+            "allergies": preferences.allergies,
+            "diet": preferences.diet,
+            "excluded_ingredients": preferences.excluded_ingredients,
+        }
 
-        # Filter based on preferences
-        filtered = []
-        for product in products:
-            # Skip if matches any allergy
-            product_name = product.get("name", "").lower()
-            if any(allergy.lower() in product_name for allergy in preferences.allergies):
-                continue
-
-            # Skip meat/fish for vegetarians
-            category = product.get("category", "").upper() if product.get("category") else ""
-            if preferences.diet == "vegetarian" and category in ["MEAT", "FISH", "MIESO", "RYBY"]:
-                continue
-
-            # Skip animal products for vegans
-            if preferences.diet == "vegan" and category in [
-                "MEAT", "FISH", "DAIRY", "EGGS",
-                "MIESO", "RYBY", "NABIAL", "JAJA"
-            ]:
-                continue
-
-            # Skip excluded ingredients
-            if any(excl.lower() in product_name for excl in preferences.excluded_ingredients):
-                continue
-
-            filtered.append(product)
-
-            if len(filtered) >= limit:
-                break
-
-        logger.debug(
-            f"Product search for '{query}': {len(products)} found, "
-            f"{len(filtered)} after filtering"
+        # Use new pgvector-based search for meal planning
+        # The PgVectorSearchService handles:
+        # - Meal type to query mapping (breakfast -> sniadanie platki owsiane...)
+        # - Hybrid vector + FTS search with RRF scoring
+        # - Preference-based filtering (allergies, diet, exclusions)
+        products = await self._food_search.search_for_meal_planning(
+            session=self._session,
+            meal_type=template.meal_type,
+            preferences=preferences_dict,
+            limit=limit
         )
 
-        return filtered
+        logger.debug(
+            f"Product search for meal '{template.meal_type}' ({template.description}): "
+            f"{len(products)} products found via pgvector"
+        )
+
+        return products

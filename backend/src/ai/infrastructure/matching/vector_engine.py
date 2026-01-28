@@ -1,3 +1,35 @@
+"""
+In-memory hybrid search engine using sentence transformers and BM25.
+
+.. deprecated:: 2.0.0
+    This in-memory search engine is deprecated in favor of PgVectorSearchService
+    which provides database-backed search with:
+    - Persistent vector embeddings via pgvector
+    - Full-text search via PostgreSQL tsvector
+    - Lower memory usage (no need to load all products into RAM)
+    - Better scalability for large product catalogs
+
+Migration guide:
+    Old (in-memory):
+        from src.ai.infrastructure.matching.vector_engine import HybridSearchEngine
+
+        engine = HybridSearchEngine()
+        engine.index_products(products)
+        results = engine.search("maslo")
+
+    New (database-backed):
+        from src.ai.infrastructure.search import PgVectorSearchService, PgVectorSearchAdapter
+        from src.ai.infrastructure.embedding import get_embedding_service
+
+        search_service = PgVectorSearchService(get_embedding_service())
+        adapter = PgVectorSearchAdapter(search_service, session)
+        results = await adapter.search("maslo")
+
+    Or for direct usage without adapter:
+        results = await search_service.search(session, "maslo", limit=20)
+"""
+
+import warnings
 import torch
 import time
 import re
@@ -11,7 +43,21 @@ from src.ai.domain.models import SearchCandidate
 
 
 class HybridSearchEngine:
+    """
+    In-memory hybrid search engine combining vector similarity and BM25.
+
+    .. deprecated:: 2.0.0
+        Use PgVectorSearchService from src.ai.infrastructure.search instead.
+        See module docstring for migration guide.
+    """
+
     def __init__(self, model_name: str = "intfloat/multilingual-e5-large"):
+        warnings.warn(
+            "HybridSearchEngine is deprecated. "
+            "Use PgVectorSearchService from src.ai.infrastructure.search instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.device = "cpu" if torch.cuda.is_available() else "cpu"
         logger.info(f"Initializing HybridSearchEngine on device: {self.device}")
 

@@ -48,3 +48,40 @@ class NLUExtractorPort(Protocol):
     @classmethod
     def is_available(cls) -> bool:
         ...
+
+
+class FoodSearchPort(Protocol):
+    """
+    Port for food search operations using pgvector hybrid search.
+
+    This is the new interface for database-backed search, replacing
+    the in-memory SearchEnginePort for production use.
+    """
+
+    async def search(
+        self,
+        session,
+        query: str,
+        limit: int = 20,
+        vector_weight: float = 0.5
+    ) -> List[SearchCandidate]:
+        """Search for products by query text."""
+        ...
+
+    async def search_for_meal_planning(
+        self,
+        session,
+        meal_type: str,
+        preferences: Optional[Dict] = None,
+        limit: int = 40
+    ) -> List[Dict]:
+        """Search products suitable for a meal type with optional dietary filters."""
+        ...
+
+    async def find_product_by_name(
+        self,
+        session,
+        name: str
+    ) -> Optional[Dict]:
+        """Find a single product by name."""
+        ...

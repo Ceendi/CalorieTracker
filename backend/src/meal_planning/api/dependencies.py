@@ -8,14 +8,18 @@ from typing import Optional
 from src.core.database import DBSession
 from src.meal_planning.application.service import MealPlanService
 from src.meal_planning.infrastructure.repository import MealPlanRepository
-from src.meal_planning.infrastructure.food_search_adapter import SqlAlchemyFoodSearchAdapter
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
+from src.ai.infrastructure.search import PgVectorSearchService
+from src.ai.infrastructure.embedding import get_embedding_service
 
 # Re-export current_active_user from users module for convenience
 from src.users.api.routes import current_active_user as get_current_user
 
 # Singleton instance of the Bielik planner (lazy loaded)
 _bielik_planner: Optional[BielikMealPlannerAdapter] = None
+
+# Singleton instance of the food search service (lazy loaded)
+_food_search_service: Optional[PgVectorSearchService] = None
 
 
 def get_meal_planner() -> BielikMealPlannerAdapter:
@@ -33,6 +37,26 @@ def get_meal_planner() -> BielikMealPlannerAdapter:
     return _bielik_planner
 
 
+def get_food_search_service() -> PgVectorSearchService:
+    """
+    Get singleton PgVectorSearchService instance.
+
+    This replaces the old SqlAlchemyFoodSearchAdapter with the new
+    pgvector-based hybrid search that combines:
+    - Vector similarity search (cosine distance) via pgvector
+    - Full-text search (tsvector/tsquery) via PostgreSQL
+    - Reciprocal Rank Fusion (RRF) for score combination
+
+    Returns:
+        PgVectorSearchService instance
+    """
+    global _food_search_service
+    if _food_search_service is None:
+        embedding_service = get_embedding_service()
+        _food_search_service = PgVectorSearchService(embedding_service)
+    return _food_search_service
+
+
 async def get_meal_plan_service(
     session: DBSession,
 ) -> MealPlanService:
@@ -42,7 +66,8 @@ async def get_meal_plan_service(
     Injects:
     - Repository for persistence
     - BielikMealPlannerAdapter for LLM-based generation
-    - SqlAlchemyFoodSearchAdapter for RAG product search
+    - PgVectorSearchService for pgvector-based RAG product search
+    - Database session for search queries
 
     Args:
         session: Database session from dependency injection
@@ -51,11 +76,12 @@ async def get_meal_plan_service(
         Configured MealPlanService instance
     """
     repository = MealPlanRepository(session)
-    food_search = SqlAlchemyFoodSearchAdapter(session)
+    food_search = get_food_search_service()
     planner = get_meal_planner()
 
     return MealPlanService(
         repository=repository,
         planner=planner,
-        food_search=food_search
+        food_search=food_search,
+        session=session  # Required for PgVectorSearchService queries
     )

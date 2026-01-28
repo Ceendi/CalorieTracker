@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 
-from sqlalchemy import String, ForeignKey, Float, Integer, Enum as SAEnum
+from sqlalchemy import String, ForeignKey, Float, Integer, Enum as SAEnum, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import UUIDModel
@@ -33,6 +33,14 @@ class FoodModel(UUIDModel):
     source: Mapped[str] = mapped_column(String, default="public")
 
     popularity_score: Mapped[int] = mapped_column(Integer, default=0, index=True)
+
+    # Vector embedding for semantic search (384 dimensions for E5-small)
+    # Note: Actual column type is vector(384) in PostgreSQL via pgvector extension
+    # Using LargeBinary for SQLAlchemy compatibility; raw SQL is used for vector operations
+    embedding: Mapped[Optional[bytes]] = mapped_column(LargeBinary, nullable=True)
+
+    # Note: search_text tsvector column is managed by PostgreSQL as a generated column
+    # It is not mapped here as it's automatically derived from the 'name' column
 
 
 class FoodUnitModel(UUIDModel):

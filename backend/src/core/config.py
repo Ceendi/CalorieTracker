@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
-    WHISPER_MODEL_SIZE: str = "small"  # tiny, base, small, medium, large
+    WHISPER_MODEL_SIZE: str = "base"  # tiny, base, small, medium, large
 
     @computed_field
     @property

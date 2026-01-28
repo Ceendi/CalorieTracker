@@ -6,8 +6,10 @@ from specific infrastructure implementations.
 """
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Dict, Protocol
 from uuid import UUID
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.meal_planning.domain.entities import GeneratedPlan
 
@@ -107,47 +109,79 @@ class MealPlanRepositoryPort(ABC):
         pass
 
 
-class FoodSearchPort(ABC):
+class FoodSearchPort(Protocol):
     """
-    Port for searching food products.
+    Port for searching food products using pgvector hybrid search.
 
     Provides abstraction for searching the food catalogue,
     used by the meal plan service for RAG-based ingredient selection.
+    This port is compatible with PgVectorSearchService.
     """
 
-    @abstractmethod
-    async def search_products(
+    async def search_for_meal_planning(
         self,
-        query: str,
-        limit: int = 20
-    ) -> List[dict]:
+        session: AsyncSession,
+        meal_type: str,
+        preferences: Optional[Dict] = None,
+        limit: int = 40
+    ) -> List[Dict]:
         """
-        Search for food products by name.
+        Search products suitable for meal planning with nutrition data.
+
+        This is the primary method for RAG-based ingredient retrieval,
+        optimized for meal planning context with dietary preferences.
 
         Args:
-            query: Search query (ingredient name or description)
-            limit: Maximum number of results
+            session: Database session for queries
+            meal_type: Type of meal (breakfast, lunch, dinner, snack, second_breakfast)
+            preferences: Optional dietary preferences dict with keys:
+                        - allergies: List[str] - ingredients to avoid
+                        - diet: str - "vegetarian", "vegan", etc.
+                        - excluded_ingredients: List[str] - specific exclusions
+            limit: Maximum number of products to return
 
         Returns:
-            List of product dicts with keys: id, name, kcal_per_100g,
-            protein_per_100g, fat_per_100g, carbs_per_100g, category
+            List of dicts with product info and nutrition data:
+            - id, name, category, kcal_per_100g, protein_per_100g,
+              fat_per_100g, carbs_per_100g, score
         """
-        pass
+        ...
 
-    @abstractmethod
-    async def get_products_by_category(
+    async def find_product_by_name(
         self,
+        session: AsyncSession,
+        name: str
+    ) -> Optional[Dict]:
+        """
+        Find single best matching product by name.
+
+        Used for exact product lookup, e.g., when matching LLM-generated
+        meal plan items to database products.
+
+        Args:
+            session: Database session for queries
+            name: Product name to search for
+
+        Returns:
+            Dict with product info and nutrition, or None if not found
+        """
+        ...
+
+    async def search_by_category(
+        self,
+        session: AsyncSession,
         category: str,
-        limit: int = 50
-    ) -> List[dict]:
+        limit: int = 20
+    ) -> List[Dict]:
         """
-        Get products by category.
+        Search products by category name.
 
         Args:
-            category: Food category to filter by
-            limit: Maximum number of results
+            session: Database session for queries
+            category: Category name (e.g., "Nabial", "Owoce")
+            limit: Maximum results
 
         Returns:
-            List of product dicts
+            List of product dicts from the specified category
         """
-        pass
+        ...

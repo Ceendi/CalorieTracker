@@ -1,6 +1,7 @@
 import re
 import time
-from typing import List, Optional, Dict
+import inspect
+from typing import List, Optional, Dict, Union
 from loguru import logger
 
 from src.ai.domain.models import (
@@ -21,6 +22,13 @@ from src.ai.config import (
 
 
 class MealRecognitionService:
+    """
+    Service for recognizing food items from text using hybrid search.
+
+    Supports both the old in-memory HybridSearchEngine (synchronous) and
+    the new PgVectorSearchAdapter (async) for database-backed search.
+    """
+
     def __init__(
         self,
         vector_engine: SearchEnginePort,
@@ -30,6 +38,35 @@ class MealRecognitionService:
         self.engine = vector_engine
         self.nlu = nlu_processor
         self.slm_extractor = slm_extractor
+
+    async def _search(
+        self,
+        query: str,
+        top_k: int = 20,
+        alpha: float = 0.3
+    ) -> List[SearchCandidate]:
+        """
+        Search for products, handling both sync and async search engines.
+
+        This method provides compatibility with both:
+        - HybridSearchEngine (synchronous search method)
+        - PgVectorSearchAdapter (asynchronous search method)
+
+        Args:
+            query: Search query
+            top_k: Maximum results
+            alpha: Hybrid search balance (vector vs BM25/FTS)
+
+        Returns:
+            List of SearchCandidate objects
+        """
+        result = self.engine.search(query, top_k=top_k, alpha=alpha)
+
+        # Handle async search engines (like PgVectorSearchAdapter)
+        if inspect.isawaitable(result):
+            return await result
+
+        return result
 
     async def recognize_meal(self, text: str) -> MealRecognitionResult:
         start_time = time.time()
@@ -64,7 +101,7 @@ class MealRecognitionService:
         unmatched_chunks: List[str] = []
 
         for chunk in chunks:
-            candidates = self.engine.search(chunk.text_for_search, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
+            candidates = await self._search(chunk.text_for_search, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
 
             best_match: Optional[SearchCandidate] = None
 
