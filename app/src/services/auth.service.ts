@@ -1,6 +1,7 @@
 import { apiClient } from './api.client';
 import { storageService } from './storage.service';
-import { LoginInput, RegisterInput, User, ChangePasswordInput } from '@/utils/validators';
+import { LoginInput, RegisterInput, ChangePasswordInput } from '@/utils/validators';
+import { User } from '@/types/user';
 import { TokenResponseSchema, UserResponseSchema, TokenResponse } from '@/schemas/api';
 
 /**

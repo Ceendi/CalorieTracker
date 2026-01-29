@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useOnboarding, Gender } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 
@@ -14,6 +15,12 @@ export default function BasicInfoScreen() {
   const [gender, setGender] = useState<Gender | undefined>(data.gender);
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
+
+// ... (omitting lines to keep replace call valid, targeting specific blocks)
+// I need to split this into chunks because they are far apart.
+
+
 
   const onNext = () => {
     if (!age || !gender) return;
@@ -59,7 +66,7 @@ export default function BasicInfoScreen() {
                     className="text-foreground flex-1 h-full"
                     style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                     placeholder={t('onboarding.agePlaceholder')}
-                    placeholderTextColor="#64748b"
+                    placeholderTextColor={Colors[colorScheme ?? 'light'].placeholder}
                     keyboardType="number-pad"
                     value={age}
                     onChangeText={setAge}
@@ -99,7 +106,7 @@ export default function BasicInfoScreen() {
                 disabled={!age || !gender}
               >
                 <LinearGradient
-                  colors={[Colors.light.tint, '#4338CA']}
+                  colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
                   className={`rounded-xl p-4 items-center ${(!age || !gender) ? 'opacity-50' : ''}`}
                 >
                   <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

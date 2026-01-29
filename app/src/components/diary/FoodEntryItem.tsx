@@ -36,7 +36,7 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
                             {entry.product?.name || t('foodDetails.unknownProduct')}
                         </Text>
                         <Text className="text-muted-foreground text-sm">
-                            {entry.amount_grams}g • {Math.round(entry.calories)} kcal
+                            {Math.round(entry.amount_grams)}g • {Math.round(entry.calories)} kcal
                         </Text>
                     </View>
                     <View>

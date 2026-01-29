@@ -6,6 +6,7 @@ import {
   CodeXml,
   ChevronRight,
   ChevronLeft,
+  ChevronUp,
   ChevronDown,
   Calendar,
   BarChart3,
@@ -42,6 +43,11 @@ import {
   Square,
   Hourglass,
   Clock,
+  Sunrise,
+  Coffee,
+  Carrot,
+  CheckCircle,
+  AlertTriangle,
 } from 'lucide-react-native';
 
 // Map SF Symbol names to Lucide Components
@@ -54,6 +60,7 @@ const MAPPING: Record<string, LucideIcon> = {
   'chevron.right': ChevronRight,
   'chevron.left': ChevronLeft,
   'chevron.down': ChevronDown,
+  'chevron.up': ChevronUp,
   'calendar': Calendar,
   'chart.bar.fill': BarChart3,
   'person.fill': User,
@@ -90,6 +97,13 @@ const MAPPING: Record<string, LucideIcon> = {
   'stop': Square,
   'hourglass': Hourglass,
   'clock': Clock,
+  'sun.horizon.fill': Sunrise,
+  'cup.and.saucer.fill': Coffee,
+  'carrot.fill': Carrot,
+  'moon.fill': Moon,
+  'trash': Trash2,
+  'checkmark.circle.fill': CheckCircle,
+  'exclamationmark.triangle': AlertTriangle,
 };
 
 export type IconSymbolName = keyof typeof MAPPING;

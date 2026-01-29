@@ -1,41 +1,10 @@
-import { FoodProduct, MealType, UnitInfo } from '@/types/food';
-
 /**
  * Raw params from expo-router
  */
-export interface FoodDetailsRawParams {
-  entryId?: string;
-  initialAmount?: string;
-  initialMealType?: string;
-  initialUnitLabel?: string;
-  initialUnitGrams?: string;
-  initialUnitQuantity?: string;
-  barcode?: string;
-  item?: string;
-  date?: string;
-}
+import { FoodProduct, MealType, UnitInfo } from '@/types/food';
+import { FoodDetailsRawParams, FoodDetailsIntent, FoodDetailsMode } from '@/types/navigation';
 
-/**
- * Intent types for the food details screen
- */
-export type FoodDetailsMode = 'new' | 'edit' | 'barcode';
-
-/**
- * Parsed and normalized params for food details
- */
-export interface FoodDetailsIntent {
-  mode: FoodDetailsMode;
-  barcode?: string;
-  food?: FoodProduct;
-  entryId?: string;
-  date?: string;
-  initialValues: {
-    amount: number;
-    mealType?: MealType;
-    unit?: UnitInfo | null;
-    unitQuantity?: number;
-  };
-}
+export { FoodDetailsRawParams, FoodDetailsIntent, FoodDetailsMode };
 
 /**
  * Parse raw expo-router params into a normalized FoodDetailsIntent

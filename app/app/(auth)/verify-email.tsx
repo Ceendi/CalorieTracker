@@ -118,7 +118,7 @@ export default function VerifyEmailScreen() {
               disabled={isLoading}
             >
               <LinearGradient
-                colors={[Colors.light.tint, '#4338CA']}
+                colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
                 className="rounded-xl p-4 items-center"
               >
                {isLoading ? (

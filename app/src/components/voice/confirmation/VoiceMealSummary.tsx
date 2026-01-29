@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, Pressable, Keyboard, Platform } from 'rea
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 
 interface VoiceMealSummaryProps {
   totals: {
@@ -19,6 +21,8 @@ interface VoiceMealSummaryProps {
 
 export const VoiceMealSummary = ({ totals, onConfirm, onPressStats, isLoading, t }: VoiceMealSummaryProps) => {
     const insets = useSafeAreaInsets();
+    const { colorScheme } = useColorScheme();
+    const theme = colorScheme ?? 'light';
     
     return (
     <View 
@@ -50,16 +54,18 @@ export const VoiceMealSummary = ({ totals, onConfirm, onPressStats, isLoading, t
          </Pressable>
          
          <TouchableOpacity 
-            className={`px-6 py-3 rounded-xl flex-row items-center shadow-md ${
-                isLoading ? 'bg-indigo-400' : 'bg-indigo-600 shadow-indigo-200 dark:shadow-none'
-            }`}
+            className="px-6 py-3 rounded-xl flex-row items-center shadow-md bg-indigo-600 shadow-indigo-200 dark:shadow-none"
+            style={{ 
+                backgroundColor: isLoading ? Colors[theme].tabIconDefault : Colors[theme].tint,
+                opacity: isLoading ? 0.7 : 1
+            }}
             onPress={onConfirm}
             disabled={isLoading}
             activeOpacity={0.8}
           >
              <IconSymbol name={isLoading ? "clock" : "checkmark"} size={18} color="white" />
              <Text className="text-white font-bold text-sm ml-2">
-                {isLoading ? t('addFood.addingToDiary') || 'Dodawanie...' : 'Dodaj'}
+                {isLoading ? t('addFood.addingToDiary') : t('addFood.buttons.addToDiary')}
              </Text>
           </TouchableOpacity>
       </View>

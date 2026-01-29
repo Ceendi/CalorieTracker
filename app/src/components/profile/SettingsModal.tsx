@@ -63,7 +63,7 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
             onPress={onClose} 
             className="p-2 bg-muted/50 rounded-full absolute right-4"
           >
-            <IconSymbol name="xmark" size={20} color={colorScheme === 'dark' ? '#94a3b8' : '#6B7280'} />
+            <IconSymbol name="xmark" size={20} color={Colors[colorScheme ?? 'light'].text} />
           </TouchableOpacity>
         </View>
 
@@ -97,7 +97,7 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
               </View>
               <View className="flex-row items-center gap-2">
                 <Text className="text-muted-foreground">{language === 'en' ? 'English' : 'Polski'}</Text>
-                <IconSymbol name="chevron.right" size={16} color="#9CA3AF" />
+                <IconSymbol name="chevron.right" size={16} color={Colors[colorScheme ?? 'light'].text} />
               </View>
             </TouchableOpacity>
           </View>
@@ -119,7 +119,7 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
                     </View>
                     <Text className="text-base font-medium text-foreground">{t('settings.changePassword')}</Text>
                   </View>
-                  <IconSymbol name="chevron.right" size={16} color="#9CA3AF" />
+                  <IconSymbol name="chevron.right" size={16} color={Colors[colorScheme ?? 'light'].text} />
                 </TouchableOpacity>
 
               </View>

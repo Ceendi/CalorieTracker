@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Keyboard } from 'react-native';
-import { ProcessedMeal, ProcessedFoodItem } from '@/services/ai.service';
+import { ProcessedMeal, ProcessedFoodItem } from '@/types/ai';
 import { FoodProduct } from '@/types/food';
 import { summarizeMealMacros } from '@/utils/calculations';
 

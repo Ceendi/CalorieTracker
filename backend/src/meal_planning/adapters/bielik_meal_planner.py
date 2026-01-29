@@ -8,7 +8,7 @@ Uses lazy loading and singleton pattern via SLMLoader.
 import asyncio
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
 from loguru import logger
@@ -31,6 +31,8 @@ from src.meal_planning.config import (
     MAX_PRODUCTS_IN_PROMPT,
     MAX_USED_INGREDIENTS_IN_PROMPT,
 )
+from src.ai.infrastructure.embedding.embedding_service import EmbeddingService
+import numpy as np
 
 
 class BielikMealPlannerAdapter(MealPlannerPort):
@@ -53,6 +55,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
     def __init__(self) -> None:
         """Initialize adapter with lazy model loading."""
         self._model: Any = None
+        self._embedding_service = EmbeddingService()
 
     def _get_model(self) -> Any:
         """
@@ -74,7 +77,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         """
         Build prompt in Bielik instruction format.
 
-        Uses Llama 2 style: <s>[INST] system + user [/INST]
+        Uses Llama 2 style: [INST] system + user [/INST]
+        Note: Removed explicit <s> as it's often added by the tokenizer/server.
 
         Args:
             system: System prompt with instructions
@@ -83,7 +87,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         Returns:
             Formatted prompt string
         """
-        return f"<s>[INST] {system}\n\n{user} [/INST]"
+        return f"[INST] {system}\n\n{user} [/INST]"
 
     async def generate_meal_templates(
         self,
@@ -142,6 +146,9 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         """
         Generate a single meal with ingredients from available products.
 
+        Uses indexed product format where LLM selects by number [1-50].
+        This ensures 100% of ingredients are matched to database products.
+
         Args:
             template: Meal template to fill with ingredients
             profile: User profile for preferences
@@ -153,15 +160,9 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         """
         model = self._get_model()
 
-        # Format products list (limit to context size)
+        # Format products as indexed list (limit to context size)
         products_limited = available_products[:MAX_PRODUCTS_IN_PROMPT]
-        products_text = "\n".join([
-            f"- {p['name']}: {p.get('kcal_per_100g', 0):.0f} kcal/100g, "
-            f"B:{p.get('protein_per_100g', 0):.1f}g, "
-            f"T:{p.get('fat_per_100g', 0):.1f}g, "
-            f"W:{p.get('carbs_per_100g', 0):.1f}g"
-            for p in products_limited
-        ])
+        products_text, index_map = self._format_products_indexed(products_limited)
 
         # Format used ingredients (limit for context)
         used_limited = used_ingredients[-MAX_USED_INGREDIENTS_IN_PROMPT:]
@@ -181,19 +182,33 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         logger.debug(f"Meal generation prompt length: {len(full_prompt)}")
 
-        # Call model in thread pool
-        response = await asyncio.to_thread(
-            model,
-            full_prompt,
-            max_tokens=MAX_TOKENS_MEAL,
-            temperature=TEMPERATURE,
-            stop=["</s>", "[INST]"],
-        )
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # Call model in thread pool
+                response = await asyncio.to_thread(
+                    model,
+                    full_prompt,
+                    max_tokens=MAX_TOKENS_MEAL,
+                    temperature=TEMPERATURE + (attempt * 0.1),  # Increase temp slightly on retry
+                    stop=["</s>", "[INST]"],
+                )
 
-        response_text = response["choices"][0]["text"]
-        logger.debug(f"Meal generation response: {response_text[:300]}...")
+                response_text = response["choices"][0]["text"]
+                logger.debug(f"Meal generation response (attempt {attempt+1}): {response_text[:300]}...")
 
-        return self._parse_meal(response_text, template, available_products)
+                if not response_text.strip():
+                    raise ValueError("Empty response from LLM")
+
+                return self._parse_meal_indexed(response_text, template, index_map)
+
+            except Exception as e:
+                logger.warning(f"Meal generation failed (attempt {attempt+1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                    logger.error("Max retries reached, returning fallback meal")
+                    return self._generate_fallback_meal(template, available_products)
+
+        return self._generate_fallback_meal(template, available_products)
 
     async def optimize_plan(
         self,
@@ -223,7 +238,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 # Only adjust if significantly off (>10%)
                 if abs(ratio - 1.0) > 0.1:
                     # Limit scaling to reasonable range
-                    scale = min(max(ratio, 0.85), 1.15)
+                    # Increased upper limit to 3.0 to handle cases where initial plan is much lower
+                    scale = min(max(ratio, 0.85), 3.0)
 
                     logger.debug(
                         f"Day {day.day_number}: scaling by {scale:.2f} "
@@ -244,6 +260,38 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                         meal.total_carbs *= scale
 
         return days
+
+    def _format_products_indexed(self, products: List[dict]) -> Tuple[str, Dict[int, dict]]:
+        """
+        Format products as indexed list for LLM selection.
+
+        Each product gets a unique index that the LLM will use to reference it.
+        This eliminates name matching issues completely.
+
+        Format: [1] Name | 165 kcal | B:25g T:3g W:0g
+
+        Args:
+            products: List of product dicts from RAG search
+
+        Returns:
+            Tuple of (formatted_text, index_to_product_map)
+        """
+        index_map: Dict[int, dict] = {}
+        lines = []
+
+        for idx, p in enumerate(products, start=1):
+            index_map[idx] = p
+            kcal = p.get("kcal_per_100g", 0)
+            protein = p.get("protein_per_100g", 0)
+            fat = p.get("fat_per_100g", 0)
+            carbs = p.get("carbs_per_100g", 0)
+
+            lines.append(
+                f"[{idx}] {p['name']} | {kcal:.0f} kcal | "
+                f"B:{protein:.0f}g T:{fat:.0f}g W:{carbs:.0f}g"
+            )
+
+        return "\n".join(lines), index_map
 
     def _format_preferences(self, preferences: dict) -> str:
         """
@@ -281,6 +329,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         Extract JSON from LLM response.
 
         Handles both code-block wrapped JSON and raw JSON.
+        Attempts to clean common JSON errors and isolate the valid JSON object.
 
         Args:
             text: Raw LLM response text
@@ -291,17 +340,50 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         Raises:
             ValueError: If no valid JSON found
         """
-        # Try code block first (```json ... ``` or ``` ... ```)
+        text = text.strip()
+        
+        # 1. Try to extract from code block
         match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
         if match:
-            return match.group(1)
+            text = match.group(1)
+        
+        # 2. Find the first '{'
+        start_idx = text.find('{')
+        if start_idx == -1:
+            raise ValueError("No JSON object found (no opening brace)")
+            
+        # 3. Find the matching closing '}'
+        # We count braces to handle nested objects correctly
+        count = 0
+        end_idx = -1
+        
+        for i, char in enumerate(text[start_idx:], start=start_idx):
+            if char == '{':
+                count += 1
+            elif char == '}':
+                count -= 1
+                if count == 0:
+                    end_idx = i
+                    break
+        
+        if end_idx == -1:
+             # If exact matching failed, try the last '}' in text
+             # This is a fallback for malformed JSON
+             end_idx = text.rfind('}')
+             if end_idx < start_idx:
+                 raise ValueError("No JSON object found (no closing brace)")
 
-        # Try raw JSON object
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return match.group(0)
+        json_str = text[start_idx : end_idx + 1]
 
-        raise ValueError(f"No JSON found in response: {text[:200]}...")
+        # Clean up common errors
+        # 1. Remove comments // ...
+        json_str = re.sub(r'//.*$', '', json_str, flags=re.MULTILINE)
+        
+        # 2. Fix trailing commas (e.g. "a": 1, } -> "a": 1 })
+        # Matches a comma followed by whitespace and a closing brace/bracket
+        json_str = re.sub(r',(\s*[\}\]])', r'\1', json_str)
+        
+        return json_str
 
     def _parse_templates(
         self,
@@ -402,33 +484,35 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             ))
         return templates
 
-    def _parse_meal(
+    def _parse_meal_indexed(
         self,
         response: str,
         template: MealTemplate,
-        available_products: List[dict]
+        index_map: Dict[int, dict]
     ) -> GeneratedMeal:
         """
-        Parse LLM response into a meal with ingredients.
+        Parse LLM response using indexed product references.
+
+        The LLM responds with {"idx": 1, "grams": 150} format, which we map
+        directly to products via the index_map. This ensures 100% of
+        ingredients are matched to database products.
 
         Args:
             response: Raw LLM response
             template: Original meal template
-            available_products: Available products for matching
+            index_map: Mapping of index -> product dict from _format_products_indexed
 
         Returns:
-            Generated meal with ingredients
+            Generated meal with ingredients (all with valid food_id)
         """
         try:
             json_str = self._extract_json(response)
             data = json.loads(json_str)
         except (ValueError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to parse meal JSON: {e}")
-            # Return a minimal meal as fallback
-            return self._generate_fallback_meal(template)
-
-        # Build product lookup (lowercase name -> product dict)
-        product_lookup = {p["name"].lower(): p for p in available_products}
+            # Convert index_map values to list for fallback
+            available_products = list(index_map.values())
+            return self._generate_fallback_meal(template, available_products)
 
         ingredients: List[GeneratedIngredient] = []
         total_kcal = 0.0
@@ -437,46 +521,170 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         total_carbs = 0.0
 
         for ing_data in data.get("ingredients", []):
-            name = ing_data.get("name", "Skladnik")
-            # Safe conversion - LLM sometimes returns text like "kilka kropli"
-            raw_amount = ing_data.get("amount_grams", 100)
+            # Get index (support both "idx" and "index")
+            idx = ing_data.get("idx") or ing_data.get("index")
+            if idx is None:
+                logger.warning(f"Ingredient missing idx: {ing_data}")
+                continue
+
             try:
-                amount = float(raw_amount) if raw_amount else 100.0
+                idx = int(idx)
             except (ValueError, TypeError):
-                logger.debug(f"Non-numeric amount '{raw_amount}' for {name}, using 10g")
-                amount = 10.0  # Small default for spices/seasonings
+                logger.warning(f"Invalid idx value: {idx}")
+                continue
 
-            # Find matching product
-            product = self._find_product(name, product_lookup)
+            # Look up product by index
+            product = index_map.get(idx)
+            if not product:
+                logger.warning(f"Invalid product index {idx}, skipping")
+                continue
 
-            if product:
-                factor = amount / 100.0
-                kcal = product.get("kcal_per_100g", 0) * factor
-                protein = product.get("protein_per_100g", 0) * factor
-                fat = product.get("fat_per_100g", 0) * factor
-                carbs = product.get("carbs_per_100g", 0) * factor
-                food_id = product.get("id")
+            # Parse grams (support "grams", "amount_grams", "amount")
+            raw_grams = (
+                ing_data.get("grams")
+                or ing_data.get("amount_grams")
+                or ing_data.get("amount")
+            )
+            try:
+                if isinstance(raw_grams, str):
+                    clean_grams = re.sub(r"[^\d.]", "", raw_grams)
+                    grams = float(clean_grams) if clean_grams else 100.0
+                else:
+                    grams = float(raw_grams) if raw_grams is not None else 100.0
+            except (ValueError, TypeError):
+                grams = 100.0
 
-                # Convert string UUID to UUID object if needed
-                if food_id and isinstance(food_id, str):
-                    try:
-                        food_id = UUID(food_id)
-                    except ValueError:
-                        food_id = None
-            else:
-                # Fallback estimates when product not found
-                logger.debug(f"Product not found: {name}, using estimates")
-                kcal = amount * 1.2
-                protein = amount * 0.08
-                fat = amount * 0.05
-                carbs = amount * 0.15
-                food_id = None
+            # Clamp to reasonable range
+            grams = max(5.0, min(grams, 1000.0))
+
+            # Calculate nutrition from database values (not estimates!)
+            factor = grams / 100.0
+            kcal = product.get("kcal_per_100g", 0) * factor
+            protein = product.get("protein_per_100g", 0) * factor
+            fat = product.get("fat_per_100g", 0) * factor
+            carbs = product.get("carbs_per_100g", 0) * factor
+
+            # Get food_id (guaranteed to exist since product is from DB)
+            food_id = product.get("id")
+            if food_id and isinstance(food_id, str):
+                try:
+                    food_id = UUID(food_id)
+                except ValueError:
+                    food_id = None
 
             ingredient = GeneratedIngredient(
                 food_id=food_id,
-                name=name,
-                amount_grams=round(amount, 1),
-                unit_label=ing_data.get("unit_label"),
+                name=product["name"],  # Use exact name from database
+                amount_grams=round(grams, 1),
+                unit_label=None,
+                kcal=round(kcal, 1),
+                protein=round(protein, 1),
+                fat=round(fat, 1),
+                carbs=round(carbs, 1),
+            )
+            ingredients.append(ingredient)
+
+            total_kcal += kcal
+            total_protein += protein
+            total_fat += fat
+            total_carbs += carbs
+
+        # If no valid ingredients, use fallback
+        if not ingredients:
+            logger.warning("No valid ingredients parsed, using fallback")
+            available_products = list(index_map.values())
+            return self._generate_fallback_meal(template, available_products)
+
+        return GeneratedMeal(
+            meal_type=template.meal_type,
+            name=data.get("name", template.description),
+            description=data.get("description", ""),
+            preparation_time_minutes=data.get("preparation_time", 20),
+            ingredients=ingredients,
+            total_kcal=round(total_kcal, 1),
+            total_protein=round(total_protein, 1),
+            total_fat=round(total_fat, 1),
+            total_carbs=round(total_carbs, 1),
+        )
+
+    def _generate_fallback_meal(
+        self,
+        template: MealTemplate,
+        available_products: Optional[List[dict]] = None
+    ) -> GeneratedMeal:
+        """
+        Generate a minimal fallback meal when parsing fails.
+
+        Args:
+            template: Original meal template
+
+        Returns:
+            Basic generated meal with real ingredients from database
+        """
+        # If no products available, return minimal fallback
+        if not available_products:
+            logger.warning("No products available for fallback meal")
+            return GeneratedMeal(
+                meal_type=template.meal_type,
+                name=template.description,
+                description="Posilek wygenerowany automatycznie (brak produktow)",
+                preparation_time_minutes=15,
+                ingredients=[],
+                total_kcal=template.target_kcal,
+                total_protein=template.target_protein,
+                total_fat=template.target_fat,
+                total_carbs=template.target_carbs,
+            )
+
+        # Sort products by calorie content (higher first for easier portion calculation)
+        sorted_products = sorted(
+            available_products,
+            key=lambda p: p.get("kcal_per_100g", 0),
+            reverse=True
+        )
+
+        # Select top 3-4 products
+        selected = sorted_products[:min(4, len(sorted_products))]
+
+        # Calculate grams for each product to hit target kcal
+        # Distribute calories roughly equally among selected products
+        target_per_ingredient = template.target_kcal / len(selected)
+
+        ingredients: List[GeneratedIngredient] = []
+        total_kcal = 0.0
+        total_protein = 0.0
+        total_fat = 0.0
+        total_carbs = 0.0
+
+        for product in selected:
+            kcal_per_100g = product.get("kcal_per_100g", 100)
+            if kcal_per_100g <= 0:
+                kcal_per_100g = 100  # Fallback to avoid division by zero
+
+            # Calculate grams to hit target calories for this ingredient
+            grams = (target_per_ingredient / kcal_per_100g) * 100
+            # Clamp to reasonable range
+            grams = max(30.0, min(grams, 300.0))
+
+            factor = grams / 100.0
+            kcal = kcal_per_100g * factor
+            protein = product.get("protein_per_100g", 0) * factor
+            fat = product.get("fat_per_100g", 0) * factor
+            carbs = product.get("carbs_per_100g", 0) * factor
+
+            # Get food_id
+            food_id = product.get("id")
+            if food_id and isinstance(food_id, str):
+                try:
+                    food_id = UUID(food_id)
+                except ValueError:
+                    food_id = None
+
+            ingredient = GeneratedIngredient(
+                food_id=food_id,
+                name=product["name"],
+                amount_grams=round(grams, 1),
+                unit_label=None,
                 kcal=round(kcal, 1),
                 protein=round(protein, 1),
                 fat=round(fat, 1),
@@ -491,72 +699,12 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         return GeneratedMeal(
             meal_type=template.meal_type,
-            name=data.get("name", template.description),
-            description=data.get("description", ""),
-            preparation_time_minutes=data.get("preparation_time", 20),
+            name=template.description,
+            description="Posilek wygenerowany automatycznie",
+            preparation_time_minutes=15,
             ingredients=ingredients,
             total_kcal=round(total_kcal, 1),
             total_protein=round(total_protein, 1),
             total_fat=round(total_fat, 1),
             total_carbs=round(total_carbs, 1),
-        )
-
-    def _find_product(
-        self,
-        name: str,
-        lookup: Dict[str, dict]
-    ) -> Optional[dict]:
-        """
-        Find product by name with fuzzy matching.
-
-        First tries exact match, then partial match.
-
-        Args:
-            name: Ingredient name from LLM
-            lookup: Dict of lowercase product names to product dicts
-
-        Returns:
-            Product dict or None if not found
-        """
-        name_lower = name.lower()
-
-        # Exact match
-        if name_lower in lookup:
-            return lookup[name_lower]
-
-        # Partial match (name contains product name or vice versa)
-        for product_name, product in lookup.items():
-            if name_lower in product_name or product_name in name_lower:
-                return product
-
-        # Word-based partial match
-        name_words = set(name_lower.split())
-        for product_name, product in lookup.items():
-            product_words = set(product_name.split())
-            # If any significant word matches
-            if name_words & product_words:
-                return product
-
-        return None
-
-    def _generate_fallback_meal(self, template: MealTemplate) -> GeneratedMeal:
-        """
-        Generate a minimal fallback meal when parsing fails.
-
-        Args:
-            template: Original meal template
-
-        Returns:
-            Basic generated meal
-        """
-        return GeneratedMeal(
-            meal_type=template.meal_type,
-            name=template.description,
-            description="Posilek wygenerowany automatycznie",
-            preparation_time_minutes=15,
-            ingredients=[],
-            total_kcal=0.0,
-            total_protein=0.0,
-            total_fat=0.0,
-            total_carbs=0.0,
         )

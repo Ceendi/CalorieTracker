@@ -24,6 +24,7 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "llama-cpp-python>=0.3.16",
     "numba>=0.60.0",
+    "pgvector>=0.3.6",
 ]
 
 [[tool.uv.index]]
@@ -52,5 +53,10 @@ torchaudio = [
 llama-cpp-python = [
   { path = "local_wheels/llama_cpp_python-0.3.16-cp313-cp313-win_amd64.whl", marker = "sys_platform == 'win32'" },
   { index = "pypi", marker = "sys_platform != 'win32'" }
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]
 

@@ -118,7 +118,7 @@ export default function PlanDetailsScreen() {
               <IconSymbol
                 name={isExpanded ? 'chevron.up' : 'chevron.down'}
                 size={16}
-                color={Colors[colorScheme ?? 'light'].muted}
+                color={Colors[colorScheme ?? 'light'].mutedForeground}
               />
             </View>
           </View>
@@ -151,7 +151,7 @@ export default function PlanDetailsScreen() {
             {/* Preparation time */}
             {meal.preparation_time_minutes && (
               <View className="flex-row items-center gap-2 mb-3">
-                <IconSymbol name="clock" size={14} color={Colors[colorScheme ?? 'light'].muted} />
+                <IconSymbol name="clock" size={14} color={Colors[colorScheme ?? 'light'].mutedForeground} />
                 <Text className="text-muted-foreground text-sm">
                   {t('mealPlan.details.prepTime')}: {meal.preparation_time_minutes} {t('mealPlan.details.minutes')}
                 </Text>
@@ -224,7 +224,7 @@ export default function PlanDetailsScreen() {
             <IconSymbol
               name={isExpanded ? 'chevron.up' : 'chevron.down'}
               size={20}
-              color={Colors[colorScheme ?? 'light'].muted}
+              color={Colors[colorScheme ?? 'light'].mutedForeground}
             />
           </View>
         </TouchableOpacity>

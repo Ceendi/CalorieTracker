@@ -50,47 +50,24 @@ export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
       <TouchableOpacity
         onPress={() => onSelectDate(item)}
         activeOpacity={0.7}
-        style={{ 
-            width: ITEM_WIDTH, 
-            height: 80,
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: isSelected ? 10 : 1,
-        }}
+        style={{ width: ITEM_WIDTH }}
+        className={`h-20 items-center justify-center ${isSelected ? 'z-10' : 'z-0'}`}
       >
-        <View style={{
-            width: ITEM_WIDTH - 6, 
-            height: 70, 
-            borderRadius: 18,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: isSelected ? Colors.light.tint : 'transparent',
-            ...(isSelected ? {
-                shadowColor: '#312E81', 
-                shadowOffset: { width: 0, height: 4 }, 
-                shadowOpacity: 0.3, 
-                shadowRadius: 5, 
-                elevation: 6
-            } : {})
-        }}>
-            <Text style={{
-                fontSize: 11,
-                fontWeight: '700',
-                marginBottom: 2,
-                textTransform: 'uppercase',
-                color: isSelected ? '#E0E7FF' : '#9CA3AF'
-            }}>
+        <View 
+            style={{ 
+                width: ITEM_WIDTH - 6,
+                backgroundColor: isSelected ? Colors[colorScheme ?? 'light'].tint : 'transparent'
+            }}
+            className={`h-[70px] rounded-2xl items-center justify-center ${isSelected ? 'shadow-md shadow-indigo-900/30' : ''}`}
+        >
+            <Text className={`text-[11px] font-bold mb-0.5 uppercase ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>
                 {format(item, 'EEE', { locale })}
             </Text>
-            <Text style={{
-                fontSize: 20, 
-                fontWeight: '800', 
-                color: isSelected ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#020617') // Matches --foreground
-            }}>
+            <Text className={`text-xl font-extrabold ${isSelected ? 'text-white' : 'text-foreground'}`}>
                 {format(item, 'd')}
             </Text>
             {isToday && !isSelected && (
-                <View style={{ width: 4, height: 4, borderRadius: 2, marginTop: 4, backgroundColor: '#6366F1' }} />
+                <View className="w-1 h-1 rounded-full mt-1" style={{ backgroundColor: Colors[colorScheme ?? 'light'].tint }} />
             )}
         </View>
       </TouchableOpacity>

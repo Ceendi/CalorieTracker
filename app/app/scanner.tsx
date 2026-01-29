@@ -18,7 +18,7 @@ export default function ScannerScreen() {
   if (!permission) {
     return (
         <View className="flex-1 justify-center items-center bg-background">
-            <ActivityIndicator size="large" color={Colors.light.tint} />
+            <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
         </View>
     );
   }

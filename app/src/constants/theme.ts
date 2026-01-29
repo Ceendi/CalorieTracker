@@ -17,6 +17,8 @@ export const Colors = {
     text: '#020617', // foreground
     background: '#f8fafc',
     tint: tintColorLight,
+    primary: '#4f46e5',
+    primaryDark: '#4338CA', // Indigo-700 for gradients
     icon: '#64748b', // muted-foreground
     tabIconDefault: '#64748b',
     tabIconSelected: tintColorLight,
@@ -29,11 +31,21 @@ export const Colors = {
     error: '#ef4444', // red-500
     warning: '#f59e0b', // amber-500
     success: '#10b981', // emerald-500
+    charts: {
+        protein: '#8B5CF6', // violet-500
+        carbs: '#3B82F6', // blue-500
+        fat: '#F97316', // orange-500
+        proteinBg: '#F3E8FF', // violet-100
+        carbsBg: '#DBEAFE', // blue-100
+        fatBg: '#FFEDD5', // orange-100
+    }
   },
   dark: {
     text: '#f8fafc', // foreground
     background: '#0f172a',
     tint: tintColorDark,
+    primary: '#4f46e5',
+    primaryDark: '#4338CA', // Indigo-700
     icon: '#94a3b8', // muted-foreground
     tabIconDefault: '#94a3b8',
     tabIconSelected: tintColorDark,
@@ -46,6 +58,14 @@ export const Colors = {
     error: '#ef4444', // red-500
     warning: '#f59e0b', // amber-500
     success: '#10b981', // emerald-500
+    charts: {
+        protein: '#8B5CF6', // violet-500
+        carbs: '#3B82F6', // blue-500
+        fat: '#F97316', // orange-500
+        proteinBg: '#2e1065', // violet-950
+        carbsBg: '#172554', // blue-950
+        fatBg: '#431407', // orange-950
+    }
   },
 };
 

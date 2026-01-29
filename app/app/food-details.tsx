@@ -5,6 +5,7 @@ import { useFoodBarcode } from '@/hooks/useFood';
 import { foodService } from '@/services/food.service';
 import { FoodProduct } from '@/types/food';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
@@ -30,6 +31,7 @@ export default function FoodDetailsScreen() {
 
   const router = useRouter();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
   
   const [food, setFood] = useState<FoodProduct | null>(null);
 
@@ -85,7 +87,7 @@ export default function FoodDetailsScreen() {
     return (
       <View className="flex-1 justify-center items-center bg-background">
         <Stack.Screen options={{ title: t('foodDetails.loading'), headerBackTitle: t('settings.cancel') }} />
-        <ActivityIndicator size="large" color={Colors.light.tint} />
+        <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
       </View>
     );
   }
@@ -121,7 +123,7 @@ export default function FoodDetailsScreen() {
                          {food.name}
                          {food.source === 'fineli' && (
                              <Text style={{ lineHeight: 32 }}>
-                               {' '}<IconSymbol name="checkmark.seal.fill" size={20} color="#6366f1" />
+                               {' '}<IconSymbol name="checkmark.seal.fill" size={20} color={Colors[colorScheme ?? 'light'].primary} />
                              </Text>
                          )}
                      </Text>

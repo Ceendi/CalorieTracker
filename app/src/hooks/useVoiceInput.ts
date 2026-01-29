@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useAudioRecorder } from './useAudioRecorder';
 import { useLanguage } from './useLanguage';
-import { aiService, ProcessedMeal, ProcessedFoodItem } from '@/services/ai.service';
+import { aiService } from '@/services/ai.service';
+import { ProcessedMeal, ProcessedFoodItem } from '@/types/ai';
 
 export type VoiceInputState = 
   | 'idle'

@@ -64,19 +64,9 @@ export const createResetPasswordSchema = (t: (key: string) => string) => z.objec
   path: ["confirmPassword"],
 });
 
-export interface User {
-  id: string;
-  email: string;
-  is_active: boolean;
-  is_verified: boolean;
-  is_onboarded?: boolean;
-  age?: number;
-  gender?: string;
-  height?: number;
-  weight?: number;
-  goal?: string;
-  activity_level?: string;
-}
+import { User } from '@/types/user';
+
+export { User };
 
 export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
 export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;

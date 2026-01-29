@@ -4,9 +4,9 @@ Service layer for meal planning module.
 Contains business logic for meal plan generation and management,
 including BMR/CPM calculations and macro targets.
 """
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import date
-from typing import Any, Callable, Awaitable, List, Optional
+from typing import Any, Callable, Awaitable, Dict, List, Optional
 from uuid import UUID
 
 from loguru import logger
@@ -444,13 +444,6 @@ class MealPlanService:
 
         optimized = await self._planner.optimize_plan(generated_days, profile)
 
-        if progress_callback:
-            await progress_callback({
-                "stage": "complete",
-                "progress": 100,
-                "message": "Plan gotowy"
-            })
-
         # Build preferences dict for storage
         preferences_dict = {
             "diet": preferences.diet,
@@ -460,7 +453,8 @@ class MealPlanService:
             "max_preparation_time": preferences.max_preparation_time,
         }
 
-        return GeneratedPlan(
+        # Build the plan
+        generated_plan = GeneratedPlan(
             days=optimized,
             preferences_applied=preferences_dict,
             generation_metadata={
@@ -474,6 +468,25 @@ class MealPlanService:
                 "start_date": str(start_date),
             }
         )
+
+        # Validate plan quality
+        validation = self.validate_plan_quality(generated_plan, profile.daily_kcal)
+        generated_plan.generation_metadata["quality_validation"] = validation
+
+        logger.info(
+            f"Plan quality: {validation['food_id_percentage']:.1f}% ingredients matched, "
+            f"{len(validation['empty_meals'])} empty meals, "
+            f"{len(validation['calorie_deviation_days'])} days with calorie deviation"
+        )
+
+        if progress_callback:
+            await progress_callback({
+                "stage": "complete",
+                "progress": 100,
+                "message": "Plan gotowy"
+            })
+
+        return generated_plan
 
     async def _search_products_for_meal(
         self,
@@ -597,10 +610,94 @@ class MealPlanService:
             name=meal.name,
             description=meal.description,
             preparation_time_minutes=meal.preparation_time_minutes,
-            instructions=meal.instructions,
             ingredients=enriched_ingredients,
             total_kcal=round(total_kcal, 1),
             total_protein=round(total_protein, 1),
             total_fat=round(total_fat, 1),
             total_carbs=round(total_carbs, 1),
         )
+
+    def validate_plan_quality(
+        self,
+        plan: GeneratedPlan,
+        daily_target_kcal: int
+    ) -> Dict[str, Any]:
+        """
+        Validate the quality of a generated meal plan.
+
+        Checks:
+        - Percentage of ingredients with valid food_id (should be 100%)
+        - Daily calorie deviation from target (should be 80-120%)
+        - Empty meals (meals with no ingredients)
+
+        Args:
+            plan: Generated plan to validate
+            daily_target_kcal: Target daily calories
+
+        Returns:
+            Dict with validation results:
+            - food_id_percentage: float (0-100)
+            - calorie_deviation_days: List of day numbers with deviation outside 80-120%
+            - empty_meals: List of (day_number, meal_type) tuples
+            - issues: List of human-readable issue strings
+            - is_valid: bool (True if no critical issues)
+        """
+        total_ingredients = 0
+        ingredients_with_food_id = 0
+        calorie_deviation_days: List[int] = []
+        empty_meals: List[tuple] = []
+        issues: List[str] = []
+
+        for day in plan.days:
+            day_kcal = day.total_kcal
+
+            # Check calorie deviation (80-120% of target)
+            if daily_target_kcal > 0:
+                deviation = day_kcal / daily_target_kcal
+                if deviation < 0.8 or deviation > 1.2:
+                    calorie_deviation_days.append(day.day_number)
+                    issues.append(
+                        f"Dzien {day.day_number}: {day_kcal:.0f} kcal "
+                        f"({deviation*100:.0f}% celu {daily_target_kcal} kcal)"
+                    )
+
+            for meal in day.meals:
+                # Check for empty meals
+                if not meal.ingredients:
+                    empty_meals.append((day.day_number, meal.meal_type))
+                    issues.append(
+                        f"Dzien {day.day_number}, {meal.meal_type}: brak skladnikow"
+                    )
+
+                # Count ingredients with/without food_id
+                for ing in meal.ingredients:
+                    total_ingredients += 1
+                    if ing.food_id is not None:
+                        ingredients_with_food_id += 1
+                    else:
+                        issues.append(
+                            f"Dzien {day.day_number}, {meal.meal_type}: "
+                            f"'{ing.name}' bez food_id"
+                        )
+
+        # Calculate food_id percentage
+        food_id_percentage = 0.0
+        if total_ingredients > 0:
+            food_id_percentage = (ingredients_with_food_id / total_ingredients) * 100
+
+        # Determine if plan is valid (no critical issues)
+        is_valid = (
+            food_id_percentage >= 90.0  # At least 90% matched
+            and len(empty_meals) == 0  # No empty meals
+            and len(calorie_deviation_days) <= len(plan.days) // 2  # Max half days off
+        )
+
+        return {
+            "food_id_percentage": round(food_id_percentage, 1),
+            "calorie_deviation_days": calorie_deviation_days,
+            "empty_meals": empty_meals,
+            "issues": issues,
+            "is_valid": is_valid,
+            "total_ingredients": total_ingredients,
+            "ingredients_with_food_id": ingredients_with_food_id,
+        }

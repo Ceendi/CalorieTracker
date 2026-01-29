@@ -9,8 +9,7 @@ import { authService } from '@/services/auth.service';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/hooks/useLanguage';
-// import { IconSymbol } from '@/components/ui/IconSymbol';
-// import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
 export default function ResetPasswordScreen() {
@@ -18,7 +17,7 @@ export default function ResetPasswordScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
-  // const { colorScheme } = useColorScheme();
+  const { colorScheme } = useColorScheme();
   
   const [isLoading, setIsLoading] = useState(false);
 
@@ -107,7 +106,7 @@ export default function ResetPasswordScreen() {
               disabled={isLoading}
             >
               <LinearGradient
-                colors={[Colors.light.tint, '#4338CA']}
+                colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
                 className="rounded-xl p-4 items-center"
               >
                {isLoading ? (

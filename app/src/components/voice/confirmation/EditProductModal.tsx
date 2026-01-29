@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import * as Haptics from 'expo-haptics';
-import { ProcessedFoodItem } from '@/services/ai.service';
+import { ProcessedFoodItem } from '@/types/ai';
 import { calculateItemMacros } from '@/utils/calculations';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 
 interface EditProductModalProps {
   visible: boolean;
@@ -32,6 +34,8 @@ export function EditProductModal({
 }: EditProductModalProps) {
   const [quantity, setQuantity] = useState('');
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
 
   useEffect(() => {
     if (item && visible) {
@@ -180,7 +184,7 @@ export function EditProductModal({
                       onPress={handleDecrement}
                       className="w-14 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl items-center justify-center border border-border"
                     >
-                      <IconSymbol name="minus" size={24} color="#6366f1" />
+                      <IconSymbol name="minus" size={24} color={Colors[theme].tint} />
                     </TouchableOpacity>
 
                     <View className="flex-1 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl border border-border px-4 justify-center">
@@ -191,7 +195,7 @@ export function EditProductModal({
                         keyboardType="decimal-pad"
                         selectTextOnFocus
                         placeholder="0"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={Colors[theme].placeholder}
                       />
                     </View>
 
@@ -199,14 +203,14 @@ export function EditProductModal({
                       onPress={handleIncrement}
                       className="w-14 h-14 bg-secondary/50 dark:bg-black/20 rounded-xl items-center justify-center border border-border"
                     >
-                      <IconSymbol name="plus" size={24} color="#6366f1" />
+                      <IconSymbol name="plus" size={24} color={Colors[theme].tint} />
                     </TouchableOpacity>
                   </View>
                 </View>
 
                 <View className="mb-8">
                   <Text className="text-sm font-bold text-muted-foreground mb-3 ml-1">
-                    {t('foodDetails.unit') || 'Jednostka'}
+                    {t('foodDetails.unit')}
                   </Text>
                   <ScrollView 
                       horizontal 
@@ -248,7 +252,7 @@ export function EditProductModal({
                 <View className="flex-row items-center justify-between gap-4 mt-2">
                      <View>
                         <Text className="text-xs font-bold text-muted-foreground uppercase mb-0.5">
-                          {t('addFood.summary.total') || 'Razem'}
+                          {t('addFood.summary.total')}
                         </Text>
                         <View className="flex-row items-baseline gap-1">
                             <Text className="text-3xl font-black text-indigo-600">{calculatedValues.kcal}</Text>

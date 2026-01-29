@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { MealType, MealEntry } from '@/types/food';
 import { FoodEntryItem } from './FoodEntryItem';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/theme';
 
@@ -16,6 +17,7 @@ interface MealSectionProps {
 
 export function MealSection({ type, entries, onAdd, onDeleteEntry, onEditEntry }: MealSectionProps) {
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
   
   const totalCalories = entries.reduce((sum, e) => sum + e.calories, 0);
 
@@ -43,7 +45,7 @@ export function MealSection({ type, entries, onAdd, onDeleteEntry, onEditEntry }
         onPress={() => onAdd(type)}
         className="flex-row items-center py-2"
       >
-        <IconSymbol name="plus.circle.fill" size={20} color={Colors.light.tint} />
+        <IconSymbol name="plus.circle.fill" size={20} color={Colors[colorScheme ?? 'light'].tint} />
         <Text className="text-primary font-medium ml-2">{t('dashboard.quickAdd')}</Text>
       </TouchableOpacity>
     </View>

@@ -44,7 +44,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
             {item.name}
             {item.source === 'fineli' && (
               <Text style={{ lineHeight: 22 }}>
-                {' '}<IconSymbol name="checkmark.seal.fill" size={16} color="#6366f1" />
+                {' '}<IconSymbol name="checkmark.seal.fill" size={16} color={tintColor} />
               </Text>
             )}
           </Text>
@@ -71,7 +71,8 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
       <View className="flex-row items-center bg-card rounded-xl px-4 border border-border shadow-sm mb-4 h-14">
         <IconSymbol name="magnifyingglass" size={20} color={iconColor} />
         <TextInput
-          className="flex-1 ml-3 text-foreground text-base h-full py-0"
+          className="flex-1 ml-3 text-foreground h-full py-0"
+          style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
           placeholder={t('addFood.searchPlaceholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}

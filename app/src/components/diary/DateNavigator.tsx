@@ -4,6 +4,8 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { format, addDays, subDays } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 
 interface DateNavigatorProps {
   date: Date;
@@ -12,6 +14,8 @@ interface DateNavigatorProps {
 
 export function DateNavigator({ date, onDateChange }: DateNavigatorProps) {
   const { language } = useLanguage();
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
   const locale = language === 'pl' ? pl : enUS;
 
   const handlePrev = () => onDateChange(subDays(date, 1));
@@ -22,7 +26,7 @@ export function DateNavigator({ date, onDateChange }: DateNavigatorProps) {
   return (
     <View className="flex-row items-center justify-between mb-6">
       <TouchableOpacity onPress={handlePrev} className="p-2 rounded-full bg-secondary">
-        <IconSymbol name="chevron.left" size={20} color="#6B7280" />
+        <IconSymbol name="chevron.left" size={20} color={Colors[theme].text} />
       </TouchableOpacity>
       
       <View className="items-center">
@@ -32,7 +36,7 @@ export function DateNavigator({ date, onDateChange }: DateNavigatorProps) {
       </View>
 
       <TouchableOpacity onPress={handleNext} className="p-2 rounded-full bg-secondary">
-        <IconSymbol name="chevron.right" size={20} color="#6B7280" />
+        <IconSymbol name="chevron.right" size={20} color={Colors[theme].text} />
       </TouchableOpacity>
     </View>
   );

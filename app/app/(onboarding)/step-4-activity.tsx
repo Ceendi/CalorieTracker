@@ -4,6 +4,7 @@ import { useOnboarding, ActivityLevel } from '@/hooks/useOnboarding';
 import { useAuth } from '@/hooks/useAuth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 
@@ -13,6 +14,7 @@ export default function ActivityScreen() {
   const [level, setLevel] = useState<ActivityLevel | undefined>(data.activityLevel);
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
 
   const onComplete = async () => {
     if (!level) return;
@@ -74,7 +76,7 @@ export default function ActivityScreen() {
             disabled={!level || isLoading}
           >
             <LinearGradient
-              colors={[Colors.light.tint, '#4338CA']}
+              colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
               className={`rounded-xl p-4 items-center ${(!level || isLoading) ? 'opacity-50' : ''}`}
             >
               {isLoading ? (

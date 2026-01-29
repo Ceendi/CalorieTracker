@@ -169,22 +169,22 @@ export default function AddScreen() {
                                   justifyContent: 'center',
                                   borderRadius: 12,
                                   gap: 8,
-                                  backgroundColor: isActive ? Colors[theme].card : 'transparent',
+                                  backgroundColor: isActive ? tintColor : 'transparent',
                                   shadowColor: isActive ? '#000' : undefined,
-                                  shadowOffset: isActive ? { width: 0, height: 1 } : undefined,
-                                  shadowOpacity: isActive ? 0.05 : 0,
-                                  shadowRadius: isActive ? 2 : 0,
-                                  elevation: isActive ? 1 : 0
+                                  shadowOffset: isActive ? { width: 0, height: 2 } : undefined,
+                                  shadowOpacity: isActive ? 0.15 : 0,
+                                  shadowRadius: isActive ? 4 : 0,
+                                  elevation: isActive ? 3 : 0
                                 }}
                                 onPress={() => setActiveMode(mode.id)}
                             >
                                 <IconSymbol 
                                     name={mode.icon as any} 
                                     size={16} 
-                                    color={isActive ? tintColor : iconColor} 
+                                    color={isActive ? 'white' : iconColor} 
                                 />
                                 {isActive && (
-                                    <Text className="text-xs font-bold text-foreground">
+                                    <Text className="text-xs font-bold text-white">
                                         {mode.label}
                                     </Text>
                                 )}

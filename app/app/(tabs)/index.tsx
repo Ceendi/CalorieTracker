@@ -10,6 +10,7 @@ import { useDiary } from '@/hooks/useDiary';
 import { calculateDailyGoal } from '@/utils/calculations';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { DateStrip } from '@/components/diary/DateStrip';
 import { NutrientRing } from '@/components/diary/NutrientRing';
 import { MealSection } from '@/components/diary/MealSection';
@@ -23,6 +24,7 @@ export default function HomeScreen() {
   const userName = user?.email?.split('@')[0] || 'User';
   const router = useRouter();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
 
   const [date, setDate] = useState(new Date());
   const formattedDate = format(date, 'yyyy-MM-dd');
@@ -87,14 +89,14 @@ export default function HomeScreen() {
         <DateStrip selectedDate={date} onSelectDate={setDate} />
 
         <LinearGradient
-          colors={[Colors.light.tint, '#4338CA']}
+          colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="rounded-[32px] p-5 mb-5 shadow-md"
         >
             <View className="flex-row justify-between items-center mb-4">
                  <Text className="text-indigo-100 font-semibold text-base">{t('dashboard.caloriesResult')}</Text>
-                 <IconSymbol name="flame.fill" size={20} color="#E0E7FF" />
+                 <IconSymbol name="flame.fill" size={20} color={Colors[colorScheme ?? 'light'].charts.proteinBg || '#E0E7FF'} />
             </View>
 
             <View className="items-center mb-4">
@@ -102,7 +104,7 @@ export default function HomeScreen() {
                     size={180} 
                     strokeWidth={18} 
                     progress={progress} 
-                    color={isOverGoal ? '#EF4444' : 'white'} 
+                    color={isOverGoal ? Colors[colorScheme ?? 'light'].error : 'white'} 
                     trackColor="rgba(255,255,255,0.15)"
                 >
                     <View className="items-center justify-center">
@@ -135,29 +137,29 @@ export default function HomeScreen() {
                 current={dailyLog?.total_protein || 0} 
                 total={calculatedGoal.protein} 
                 unit="g" 
-                color="#8B5CF6" 
-                bgColor="#F3E8FF"
+                color={Colors[colorScheme ?? 'light'].charts.protein} 
+                bgColor={Colors[colorScheme ?? 'light'].charts.proteinBg}
             />
             <NutrientRing 
                  label={t('manualEntry.carbs')} 
                  current={dailyLog?.total_carbs || 0} 
                  total={calculatedGoal.carbs} 
                  unit="g" 
-                 color="#3B82F6" 
-                 bgColor="#DBEAFE"
+                 color={Colors[colorScheme ?? 'light'].charts.carbs} 
+                 bgColor={Colors[colorScheme ?? 'light'].charts.carbsBg}
             />
             <NutrientRing 
                  label={t('manualEntry.fat')} 
                  current={dailyLog?.total_fat || 0} 
                  total={calculatedGoal.fat} 
                  unit="g" 
-                 color="#F97316" 
-                 bgColor="#FFEDD5"
+                 color={Colors[colorScheme ?? 'light'].charts.fat} 
+                 bgColor={Colors[colorScheme ?? 'light'].charts.fatBg}
             />
         </View>
 
         {isLoading && !dailyLog ? (
-            <ActivityIndicator size="large" color={Colors.light.tint} />
+            <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
         ) : (
             <>
                 {mealTypes.map(type => (
@@ -173,7 +175,7 @@ export default function HomeScreen() {
                 
                 {(!dailyLog?.entries || dailyLog.entries.length === 0) && (
                     <View className="items-center py-10 opacity-50">
-                        <IconSymbol name="fork.knife" size={48} color="#9CA3AF" />
+                        <IconSymbol name="fork.knife" size={48} color={Colors[colorScheme ?? 'light'].mutedForeground} />
                         <Text className="text-muted-foreground mt-4 text-center">{t('dashboard.noEntries')}</Text>
                         <Text className="text-muted-foreground text-sm text-center">{t('dashboard.addFirst')}</Text>
                     </View>

@@ -17,10 +17,10 @@ function mapFoodProduct(apiFood: FoodProductResponse): FoodProduct {
     category: apiFood.category ?? undefined,
     default_unit: apiFood.default_unit ?? undefined,
     nutrition: {
-      calories_per_100g: apiFood.kcal_per_100g,
-      protein_per_100g: apiFood.protein_per_100g,
-      fat_per_100g: apiFood.fat_per_100g,
-      carbs_per_100g: apiFood.carbs_per_100g,
+      calories_per_100g: apiFood.nutrition.kcal_per_100g,
+      protein_per_100g: apiFood.nutrition.protein_per_100g,
+      fat_per_100g: apiFood.nutrition.fat_per_100g,
+      carbs_per_100g: apiFood.nutrition.carbs_per_100g,
     },
     owner_id: apiFood.owner_id ?? undefined,
     source: apiFood.source ?? undefined,
@@ -69,7 +69,16 @@ export const foodService = {
   },
 
   async createFood(food: CreateFoodDto): Promise<FoodProduct> {
-    const response = await apiClient.post(`/api/v1/foods/custom`, food);
+    const payload = {
+      ...food,
+      nutrition: {
+        kcal_per_100g: food.nutrition.calories_per_100g,
+        protein_per_100g: food.nutrition.protein_per_100g,
+        fat_per_100g: food.nutrition.fat_per_100g,
+        carbs_per_100g: food.nutrition.carbs_per_100g,
+      }
+    };
+    const response = await apiClient.post(`/api/v1/foods/custom`, payload);
     const validated = FoodProductResponseSchema.parse(response.data);
     return mapFoodProduct(validated);
   },

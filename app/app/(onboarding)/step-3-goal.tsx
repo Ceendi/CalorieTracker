@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useOnboarding, Goal } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 
@@ -13,6 +14,7 @@ export default function GoalScreen() {
   const [goal, setGoal] = useState<Goal | undefined>(data.goal);
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
 
   const onNext = () => {
     if (!goal) return;
@@ -71,7 +73,7 @@ export default function GoalScreen() {
             disabled={!goal}
           >
             <LinearGradient
-              colors={[Colors.light.tint, '#4338CA']}
+              colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
               className={`rounded-xl p-4 items-center ${(!goal) ? 'opacity-50' : ''}`}
             >
               <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

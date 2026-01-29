@@ -179,7 +179,7 @@ export default function PlanScreen() {
               className="p-2"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <IconSymbol name="trash" size={18} color={Colors[colorScheme ?? 'light'].muted} />
+              <IconSymbol name="trash" size={18} color={Colors[colorScheme ?? 'light'].mutedForeground} />
             </TouchableOpacity>
           </View>
         </View>
@@ -243,7 +243,7 @@ export default function PlanScreen() {
   const renderEmptyState = () => (
     <View className="items-center py-16 px-6">
       <View className="w-20 h-20 bg-muted rounded-full items-center justify-center mb-4">
-        <IconSymbol name="calendar" size={40} color={Colors[colorScheme ?? 'light'].muted} />
+        <IconSymbol name="calendar" size={40} color={Colors[colorScheme ?? 'light'].mutedForeground} />
       </View>
       <Text className="text-foreground font-bold text-xl mb-2 text-center">
         {t('mealPlan.emptyTitle')}
@@ -295,7 +295,7 @@ export default function PlanScreen() {
             <TextInput
               className="bg-card border border-border rounded-xl px-4 py-3 text-foreground"
               placeholder={t('mealPlan.planNamePlaceholder')}
-              placeholderTextColor={Colors[colorScheme ?? 'light'].muted}
+              placeholderTextColor={Colors[colorScheme ?? 'light'].placeholder}
               value={formData.name}
               onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
             />

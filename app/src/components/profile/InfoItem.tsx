@@ -55,8 +55,8 @@ export const InfoItem = ({
       {isEditing ? (
         isSelect ? (
            <TouchableOpacity onPress={onOpenSelection} className="flex-row items-center flex-1 justify-end">
-             <Text className="text-primary font-bold text-lg text-right mr-2">
-               {value ? getDisplayValue() : 'Select'}
+              <Text className="text-primary font-bold text-lg text-right mr-2">
+               {value ? getDisplayValue() : t('options.select')}
              </Text>
              <IconSymbol name="chevron.down" size={16} color={Colors[colorScheme ?? 'light'].tint} />
            </TouchableOpacity>
@@ -68,7 +68,7 @@ export const InfoItem = ({
               className="flex-1 text-primary font-bold text-right h-full"
               style={{ fontSize: 18, textAlignVertical: 'center', includeFontPadding: false, paddingVertical: 0 }}
               placeholder="-"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={Colors[colorScheme ?? 'light'].placeholder}
               selectTextOnFocus
             />
         )

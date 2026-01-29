@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TextInput, TextInputProps } from 'react-native';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 
 interface ControlledInputProps<T extends FieldValues> extends TextInputProps {
   control: Control<T>;
@@ -10,6 +12,9 @@ interface ControlledInputProps<T extends FieldValues> extends TextInputProps {
 }
 
 export function ControlledInput<T extends FieldValues>({ control, name, label, error, style, ...textInputProps }: ControlledInputProps<T>) {
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme ?? 'light';
+
   return (
     <View className="mb-4">
       {label && <Text className="text-foreground font-medium mb-1">{label}</Text>}
@@ -21,7 +26,7 @@ export function ControlledInput<T extends FieldValues>({ control, name, label, e
             <TextInput
               className="text-foreground flex-1"
               style={{ fontSize: 16, paddingVertical: 0, includeFontPadding: false }}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={Colors[theme].placeholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}

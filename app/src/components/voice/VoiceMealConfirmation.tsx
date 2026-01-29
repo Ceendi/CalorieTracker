@@ -11,7 +11,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 import { useFoodSearch } from '@/hooks/useFood';
-import type { ProcessedMeal } from '@/services/ai.service';
+import { ProcessedMeal } from '@/types/ai';
 import { FoodProduct } from '@/types/food';
 
 import { VoiceMealReview } from './confirmation/VoiceMealReview';

@@ -29,7 +29,7 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         render={({ field: { onChange, value } }) => (
                             <TextInput 
                                 className="text-foreground w-full" 
-                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false }}
+                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
                                 value={value?.toString()} 
                                 onChangeText={onChange} 
                                 keyboardType="numeric" 
@@ -48,8 +48,8 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         name="protein"
                         render={({ field: { onChange, value } }) => (
                             <TextInput 
-                                className="text-base text-foreground flex-1" 
-                                style={{ textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false }}
+                                className="text-foreground w-full" 
+                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
                                 value={value?.toString()} 
                                 onChangeText={onChange} 
                                 keyboardType="numeric" 
@@ -71,7 +71,7 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         render={({ field: { onChange, value } }) => (
                             <TextInput 
                                 className="text-foreground w-full" 
-                                style={{ textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false }}
+                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
                                 value={value?.toString()} 
                                 onChangeText={onChange} 
                                 keyboardType="numeric" 
@@ -91,7 +91,7 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         render={({ field: { onChange, value } }) => (
                             <TextInput 
                                 className="text-foreground w-full" 
-                                style={{ textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false }}
+                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
                                 value={value?.toString()} 
                                 onChangeText={onChange} 
                                 keyboardType="numeric" 

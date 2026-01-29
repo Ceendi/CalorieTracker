@@ -94,7 +94,9 @@ class MealPlanRepository(MealPlanRepositoryPort):
                 for ing_idx, ing in enumerate(meal.ingredients):
                     db_ingredient = MealPlanIngredientModel(
                         food_id=ing.food_id,
-                        custom_name=ing.name if not ing.food_id else None,
+                        # Always save the name to ensure it's available for display
+                        # without requiring a join on the foods table
+                        custom_name=ing.name,
                         amount_grams=ing.amount_grams,
                         unit_label=ing.unit_label,
                         kcal=ing.kcal,

@@ -33,8 +33,12 @@ Rozklad kalorii:
 
 Preferencje: {preferences}
 
+Zasady roznorodnosci (BARDZO WAZNE):
+1. Ten sam typ posilku NIE MOZE sie powtarzac dzien po dniu (np. jesli jajecznica w poniedzialek, to we wtorek cos innego).
+2. Unikaj powtarzania glownego skladnika (np. kurczak) czesciej niz raz na 2 dni.
+3. Zadbaj o urozmaicenie zrodel bialka (jajka, nabial, mieso, ryby, roslinne).
+
 Dla kazdego dnia podaj krotki opis posilku (np. "Owsianka z bananem", "Zupa pomidorowa").
-Zadbaj o roznorodnosc miedzy dniami.
 
 Odpowiedz w formacie JSON:
 {{"days": [{{"day": 1, "meals": [{{"type": "breakfast", "description": "..."}}, {{"type": "second_breakfast", "description": "..."}}, {{"type": "lunch", "description": "..."}}, {{"type": "snack", "description": "..."}}, {{"type": "dinner", "description": "..."}}]}}]}}"""
@@ -44,28 +48,32 @@ Odpowiedz w formacie JSON:
 # MEAL GENERATION PROMPT
 # =============================================================================
 
-MEAL_GENERATION_PROMPT: str = """Stworz przepis: {description}
+MEAL_GENERATION_PROMPT: str = """Stworz przepis: "{description}"
 
-Cel kaloryczny: ~{target_kcal} kcal
-Makro: B:{target_protein}g, T:{target_fat}g, W:{target_carbs}g
+Cel: ~{target_kcal} kcal (B:{target_protein}g, T:{target_fat}g, W:{target_carbs}g)
 
-Dostepne produkty (uzywaj TYLKO tych):
+DOSTEPNE PRODUKTY (wybieraj TYLKO po numerze [X]):
 {products}
 
 Ostatnio uzyte (unikaj): {used}
 
-Odpowiedz w JSON:
-{{"name": "...", "description": "krotki opis", "preparation_time": 15, "ingredients": [{{"name": "nazwa z listy", "amount_grams": 100, "unit_label": "1 szklanka"}}]}}"""
+ZASADY:
+1. Wybierz 3-6 produktow po NUMERZE z listy powyzej.
+2. Podaj gramatury (typowo 50-200g, dla przypraw 5-15g).
+3. Suma kalorii powinna byc bliska {target_kcal} kcal.
+
+FORMAT ODPOWIEDZI (TYLKO JSON):
+{{"name": "Nazwa posilku", "description": "Krotki opis", "preparation_time": 15, "ingredients": [{{"idx": 1, "grams": 150}}, {{"idx": 3, "grams": 100}}]}}"""
 
 
 # =============================================================================
 # MODEL PARAMETERS
 # =============================================================================
 
-MAX_TOKENS_TEMPLATES: int = 1024
+MAX_TOKENS_TEMPLATES: int = 2048
 MAX_TOKENS_MEAL: int = 512
 TEMPERATURE: float = 0.7
 
-# Context size limits (Bielik has n_ctx=2048)
-MAX_PRODUCTS_IN_PROMPT: int = 12
-MAX_USED_INGREDIENTS_IN_PROMPT: int = 15
+# Context size limits (Bielik has n_ctx=2048, likely supports more with RoPE scaling but keeping safe)
+MAX_PRODUCTS_IN_PROMPT: int = 50   # Increased from 12 to 50
+MAX_USED_INGREDIENTS_IN_PROMPT: int = 30 # Increased from 15 to 30

@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createChangePasswordSchema, ChangePasswordInput } from '@/utils/validators';
 import { ControlledInput } from '@/components/ui/ControlledInput';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { authService } from '@/services/auth.service';
 import { isAxiosError } from 'axios';
@@ -71,7 +73,7 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
             onPress={handleClose} 
             className="p-2 bg-muted/50 rounded-full absolute right-4"
           >
-            <IconSymbol name="xmark" size={20} color={Platform.OS === 'ios' ? '#94a3b8' : '#6B7280'} />
+            <IconSymbol name="xmark" size={20} color={Colors[useColorScheme().colorScheme ?? 'light'].text} />
           </TouchableOpacity>
         </View>
 

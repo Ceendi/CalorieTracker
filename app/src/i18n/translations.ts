@@ -197,6 +197,7 @@ export const translations = {
         },
         voiceTip: "💡 Tip: Say quantity in grams or use units like \"slice\", \"cup\", \"spoon\"",
         confirmTitle: "Confirm Meal",
+        confirmProducts: "Confirm Products",
         transcriptionLabel: "I heard:",
         productsLabel: "Products",
         summaryTitle: "Summary",
@@ -211,6 +212,7 @@ export const translations = {
         mealAddedDesc: "Meal added to diary",
         addingToDiary: "Adding to diary...",
         summary: {
+            total: "Total",
             kcal: "kcal",
             protein: "Protein",
             fat: "Fat",
@@ -229,7 +231,8 @@ export const translations = {
             startRecording: "Failed to start recording",
             noRecording: "No audio recording found",
             unknown: "Unknown error"
-        }
+        },
+        comingSoon: "Coming Soon"
     },
     scanner: {
         permissionTitle: "Camera Access Required",
@@ -267,6 +270,7 @@ export const translations = {
         creationFailed: "Failed to create food product.",
         unknownProduct: "Unknown Product",
         selectUnit: "Select unit",
+        unit: "Unit",
         grams: "Grams",
         macroP: "P",
         macroF: "F",
@@ -295,7 +299,8 @@ export const translations = {
         addFirst: "Tap + to add your first meal.",
         delete: "Delete",
         edit: "Edit",
-        over: "Over"
+        over: "Over",
+        stats: "Statistics"
     },
     accessibility: {
         decreaseQuantity: "Decrease quantity",
@@ -551,13 +556,14 @@ export const translations = {
         },
         voiceTip: "💡 Wskazówka: Podaj ilość w gramach lub użyj miar jak \"sztuka\", \"łyżka\", \"szklanka\"",
         confirmTitle: "Potwierdź posiłek",
+        confirmProducts: "Potwierdź produkty",
         transcriptionLabel: "Usłyszałem:",
         productsLabel: "Produkty",
         summaryTitle: "Podsumowanie",
         processedTime: "Przetworzono w",
         tapToChange: "Dotknij, aby zmienić",
         manualEntry: "Ręczne wprowadzanie",
-        searchToConfirm: "Dodaj produkt",
+        searchToConfirm: "Dodaj kolejny produkt",
         editInfo: "Edycja",
         editInfoDesc: "Dodaj produkty ręcznie lub nagraj ponownie",
         voiceError: "Błąd głosowy",
@@ -565,6 +571,7 @@ export const translations = {
         mealAddedDesc: "Posiłek dodany do dziennika",
         addingToDiary: "Dodawanie do dziennika...",
         summary: {
+            total: "Razem",
             kcal: "kcal",
             protein: "Białko",
             fat: "Tłuszcz",
@@ -583,7 +590,8 @@ export const translations = {
             startRecording: "Nie udało się rozpocząć nagrywania",
             noRecording: "Brak nagrania audio",
             unknown: "Nieznany błąd"
-        }
+        },
+        comingSoon: "Wkrótce"
     },
     scanner: {
         permissionTitle: "Wymagany dostęp do kamery",
@@ -621,6 +629,7 @@ export const translations = {
         creationFailed: "Nie udało się utworzyć produktu.",
         unknownProduct: "Nieznany produkt",
         selectUnit: "Wybierz jednostkę",
+        unit: "Jednostka",
         grams: "Gramy",
         macroP: "B",
         macroF: "T",
@@ -649,7 +658,8 @@ export const translations = {
         addFirst: "Kliknij +, aby dodać pierwszy posiłek.",
         delete: "Usuń",
         edit: "Edytuj",
-        over: "Przekroczono"
+        over: "Przekroczono",
+        stats: "Statystyki"
     },
     accessibility: {
         decreaseQuantity: "Zmniejsz ilość",

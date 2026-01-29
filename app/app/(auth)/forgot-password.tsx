@@ -95,7 +95,7 @@ export default function ForgotPasswordScreen() {
                   onPress={() => router.replace('/(auth)/login')}
                 >
                    <LinearGradient
-                    colors={[Colors[theme].tint, '#4338CA']}
+                    colors={[Colors[theme].primary, Colors[theme].primaryDark]}
                     className="rounded-xl p-4 items-center shadow-md"
                   >
                     <Text className="text-white font-bold text-lg">

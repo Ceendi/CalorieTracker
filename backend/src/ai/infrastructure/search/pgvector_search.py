@@ -54,7 +54,8 @@ class PgVectorSearchService:
         """
         # 1. Encode query to embedding
         query_embedding = self._embedding_service.encode_query(query)
-        embedding_str = f"[{','.join(map(str, query_embedding.tolist()))}]"
+        # Format with 8 decimal places to match pgvector storage precision
+        embedding_str = f"[{','.join(f'{x:.8f}' for x in query_embedding.tolist())}]"
 
         # 2. Call hybrid search function
         result = await session.execute(text("""
@@ -109,25 +110,45 @@ class PgVectorSearchService:
             List of dicts with product info and nutrition data
         """
         MEAL_QUERIES = {
-            "breakfast": "sniadanie platki owsiane jajka chleb maslo ser mleko jogurt twarog banan",
-            "second_breakfast": "przekaska owoce jogurt kanapka banan jablko orzechy marchew",
-            "lunch": "obiad mieso kurczak ryba ziemniaki ryz makaron warzywa zupa pomidor ogorek salata cebula",
-            "snack": "przekaska owoce orzechy jogurt baton jablko banan marchew",
-            "dinner": "kolacja kanapka salata jajka ser wedlina warzywa pomidor ogorek papryka"
+            "breakfast": "sniadanie platki owsiane jajka chleb maslo ser mleko jogurt twarog banan jablko dzem miod musli kasza manna",
+            "second_breakfast": "przekaska owoce jogurt kanapka banan jablko orzechy marchew ser twarog wafle ryzowe hummus papryka ogorek pomidor baton proteinowy smoothie",
+            "lunch": "obiad mieso kurczak ryba ziemniaki ryz makaron warzywa zupa pomidor ogorek salata cebula marchew brokuty kalafior wolowina wieprzowina indyk fasola soczewica",
+            "snack": "przekaska owoce orzechy jogurt baton jablko banan marchew ser twarog krakersy wafle ryzowe hummus rodzynki migdaly orzeszki ziemne",
+            "dinner": "kolacja kanapka salata jajka ser wedlina warzywa pomidor ogorek papryka twarog chleb razowy salatka grecka omlet szynka"
         }
 
         query = MEAL_QUERIES.get(meal_type, meal_type)
 
+        # Dynamic query adjustment based on diet preferences
+        # This helps RAG find relevant products even before python filtering
+        if preferences:
+            diet = preferences.get("diet")
+            if diet == "keto":
+                # Remove carb-heavy keywords and add fat/protein sources
+                for kw in ["chleb", "ziemniaki", "ryz", "makaron", "banan", "jablko", "platki", "owsiane"]:
+                    query = query.replace(kw, "")
+                query += " awokado boczek jajka oliwa orzechy mieso ryby ser maslo"
+            elif diet == "vegan":
+                # Remove animal products and add plant sources
+                for kw in ["jajka", "mieso", "kurczak", "ser", "wedlina", "twarog", "mleko", "maslo", "ryba", "jogurt"]:
+                    query = query.replace(kw, "")
+                query += " tofu soczewica ciecierzyca warzywa orzechy fasola mleko_roslinne hummus"
+
         # Get more results for filtering
         query_embedding = self._embedding_service.encode_query(query)
-        embedding_str = f"[{','.join(map(str, query_embedding.tolist()))}]"
+        # Format with 8 decimal places to match pgvector storage precision
+        embedding_str = f"[{','.join(f'{x:.8f}' for x in query_embedding.tolist())}]"
+
+        # Increase fetch limit drastically (limit * 10) to ensure enough valid products remain after filtering
+        # This is a critical fix for "filtering by Python" issue without changing DB schema
+        fetch_limit = limit * 10
 
         result = await session.execute(text("""
             SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, 0.5)
         """), {
             "query": query,
             "embedding": embedding_str,
-            "limit": limit * 2  # Get extra for filtering
+            "limit": fetch_limit
         })
 
         rows = result.fetchall()
@@ -226,7 +247,8 @@ class PgVectorSearchService:
         """
         results = await self.search(session, name, limit=1, vector_weight=0.6)
 
-        if results and results[0].score > 0.3:
+        # RRF scores are low (max ~0.016), so use low threshold
+        if results and results[0].score > 0.005:
             # Get full product data
             result = await session.execute(text("""
                 SELECT id, name, category, calories, protein, fat, carbs

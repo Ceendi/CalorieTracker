@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from sqlalchemy import String, ForeignKey, Float, Integer, Enum as SAEnum, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pgvector.sqlalchemy import Vector
 
 from src.core.database import UUIDModel
 from src.food_catalogue.domain.enums import UnitType, UnitLabel
@@ -36,8 +37,8 @@ class FoodModel(UUIDModel):
 
     # Vector embedding for semantic search (384 dimensions for E5-small)
     # Note: Actual column type is vector(384) in PostgreSQL via pgvector extension
-    # Using LargeBinary for SQLAlchemy compatibility; raw SQL is used for vector operations
-    embedding: Mapped[Optional[bytes]] = mapped_column(LargeBinary, nullable=True)
+    # We use pgvector.sqlalchemy.Vector to handle this correctly
+    embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(384), nullable=True)
 
     # Note: search_text tsvector column is managed by PostgreSQL as a generated column
     # It is not mapped here as it's automatically derived from the 'name' column

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 
@@ -14,6 +15,7 @@ export default function MeasurementsScreen() {
   const [weight, setWeight] = useState(data.weight?.toString() || '');
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { colorScheme } = useColorScheme();
 
   const onNext = () => {
     if (!height || !weight) return;
@@ -50,7 +52,7 @@ export default function MeasurementsScreen() {
                       className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="175"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={Colors[colorScheme ?? 'light'].placeholder}
                       keyboardType="number-pad"
                       value={height}
                       onChangeText={setHeight}
@@ -68,7 +70,7 @@ export default function MeasurementsScreen() {
                       className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="70"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={Colors[colorScheme ?? 'light'].placeholder}
                       keyboardType="number-pad"
                       value={weight}
                       onChangeText={setWeight}
@@ -85,7 +87,7 @@ export default function MeasurementsScreen() {
                 disabled={!height || !weight}
               >
                 <LinearGradient
-                  colors={[Colors.light.tint, '#4338CA']}
+                  colors={[Colors[colorScheme ?? 'light'].primary, Colors[colorScheme ?? 'light'].primaryDark]}
                   className={`rounded-xl p-4 items-center ${(!height || !weight) ? 'opacity-50' : ''}`}
                 >
                   <Text className="text-white font-semibold text-lg">{t('onboarding.next')}</Text>

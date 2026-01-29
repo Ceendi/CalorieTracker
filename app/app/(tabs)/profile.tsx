@@ -14,6 +14,8 @@ import { Colors } from '@/constants/theme';
 import { calculateDailyGoal } from '@/utils/calculations';
 import { useDailyTargets } from '@/hooks/useMealPlan';
 import { User } from '@/utils/validators';
+import { userService } from '@/services/user.service';
+import { UserProfileSchema } from '@/schemas/user';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshUser } = useAuth();
@@ -65,33 +67,38 @@ export default function ProfileScreen() {
 
 
   const handleSave = async () => {
-    const heightVal = parseFloat(formData.height);
-    const weightVal = parseFloat(formData.weight);
-    const ageVal = parseInt(formData.age);
-
-    if (isNaN(heightVal) || heightVal < 50 || heightVal > 300) {
-      Alert.alert(t('profile.error'), t('profile.validation.height'));
-      return;
-    }
-    if (isNaN(weightVal) || weightVal < 20 || weightVal > 500) {
-      Alert.alert(t('profile.error'), t('profile.validation.weight'));
-      return;
-    }
-    if (isNaN(ageVal) || ageVal < 10 || ageVal > 120) {
-      Alert.alert(t('profile.error'), t('profile.validation.age'));
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      await apiClient.patch('/users/me', {
+    const rawData = {
         height: formData.height ? parseFloat(formData.height) : null,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         age: formData.age ? parseInt(formData.age) : null,
         goal: formData.goal,
         activity_level: formData.activity_level,
         gender: formData.gender,
-      });
+    };
+
+    const validationResult = UserProfileSchema.safeParse(rawData);
+
+    if (!validationResult.success) {
+      // Find the first error for user display
+      const firstError = validationResult.error.issues[0];
+      const field = firstError.path[0];
+      
+      // Map field errors to translation keys
+      if (field === 'height') {
+        Alert.alert(t('profile.error'), t('profile.validation.height'));
+      } else if (field === 'weight') {
+        Alert.alert(t('profile.error'), t('profile.validation.weight'));
+      } else if (field === 'age') {
+        Alert.alert(t('profile.error'), t('profile.validation.age'));
+      } else {
+        Alert.alert(t('profile.error'), firstError.message);
+      }
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await userService.updateProfile(validationResult.data);
       await refreshUser();
       setIsEditing(false);
       Alert.alert(t('profile.success'), t('profile.profileUpdated'));
@@ -312,12 +319,6 @@ export default function ProfileScreen() {
             onSelect={selectOption}
             onClose={() => setModalVisible(false)}
         />
-
-
-
-
-
-
 
         <Text className="text-center text-muted-foreground mt-8 text-sm">
           {t('profile.version')} 1.0.0

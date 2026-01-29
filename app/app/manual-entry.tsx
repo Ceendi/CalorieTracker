@@ -73,7 +73,7 @@ export default function ManualEntryScreen() {
                             className="w-12 bg-muted/50 rounded-xl items-center justify-center"
                             onPress={() => setValue('weight', Math.max(10, (Number(weight) || 0) - 10))}
                         >
-                            <IconSymbol name="minus" size={20} color={colorScheme === 'dark' ? '#94a3b8' : '#6B7280'} />
+                            <IconSymbol name="minus" size={20} color={Colors[colorScheme ?? 'light'].icon} />
                         </TouchableOpacity>
                         <View className="flex-1 flex-row items-center bg-background rounded-xl px-4 border border-border">
                            <Controller
@@ -81,7 +81,8 @@ export default function ManualEntryScreen() {
                                 name="weight"
                                 render={({ field: { onChange, value } }) => (
                                     <TextInput
-                                        className="flex-1 text-xl font-bold text-foreground text-center"
+                                        className="flex-1 font-bold text-foreground text-center"
+                                        style={{ fontSize: 20, height: '100%' }}
                                         value={value?.toString()}
                                         onChangeText={onChange}
                                         keyboardType="numeric"
@@ -94,14 +95,20 @@ export default function ManualEntryScreen() {
                             className="w-12 bg-muted/50 rounded-xl items-center justify-center"
                             onPress={() => setValue('weight', (Number(weight) || 0) + 10)}
                         >
-                            <IconSymbol name="plus" size={20} color={colorScheme === 'dark' ? '#94a3b8' : '#6B7280'} />
+                            <IconSymbol name="plus" size={20} color={Colors[colorScheme ?? 'light'].icon} />
                         </TouchableOpacity>
                     </View>
                 </View>
 
-                <MealTypeSelector
-                    selectedMeal={selectedMeal}
-                    onSelect={(meal) => setValue('mealType', meal)}
+                <Controller
+                    control={control}
+                    name="mealType"
+                    render={({ field: { value, onChange } }) => (
+                        <MealTypeSelector
+                            selectedMeal={value}
+                            onSelect={onChange}
+                        />
+                    )}
                 />
 
               </ScrollView>
