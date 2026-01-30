@@ -48,6 +48,7 @@ import {
   Carrot,
   CheckCircle,
   AlertTriangle,
+  Image,
 } from 'lucide-react-native';
 
 // Map SF Symbol names to Lucide Components
@@ -84,6 +85,7 @@ const MAPPING: Record<string, LucideIcon> = {
   'barcode.viewfinder': ScanBarcode,
   'mic.fill': Mic,
   'camera.fill': Camera,
+  'photo.fill': Image,
   'pencil.circle.fill': Pencil, // Approximate
   'xmark.circle.fill': XCircle,
   'plus.circle.fill': PlusCircle,

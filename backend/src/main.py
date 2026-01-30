@@ -5,7 +5,7 @@ from loguru import logger
 from src.users.api.routes import router as access_control_router
 from src.food_catalogue.api.router import router as food_router
 from src.tracking.api.router import router as tracking_router
-from src.ai.api.router import router as ai_router, get_audio_service
+from src.ai.api.router import router as ai_router, get_audio_service, get_vision_service
 from src.meal_planning.api.router import router as meal_planning_router
 from src.core.config import settings
 
@@ -16,6 +16,8 @@ async def lifespan(app: FastAPI):
     try:
         service = get_audio_service()
         await service.warmup()
+        vision_service = get_vision_service()
+
         logger.info("AI models preloaded successfully!")
     except Exception as e:
         logger.warning(f"Failed to preload AI models: {e}")

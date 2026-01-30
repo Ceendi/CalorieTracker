@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
+    GEMINI_API_KEY: str
 
     WHISPER_MODEL_SIZE: str = "base"  # tiny, base, small, medium, large
 

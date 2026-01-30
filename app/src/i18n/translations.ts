@@ -221,6 +221,13 @@ export const translations = {
         buttons: {
             edit: "Edit",
             addToDiary: "Add to Diary"
+        },
+        photo: {
+             description: "Take a photo or choose from gallery, and AI will identify ingredients and calculate calories.",
+             camera: "Camera",
+             gallery: "Gallery",
+             tip: "💡 Tip: Good lighting improves recognition accuracy.",
+             preparing: "Preparing..."
         }
     },
     common: {
@@ -580,6 +587,13 @@ export const translations = {
         buttons: {
             edit: "Edytuj",
             addToDiary: "Dodaj do dziennika"
+        },
+        photo: {
+             description: "Zrób zdjęcie lub wybierz z galerii, a AI rozpozna składniki i obliczy kalorie.",
+             camera: "Aparat",
+             gallery: "Galeria",
+             tip: "💡 Wskazówka: Dobre oświetlenie poprawia dokładność rozpoznawania.",
+             preparing: "Przygotowywanie..."
         }
     },
     common: {

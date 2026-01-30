@@ -25,6 +25,7 @@ dependencies = [
     "llama-cpp-python>=0.3.16",
     "numba>=0.60.0",
     "pgvector>=0.3.6",
+    "google-genai>=0.3.0",
 ]
 
 [[tool.uv.index]]

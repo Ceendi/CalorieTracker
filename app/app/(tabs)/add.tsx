@@ -9,10 +9,10 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { VoiceMealConfirmation } from '@/components/voice/VoiceMealConfirmation';
 import { ProcessedMeal } from '@/hooks/useVoiceInput';
 import { useLogEntriesBulk } from '@/hooks/useFood';
-import { foodService } from '@/services/food.service';
 import { ProductSearchMode } from '@/components/add/ProductSearchMode';
 import { PlaceholderMode } from '@/components/add/PlaceholderMode';
 import { AudioEntryMode } from '@/components/add/AudioEntryMode';
+import { PhotoEntryMode } from '@/components/add/PhotoEntryMode';
 import { Colors } from '@/constants/theme';
 import { formatDateForApi } from '@/utils/date';
 
@@ -45,7 +45,7 @@ export default function AddScreen() {
     const { mutateAsync: logEntriesBulk, isPending: isAddingToDiary } = useLogEntriesBulk();
     
     const theme = colorScheme ?? 'light';
-    const cardColor = Colors[theme].card;
+
     const tintColor = Colors[theme].tint;
     const iconColor = Colors[theme].icon;
 
@@ -208,10 +208,9 @@ export default function AddScreen() {
                     />
                 )}
                 {activeMode === 'photo' && (
-                    <PlaceholderMode
-                        title={t('addFood.placeholders.photoTitle') || "Zdjęcie"}
-                        icon="camera.fill"
-                        description={t('addFood.placeholders.photoDesc') || "Zrób zdjęcie posiłku, aby go dodać"}
+                    <PhotoEntryMode 
+                         onMealProcessed={handleMealProcessed} 
+                         onError={handleVoiceError} 
                     />
                 )}
                 {activeMode === 'barcode' && (

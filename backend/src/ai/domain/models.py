@@ -23,6 +23,10 @@ class ExtractedFoodItem(BaseModel):
     extraction_method: Optional[ExtractionMethod] = None
     is_vague_quantity: bool = False
     meal_context: Optional[str] = None
+    kcal: Optional[float] = None
+    protein: Optional[float] = None
+    fat: Optional[float] = None
+    carbs: Optional[float] = None
 
 
 class MealExtraction(BaseModel):

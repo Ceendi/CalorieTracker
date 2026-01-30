@@ -4,6 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from loguru import logger
 
 from src.ai.application.audio_service import AudioProcessingService
+from src.ai.application.vision_service import VisionProcessingService
 from src.ai.application.dto import ProcessedMealDTO
 from src.ai.domain.exceptions import (
     AudioProcessingException,
@@ -17,6 +18,14 @@ from src.core.database import DBSession
 router = APIRouter()
 
 _audio_service: Optional[AudioProcessingService] = None
+_vision_service: Optional[VisionProcessingService] = None
+
+def get_vision_service() -> VisionProcessingService:
+    global _vision_service
+    if _vision_service is None:
+        _vision_service = VisionProcessingService()
+        logger.info("VisionProcessingService initialized")
+    return _vision_service
 
 
 def get_audio_service() -> AudioProcessingService:
@@ -175,12 +184,63 @@ async def transcribe_audio(
         )
 
 
+@router.post(
+    "/process-image",
+    response_model=ProcessedMealDTO,
+    summary="Process food photo and extract meal information",
+    description="""
+    Upload a food photo and receive structured meal data.
+    
+    **Workflow:**
+    1. Image analyzed by Gemini Flash 3.0 (Vision)
+    2. Ingredients extracted with estimated weight and macros
+    3. Ingredients matched against DB using Vector Search
+    4. If DB match found -> DB macros used
+    5. If NO DB match -> Gemini macros used (fallback)
+    """
+)
+async def process_food_image(
+    session: DBSession,
+    image: UploadFile = File(..., description="Image file (jpg, png, webp)"),
+    service: VisionProcessingService = Depends(get_vision_service)
+):
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+        
+    valid_extensions = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
+    file_ext = Path(image.filename).suffix.lower()
+    if file_ext not in valid_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid file format. Supported: {', '.join(valid_extensions)}"
+        )
+        
+    try:
+        image_bytes = await image.read()
+        
+        if len(image_bytes) == 0:
+            raise HTTPException(status_code=400, detail="Empty image file")
+            
+        if len(image_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File too large. Max 10MB")
+            
+        result = await service.process_image(image_bytes, session)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Image processing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get(
     "/status",
     summary="Get AI processing system status",
-    description="Check availability of Whisper, SLM (Bielik), and pgvector search."
+    description="Check availability of Whisper, SLM (Bielik), Vision (Gemini), and search."
 )
 async def get_status(
-    service: AudioProcessingService = Depends(get_audio_service)
+    audio_service: AudioProcessingService = Depends(get_audio_service),
+    vision_service: VisionProcessingService = Depends(get_vision_service)
 ):
-    return service.get_system_status()
+    status = audio_service.get_system_status()
+    status.update(vision_service.get_system_status())
+    return status

@@ -1,7 +1,7 @@
 import re
 import time
 import inspect
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict
 from loguru import logger
 
 from src.ai.domain.models import (
@@ -62,6 +62,123 @@ class MealRecognitionService:
             return await result
 
         return result
+
+    async def recognize_from_vision_items(
+        self,
+        extracted_items: List[ExtractedFoodItem]
+    ) -> MealRecognitionResult:
+        """
+        Process items already extracted by Vision AI.
+        Prioritizes DB match for macros. If no match, falls back to Gemini's macros.
+        """
+        start_time = time.time()
+        logger.info(f"Processing {len(extracted_items)} vision items")
+
+        matched_products: List[MatchedProduct] = []
+        unmatched_chunks: List[str] = []
+
+        for item in extracted_items:
+            normalized_name = self.nlu.normalize_text(item.name)
+            
+            # 1. Search in DB
+            candidates = await self._search(normalized_name, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
+            
+            best_match: Optional[SearchCandidate] = None
+            if candidates:
+                # Basic scoring similar to recognize_meal but reduced since we have structured input
+                candidate_scores = []
+                q_norm = normalized_name.lower()
+                
+                for candidate in candidates:
+                    c_norm = candidate.name.lower()
+                    current_score = candidate.score
+                    
+                    if q_norm == c_norm:
+                        current_score += CONFIG.EXACT_MATCH_BOOST
+                    elif q_norm in c_norm.split():
+                        current_score += CONFIG.TOKEN_MATCH_BOOST
+                        
+                    candidate_scores.append((current_score, candidate))
+                
+                candidate_scores.sort(key=lambda x: x[0], reverse=True)
+                if candidate_scores:
+                    best_match = candidate_scores[0][1]
+                    best_match.score = max(0.0, min(1.0, candidate_scores[0][0]))
+
+            # 2. Decide: Use DB or Fallback
+            use_db_match = False
+            if best_match and best_match.score > 0.4: # Threshold for accepting DB match
+                use_db_match = True
+            
+            final_grams = item.quantity_value # Default to what Gemini saw
+            
+            if use_db_match and best_match:
+                raw_product = self.engine.get_product_by_id(best_match.product_id)
+                
+                final_grams = item.quantity_value
+                qty_scale = final_grams / 100.0
+                
+                matched = MatchedProduct(
+                    product_id=best_match.product_id,
+                    name_pl=best_match.name,
+                    name_en=raw_product.get("name_en", ""),
+                    quantity_grams=round(final_grams, 1),
+                    kcal=round(raw_product.get("kcal_100g", 0) * qty_scale, 1),
+                    protein=round(raw_product.get("protein_100g", 0) * qty_scale, 1),
+                    fat=round(raw_product.get("fat_100g", 0) * qty_scale, 1),
+                    carbs=round(raw_product.get("carbs_100g", 0) * qty_scale, 1),
+                    match_confidence=round(best_match.score, 3),
+                    unit_matched=item.quantity_unit,
+                    quantity_unit_value=item.quantity_value,
+                    original_query=item.name,
+                    match_strategy="vision_vector_hybrid",
+                    units=[
+                        {
+                            "label": u.get("name"),
+                            "unit": u.get("name"),
+                            "grams": u.get("weight_g")
+                        } 
+                        for u in raw_product.get("units", []) 
+                        if u.get("name") and u.get("weight_g")
+                    ],
+                    notes=f"Vision Match. Score: {best_match.score:.2f}",
+                    alternatives=candidates[1:]
+                )
+                matched_products.append(matched)
+            else:
+                # FALLBACK to Gemini Macros
+                matched = MatchedProduct(
+                    product_id="00000000-0000-0000-0000-000000000000", # Placeholder for AI-generated
+                    name_pl=item.name,
+                    name_en=item.name,
+                    quantity_grams=round(item.quantity_value, 1),
+                    kcal=round(item.kcal or 0, 1),
+                    protein=round(item.protein or 0, 1),
+                    fat=round(item.fat or 0, 1),
+                    carbs=round(item.carbs or 0, 1),
+                    match_confidence=item.confidence,
+                    unit_matched=item.quantity_unit,
+                    quantity_unit_value=item.quantity_value,
+                    original_query=item.name,
+                    match_strategy="vision_ai_estimate",
+                    notes="AI Estimated Values (No DB match)",
+                    units=[],
+                    alternatives=[]
+                )
+                matched_products.append(matched)
+
+        processing_time = (time.time() - start_time) * 1000
+        overall_confidence = (
+            sum(p.confidence for p in matched_products) / len(matched_products)
+            if matched_products else 0.0
+        )
+        
+        return MealRecognitionResult(
+            matched_products=matched_products,
+            unmatched_chunks=unmatched_chunks,
+            overall_confidence=round(overall_confidence, 3),
+            processing_time_ms=round(processing_time, 2)
+        )
 
     async def recognize_meal(self, text: str) -> MealRecognitionResult:
         start_time = time.time()
