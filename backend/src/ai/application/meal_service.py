@@ -78,19 +78,32 @@ class MealRecognitionService:
             
             best_match: Optional[SearchCandidate] = None
             if candidates:
-                # Basic scoring similar to recognize_meal but reduced since we have structured input
                 candidate_scores = []
                 q_norm = normalized_name.lower()
-                
+                q_tokens = set(q_norm.split())
+
                 for candidate in candidates:
                     c_norm = candidate.name.lower()
+                    c_tokens = set(c_norm.split())
                     current_score = candidate.score
-                    
+
                     if q_norm == c_norm:
                         current_score += CONFIG.EXACT_MATCH_BOOST
                     elif q_norm in c_norm.split():
                         current_score += CONFIG.TOKEN_MATCH_BOOST
-                        
+
+                    if c_norm.startswith(q_norm):
+                        current_score += CONFIG.PREFIX_MATCH_BOOST
+
+                    if len(q_tokens) == 1 and len(c_tokens) > 2:
+                        current_score -= CONFIG.MULTI_TOKEN_PENALTY
+
+                    if not self.nlu.verify_keyword_consistency(normalized_name, candidate.name):
+                        current_score *= CONFIG.GUARD_FAIL_MULTIPLIER
+                        candidate.passed_guard = False
+                    else:
+                        candidate.passed_guard = True
+
                     candidate_scores.append((current_score, candidate))
                 
                 candidate_scores.sort(key=lambda x: x[0], reverse=True)
@@ -100,7 +113,7 @@ class MealRecognitionService:
 
             # 2. Decide: Use DB or Fallback
             use_db_match = False
-            if best_match and best_match.score > 0.4: # Threshold for accepting DB match
+            if best_match and best_match.score > 0.5:
                 use_db_match = True
             
             final_grams = item.quantity_value # Default to what Gemini saw
@@ -134,7 +147,7 @@ class MealRecognitionService:
                         for u in raw_product.get("units", []) 
                         if u.get("name") and u.get("weight_g")
                     ],
-                    notes=f"Vision Match. Score: {best_match.score:.2f}",
+                    notes=f"Vision Match. Score: {best_match.score:.2f}, Guard: {best_match.passed_guard}",
                     alternatives=candidates[1:]
                 )
                 matched_products.append(matched)

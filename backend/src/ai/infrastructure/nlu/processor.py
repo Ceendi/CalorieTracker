@@ -120,12 +120,23 @@ class NaturalLanguageProcessor:
         "ogórek": [r"\bogórek\b", r"\bogórk"],
         "jajko": [r"\bjajk\b", r"\bjajeczn"],
         "chleb": [r"\bchleb\b", r"\bpieczyw", r"\bbułk", r"\btost"],
+        "makaron": ["makaron", "spaghet", "penne", "tagliatelle", "pasta"],
+        "fasola": ["fasol", "fasolka"],
+        "ryż": [r"\bryż\b", r"\bryżu\b", "rice"],
+        "kasza": ["kasza", "kaszy"],
+        "kapusta": ["kapust"],
+        "zupa": [r"\bzup[aęy]\b", r"\bzupk"],
+        "surówka": ["surówk"],
+        "sałatka": ["sałatk", "sałata"],
     }
 
     def normalize_text(self, text: str) -> str:
         text_lower = text.lower()
         for informal, standard in self.SYNONYMS.items():
             text_lower = re.sub(rf'\b{re.escape(informal)}\b', standard, text_lower)
+        # Remove consecutive duplicate words caused by synonym expansion
+        # e.g. "makaron spaghetti" → synonym "spaghetti"→"makaron spaghetti" → "makaron makaron spaghetti"
+        text_lower = re.sub(r'\b(\w+)(\s+\1)+\b', r'\1', text_lower)
         return text_lower
 
     def _split_into_chunks(self, text: str) -> List[str]:
@@ -203,14 +214,22 @@ class NaturalLanguageProcessor:
         product_lower = product_name.lower()
 
         for category, synonyms in self.CRITICAL_KEYWORDS.items():
-            has_word = any(re.search(s, query_lower) if "\\" in s else s in query_lower for s in synonyms)
+            query_has = any(
+                re.search(s, query_lower) if "\\" in s else s in query_lower
+                for s in synonyms
+            )
+            product_has = any(
+                re.search(s, product_lower) if "\\" in s else s in product_lower
+                for s in synonyms
+            )
 
-            if has_word:
-                if not any(re.search(s, product_lower) if "\\" in s else s in product_lower for s in synonyms):
-                    if category == "masło" and "masłowa" in product_lower and "masło" not in product_lower:
-                        return False
+            # Forward: query mentions category X but product doesn't
+            if query_has and not product_has:
+                return False
+            # Reverse: product contains category Y but query doesn't mention it
+            if product_has and not query_has:
+                return False
 
-                    return False
         return True
 
     def process_text(self, text: str) -> List[IngredientChunk]:
