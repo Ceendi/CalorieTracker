@@ -91,6 +91,12 @@ class NaturalLanguageProcessor:
         "kawy": "kawa", "kawę": "kawa", "kawka": "kawa",
         "herbaty": "herbata", "herbatę": "herbata", "herbatka": "herbata",
 
+        # Sosy / Sauces → bazowe składniki
+        "sos pomidorowy": "przecier pomidorowy",
+        "sosu pomidorowego": "przecier pomidorowy",
+        "sosie pomidorowym": "przecier pomidorowy",
+        "sos majonezowy": "majonez",
+
         # Regionalne / Regional
         "żurek": "żur", "żurku": "żur",
         "kluski": "kluska", "klusek": "kluska",

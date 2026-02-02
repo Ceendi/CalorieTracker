@@ -21,19 +21,25 @@ ZASADY:
 1. Rozpoznaj wszystkie widoczne składniki.
 2. Dla dań złożonych (np. kanapka, sałatka) wymień poszczególne składniki (np. chleb, szynka, masło, pomidor).
 3. Dla dań jednorodnych/gotowych (np. pierogi, zupa, lasagne) potraktuj je jako jedną pozycję, chyba że wyraźnie widać dodatki (np. śmietana, boczek).
-4. Oszacuj wagę każdego składnika w gramach (quantity_value). Bądź precyzyjny, bazując na standardowych porcjach.
-5. Oszacuj makroskładniki (kcal, białko, tłuszcze, węglowodany) dla oszacowanej wagi (NIE na 100g, ale na porcję którą widzisz).
+4. Jednostka i ilość (quantity_value + quantity_unit):
+   - Dla produktów policzalnych (jajka, owoce, bułki, pierogi, kotlety, parówki) używaj "sztuka" z liczbą sztuk (np. quantity_value=3, quantity_unit="sztuka").
+   - Dla produktów sypkich, płynnych, mięs, wędlin i pozostałych używaj "g" z wagą w gramach.
+5. Oszacuj makroskładniki (kcal, białko, tłuszcze, węglowodany) dla CAŁEJ porcji którą widzisz (NIE na 100g, NIE na 1 sztukę — na WSZYSTKO co widzisz danego składnika).
 6. Określ typ posiłku (śniadanie, drugie_śniadanie, obiad, podwieczorek, kolacja, przekąska).
-7. Zwróć wynik TYLKO w formacie JSON zgodnym ze schematem.
+7. Używaj nazw BAZOWYCH składników, jakie znajdziesz w bazie wartości odżywczych, np.:
+   - "sos pomidorowy" → "przecier pomidorowy"
+   - "sos majonezowy" → "majonez"
+   - Nie używaj nazw dań złożonych jako składników (np. nie "sos bolognese" tylko osobno "mięso mielone", "przecier pomidorowy").
+8. Zwróć wynik TYLKO w formacie JSON zgodnym ze schematem.
 
 Format JSON:
 {
   "meal_type": "string (enum)",
   "items": [
     {
-      "name": "string (nazwa produktu po polsku)",
-      "quantity_value": float (waga w gramach),
-      "quantity_unit": "g",
+      "name": "string (nazwa produktu po polsku, bazowa nazwa składnika)",
+      "quantity_value": float (ilość: gramy LUB sztuki w zależności od quantity_unit),
+      "quantity_unit": "g | sztuka",
       "kcal": float,
       "protein": float,
       "fat": float,
@@ -78,7 +84,7 @@ class VisionExtractor:
                             "properties": {
                                 "name": {"type": "STRING"},
                                 "quantity_value": {"type": "NUMBER"},
-                                "quantity_unit": {"type": "STRING"},
+                                "quantity_unit": {"type": "STRING", "enum": ["g", "sztuka"]},
                                 "kcal": {"type": "NUMBER"},
                                 "protein": {"type": "NUMBER"},
                                 "fat": {"type": "NUMBER"},

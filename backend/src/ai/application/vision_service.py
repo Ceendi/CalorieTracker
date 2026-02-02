@@ -98,7 +98,7 @@ class VisionProcessingService:
                 confidence=product.confidence,
                 unit_matched=product.unit_matched,
                 quantity_unit_value=product.quantity_unit_value,
-                status="matched" if product.match_strategy != "vision_ai_estimate" else "ai_estimate",
+                status="matched" if product.match_strategy != "vision_ai_estimate" else "needs_confirmation",
                 units=product.units,
                 notes=product.notes
             ))

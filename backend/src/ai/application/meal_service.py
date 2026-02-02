@@ -116,12 +116,15 @@ class MealRecognitionService:
             if best_match and best_match.score > 0.5:
                 use_db_match = True
             
-            final_grams = item.quantity_value # Default to what Gemini saw
-            
             if use_db_match and best_match:
                 raw_product = self.engine.get_product_by_id(best_match.product_id)
-                
-                final_grams = item.quantity_value
+
+                temp_item = ExtractedFoodItem(
+                    name=item.name,
+                    quantity_value=item.quantity_value,
+                    quantity_unit=item.quantity_unit
+                )
+                final_grams = self._calculate_grams(temp_item, raw_product)
                 qty_scale = final_grams / 100.0
                 
                 matched = MatchedProduct(
@@ -153,11 +156,20 @@ class MealRecognitionService:
                 matched_products.append(matched)
             else:
                 # FALLBACK to Gemini Macros
+                fallback_grams = item.quantity_value
+                if item.quantity_unit.lower() not in ("g", "gram", "ml"):
+                    for keyword, grams in DEFAULT_UNIT_GRAMS.items():
+                        if keyword in item.quantity_unit.lower():
+                            fallback_grams = grams * item.quantity_value
+                            break
+                    else:
+                        fallback_grams = DEFAULT_PORTION_GRAMS * item.quantity_value
+
                 matched = MatchedProduct(
-                    product_id="00000000-0000-0000-0000-000000000000", # Placeholder for AI-generated
+                    product_id="00000000-0000-0000-0000-000000000000",
                     name_pl=item.name,
                     name_en=item.name,
-                    quantity_grams=round(item.quantity_value, 1),
+                    quantity_grams=round(fallback_grams, 1),
                     kcal=round(item.kcal or 0, 1),
                     protein=round(item.protein or 0, 1),
                     fat=round(item.fat or 0, 1),
