@@ -267,7 +267,6 @@ async def generate_meal_plan(
             logger.error(f"Plan generation failed: task={task_id}, error={e}")
             _generation_progress[task_id] = {
                 "status": "error",
-                "error": str(e),
                 "message": "Blad podczas generowania planu"
             }
 

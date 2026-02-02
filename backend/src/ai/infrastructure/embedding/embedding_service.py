@@ -179,18 +179,23 @@ class EmbeddingService:
             embeddings = self.encode_passages_batch(names, batch_size=32, show_progress=True)
 
             # Update database
-            for food_id, embedding in zip(ids, embeddings):
-                embedding_list = embedding.tolist()
-                # Format embedding as PostgreSQL vector literal
-                vector_str = f"[{','.join(map(str, embedding_list))}]"
-                await session.execute(
-                    text("UPDATE foods SET embedding = :embedding WHERE id = :id"),
-                    {"embedding": vector_str, "id": food_id}
-                )
+            try:
+                for food_id, embedding in zip(ids, embeddings):
+                    embedding_list = embedding.tolist()
+                    # Format embedding as PostgreSQL vector literal
+                    vector_str = f"[{','.join(map(str, embedding_list))}]"
+                    await session.execute(
+                        text("UPDATE foods SET embedding = :embedding WHERE id = :id"),
+                        {"embedding": vector_str, "id": food_id}
+                    )
 
-            await session.commit()
-            total_updated += len(batch)
-            logger.info(f"Progress: {total_updated}/{len(foods)}")
+                await session.commit()
+                total_updated += len(batch)
+                logger.info(f"Progress: {total_updated}/{len(foods)}")
+            except Exception as e:
+                logger.error(f"Failed to update batch {i // batch_size + 1}: {e}")
+                await session.rollback()
+                raise
 
         logger.info(f"Generated embeddings for {total_updated} foods")
         return total_updated

@@ -227,9 +227,11 @@ async def process_food_image(
         result = await service.process_image(image_bytes, session)
         return result
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Image processing failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to process image. Please try again.")
 
 
 @router.get(

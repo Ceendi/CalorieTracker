@@ -20,7 +20,7 @@ class STTPort(Protocol):
 
 
 class SearchEnginePort(Protocol):
-    def search(self, query: str, top_k: int = 20, alpha: float = 0.3) -> List[SearchCandidate]:
+    async def search(self, query: str, top_k: int = 20, alpha: float = 0.3) -> List[SearchCandidate]:
         ...
 
     def index_products(self, products: List[Dict]) -> None:

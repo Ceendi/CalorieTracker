@@ -330,6 +330,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         Handles both code-block wrapped JSON and raw JSON.
         Attempts to clean common JSON errors and isolate the valid JSON object.
+        Validates extracted JSON with json.loads() and falls back to shorter
+        substrings if the initial extraction is invalid.
 
         Args:
             text: Raw LLM response text
@@ -341,22 +343,26 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             ValueError: If no valid JSON found
         """
         text = text.strip()
-        
-        # 1. Try to extract from code block
+
+        # 1. Try code block extraction
         match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
         if match:
-            text = match.group(1)
-        
+            candidate = match.group(1)
+            candidate = self._clean_json(candidate)
+            try:
+                json.loads(candidate)
+                return candidate
+            except json.JSONDecodeError:
+                pass  # Fall through to general extraction
+
         # 2. Find the first '{'
         start_idx = text.find('{')
         if start_idx == -1:
             raise ValueError("No JSON object found (no opening brace)")
-            
-        # 3. Find the matching closing '}'
-        # We count braces to handle nested objects correctly
+
+        # 3. Brace-counting to find matching '}'
         count = 0
         end_idx = -1
-        
         for i, char in enumerate(text[start_idx:], start=start_idx):
             if char == '{':
                 count += 1
@@ -365,24 +371,49 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 if count == 0:
                     end_idx = i
                     break
-        
+
         if end_idx == -1:
-             # If exact matching failed, try the last '}' in text
-             # This is a fallback for malformed JSON
-             end_idx = text.rfind('}')
-             if end_idx < start_idx:
-                 raise ValueError("No JSON object found (no closing brace)")
+            end_idx = text.rfind('}')
+            if end_idx < start_idx:
+                raise ValueError("No JSON object found (no closing brace)")
 
-        json_str = text[start_idx : end_idx + 1]
+        json_str = self._clean_json(text[start_idx:end_idx + 1])
 
-        # Clean up common errors
-        # 1. Remove comments // ...
+        # 4. Validate with json.loads; if invalid, try shorter substrings
+        try:
+            json.loads(json_str)
+            return json_str
+        except json.JSONDecodeError:
+            pass
+
+        # Fallback: try each '}' from end to find valid JSON
+        search_region = text[start_idx:]
+        for i in range(len(search_region) - 1, 0, -1):
+            if search_region[i] == '}':
+                candidate = self._clean_json(search_region[:i + 1])
+                try:
+                    json.loads(candidate)
+                    return candidate
+                except json.JSONDecodeError:
+                    continue
+
+        raise ValueError("No valid JSON object found in response")
+
+    def _clean_json(self, json_str: str) -> str:
+        """
+        Clean common JSON errors from LLM output.
+
+        Removes single-line comments and trailing commas before
+        closing braces/brackets.
+
+        Args:
+            json_str: Raw JSON string
+
+        Returns:
+            Cleaned JSON string
+        """
         json_str = re.sub(r'//.*$', '', json_str, flags=re.MULTILINE)
-        
-        # 2. Fix trailing commas (e.g. "a": 1, } -> "a": 1 })
-        # Matches a comma followed by whitespace and a closing brace/bracket
         json_str = re.sub(r',(\s*[\}\]])', r'\1', json_str)
-        
         return json_str
 
     def _parse_templates(

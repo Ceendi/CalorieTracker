@@ -12,9 +12,7 @@ from sqlalchemy import text
 from loguru import logger
 
 from src.ai.domain.models import SearchCandidate
-from src.ai.application.ports import SearchEnginePort
 from src.ai.infrastructure.search.pgvector_search import PgVectorSearchService
-from src.ai.infrastructure.embedding import EmbeddingService
 
 
 class PgVectorSearchAdapter:
@@ -115,6 +113,16 @@ class PgVectorSearchAdapter:
 
             row = result.fetchone()
             if row:
+                # Load units from food_units table
+                units_result = await self._session.execute(text("""
+                    SELECT label, grams FROM food_units
+                    WHERE food_id = :food_id ORDER BY priority DESC
+                """), {"food_id": product_id})
+                units = [
+                    {"name": unit_row.label, "weight_g": unit_row.grams}
+                    for unit_row in units_result.fetchall()
+                ]
+
                 return {
                     "id": str(row.id),
                     "name_pl": row.name,
@@ -125,7 +133,7 @@ class PgVectorSearchAdapter:
                     "fat_100g": row.fat or 0,
                     "carbs_100g": row.carbs or 0,
                     "source": row.source,
-                    "units": []  # TODO: Load units if available
+                    "units": units
                 }
         except Exception as e:
             logger.error(f"Failed to fetch product {product_id}: {e}")

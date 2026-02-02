@@ -1,6 +1,5 @@
 import re
 import time
-import inspect
 from typing import List, Optional, Dict
 from loguru import logger
 
@@ -55,13 +54,7 @@ class MealRecognitionService:
         Returns:
             List of SearchCandidate objects
         """
-        result = self.engine.search(query, top_k=top_k, alpha=alpha)
-
-        # Handle async search engines (like PgVectorSearchAdapter)
-        if inspect.isawaitable(result):
-            return await result
-
-        return result
+        return await self.engine.search(query, top_k=top_k, alpha=alpha)
 
     async def recognize_from_vision_items(
         self,
