@@ -154,7 +154,7 @@ class NaturalLanguageProcessor:
 
     def _extract_quantity(self, chunk: str) -> Tuple[str, Optional[float], Optional[str]]:
         patterns = [
-            (r'(\d+(?:[,.]\d+)?)\s*(g|gram[όwy]*|ml|mililitr[όw]*|sztuk[iy]?|szt\.?|kg|litr[όw]*)\b', True),
+            (r'(\d+(?:[,.]\d+)?)\s*(g|gram[óowy]*|ml|mililitr[óów]*|sztuk[iy]?|szt\.?|kg|litr[óów]*)\b', True),
             (r'\b(pół|półtora|półtorej)\s*(szklanki|szklankę|szklanka|łyżeczki|łyżeczka|łyżki|łyżka)\b', False),
             (r'\b(szklanka|szklankę|łyżka|łyżkę|łyżeczka|łyżeczkę|kromka|kromkę|plaster|plasterek)\b', False),
             (r'\b(garść|szczypta|odrobina|trochę|dużo|mało)\b', False),

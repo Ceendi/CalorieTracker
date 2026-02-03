@@ -118,6 +118,8 @@ async def process_audio_meal(
 
         return result
 
+    except HTTPException:
+        raise
     except TranscriptionFailedException as e:
         logger.error(f"Transcription failed: {e}")
         raise HTTPException(
@@ -171,6 +173,8 @@ async def transcribe_audio(
 
         return {"transcription": text, "language": language}
 
+    except HTTPException:
+        raise
     except TranscriptionFailedException as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

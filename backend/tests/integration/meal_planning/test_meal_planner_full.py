@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.getcwd(), "backend"))
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
 from src.meal_planning.domain.entities import MealTemplate, UserProfile, GeneratedDay, GeneratedMeal, GeneratedIngredient
 
+@pytest.mark.asyncio
 async def test_full_plan_optimization():
     print("Running full plan optimization test...")
     adapter = BielikMealPlannerAdapter()

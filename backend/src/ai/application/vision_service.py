@@ -38,6 +38,9 @@ class VisionProcessingService:
         """
         Process image and extract meal info.
         """
+        if session is None:
+            raise ValueError("Database session is required")
+
         start_time = time.time()
         
         # 1. Vision Extraction (Gemini)

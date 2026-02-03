@@ -3,12 +3,15 @@ import os
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 # Add backend to path so we can import config
 sys.path.append(os.path.join(os.getcwd(), "backend"))
 
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
 from src.meal_planning.domain.entities import MealTemplate, UserProfile
 
+@pytest.mark.asyncio
 async def test_meal_generation_calorie_parsing():
     print("Running calorie parsing test (standalone)...")
     adapter = BielikMealPlannerAdapter()

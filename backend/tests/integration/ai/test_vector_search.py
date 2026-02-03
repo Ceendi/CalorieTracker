@@ -3,6 +3,7 @@ import pytest
 import sys
 import os
 import asyncio
+import socket
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -10,6 +11,21 @@ from sqlalchemy.ext.asyncio import create_async_engine
 sys.path.append(os.path.join(os.getcwd(), "backend"))
 
 from src.ai.infrastructure.embedding.embedding_service import EmbeddingService
+
+
+def _db_is_reachable(host="localhost", port=5432, timeout=1):
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+requires_db = pytest.mark.skipif(
+    not _db_is_reachable(),
+    reason="PostgreSQL not reachable on localhost:5432",
+)
+
 
 def get_db_url():
     # Helper to get DB URL, similar to check_db.py
@@ -38,6 +54,7 @@ def get_db_url():
                     break
     return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/calorie_tracker_db"
 
+@requires_db
 @pytest.mark.asyncio
 async def test_vector_search_banana():
     """Test searching for 'BANAN' returns relevant banana products."""
@@ -71,6 +88,7 @@ async def test_vector_search_banana():
 
     await engine.dispose()
 
+@requires_db
 @pytest.mark.asyncio
 async def test_vector_search_potatoes():
     """Test searching for 'Ziemniaki' returns potato products."""
@@ -100,6 +118,7 @@ async def test_vector_search_potatoes():
 
     await engine.dispose()
 
+@requires_db
 @pytest.mark.asyncio
 async def test_vector_search_honey():
     """Test searching for 'Miód' returns honey products."""
