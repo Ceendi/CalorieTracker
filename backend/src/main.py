@@ -1,3 +1,4 @@
+import torch
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
@@ -13,6 +14,13 @@ from src.core.config import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Preloading AI models...")
+    
+    if torch.cuda.is_available():
+        logger.info(f"CUDA Available: True")
+        logger.info(f"Device Name: {torch.cuda.get_device_name(0)}")
+    else:
+        logger.warning("CUDA Available: False - Running on CPU")
+
     try:
         service = get_audio_service()
         await service.warmup()
