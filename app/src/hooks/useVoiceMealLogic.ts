@@ -83,7 +83,7 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
   const addManualItem = (product: FoodProduct) => {
     if (!localMeal) return;
     const newItem: ProcessedFoodItem = {
-      product_id: product.id ? parseInt(product.id) : null,
+      product_id: product.id || null,
       name: product.name,
       quantity_grams: 100,
       quantity_unit_value: 100,

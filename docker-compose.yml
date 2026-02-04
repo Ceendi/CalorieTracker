@@ -4,18 +4,19 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: calorie_tracker_backend
-    # CRITICAL: Required for PyTorch DataLoader with num_workers > 0
-    ipc: host
+    # Shared memory for PyTorch operations (replaces insecure ipc: host)
+    shm_size: "2g"
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/calorie_tracker
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calorie_tracker}
     env_file:
       - ./backend/.env
     deploy:
       resources:
         limits:
           memory: 16G
+          cpus: "4"
         reservations:
           devices:
             - driver: nvidia
@@ -25,7 +26,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
-      start_period: 60s
+      # AI model loading (Whisper, Bielik, E5) can take well over 60s
+      start_period: 180s
       retries: 3
     depends_on:
       db:
@@ -37,31 +39,47 @@ services:
         max-size: "100m"
         max-file: "3"
     volumes:
-       - ./backend/models:/app/models
-       - ./backend/local_wheels:/app/local_wheels
+      - ./backend/models:/app/models
+    networks:
+      - app-network
 
   db:
-    image: pgvector/pgvector:pg16
+    # Pin to a specific pgvector release for reproducible deployments
+    # Check available tags: https://hub.docker.com/r/pgvector/pgvector/tags
+    image: pgvector/pgvector:0.8.0-pg16
     container_name: calorie_tracker_db
+    # PostgreSQL uses shared memory heavily; default 64MB is too low for pgvector workloads
+    shm_size: "256m"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: calorie_tracker
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-calorie_tracker}
+    # Dev only — remove or comment out port exposure in production
     ports:
       - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     logging:
       driver: json-file
       options:
         max-size: "50m"
         max-file: "3"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:

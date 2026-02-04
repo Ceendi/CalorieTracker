@@ -1,5 +1,5 @@
-import React, { useRef, useMemo, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import React, { useRef, useMemo, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Dimensions, StyleSheet } from 'react-native';
 import { format, addDays, isSameDay, startOfDay } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -11,13 +11,114 @@ interface DateStripProps {
   onSelectDate: (date: Date) => void;
 }
 
+interface DateItemProps {
+  item: Date;
+  isSelected: boolean;
+  isToday: boolean;
+  colorScheme: 'light' | 'dark' | null | undefined;
+  locale: typeof pl | typeof enUS;
+  onPress: () => void;
+}
+
 const ITEM_WIDTH = Dimensions.get('window').width / 7;
+
+// Using StyleSheet instead of className to avoid NativeWind's react-native-css-interop
+// trying to access navigation context inside FlatList (which causes the error)
+const DateItem = React.memo(function DateItem({ 
+  item, 
+  isSelected, 
+  isToday, 
+  colorScheme, 
+  locale, 
+  onPress 
+}: DateItemProps) {
+  const tintColor = Colors[colorScheme ?? 'light'].tint;
+  
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={[
+        styles.itemContainer,
+        { width: ITEM_WIDTH, zIndex: isSelected ? 10 : 0 }
+      ]}
+    >
+      <View 
+        style={[
+          styles.itemInner,
+          { 
+            width: ITEM_WIDTH - 6,
+            backgroundColor: isSelected ? tintColor : 'transparent',
+          },
+          isSelected && styles.itemSelected
+        ]}
+      >
+        <Text style={[
+          styles.dayText,
+          { color: isSelected ? '#E0E7FF' : '#9CA3AF' }
+        ]}>
+          {format(item, 'EEE', { locale })}
+        </Text>
+        <Text style={[
+          styles.dateText,
+          { color: isSelected ? '#FFFFFF' : Colors[colorScheme ?? 'light'].text }
+        ]}>
+          {format(item, 'd')}
+        </Text>
+        {isToday && !isSelected && (
+          <View style={[styles.todayDot, { backgroundColor: tintColor }]} />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+const styles = StyleSheet.create({
+  itemContainer: {
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemInner: {
+    height: 70,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemSelected: {
+    shadowColor: '#312E81',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  dayText: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginBottom: 2,
+    textTransform: 'uppercase',
+  },
+  dateText: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  todayDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 4,
+  },
+  container: {
+    marginBottom: 8,
+    marginHorizontal: -20,
+    overflow: 'visible',
+  },
+});
 
 export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
   const { language } = useLanguage();
   const { colorScheme } = useColorScheme();
   const locale = language === 'pl' ? pl : enUS;
-  const isDark = colorScheme === 'dark';
   const flatListRef = useRef<FlatList>(null);
 
   const dates = useMemo(() => {
@@ -32,50 +133,28 @@ export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
   const selectedIndex = dates.findIndex(d => isSameDay(d, selectedDate));
   const todayIndex = dates.findIndex(d => isSameDay(d, new Date()));
 
-  useEffect(() => {
-      if (selectedIndex !== -1 && flatListRef.current) {
-          flatListRef.current.scrollToIndex({
-              index: selectedIndex,
-              animated: true,
-              viewPosition: 0
-          });
-      }
-  }, [selectedDate]); 
+  // Note: Removed automatic scrollToIndex on selectedDate change
+  // as it caused visual "jump" when user clicks on a date.
+  // The user is clicking on a visible date anyway, so no scroll needed. 
 
-  const renderItem = ({ item }: { item: Date }) => {
+  const renderItem = useCallback(({ item }: { item: Date }) => {
     const isSelected = isSameDay(item, selectedDate);
     const isToday = isSameDay(item, new Date());
 
     return (
-      <TouchableOpacity
+      <DateItem
+        item={item}
+        isSelected={isSelected}
+        isToday={isToday}
+        colorScheme={colorScheme}
+        locale={locale}
         onPress={() => onSelectDate(item)}
-        activeOpacity={0.7}
-        style={{ width: ITEM_WIDTH }}
-        className={`h-20 items-center justify-center ${isSelected ? 'z-10' : 'z-0'}`}
-      >
-        <View 
-            style={{ 
-                width: ITEM_WIDTH - 6,
-                backgroundColor: isSelected ? Colors[colorScheme ?? 'light'].tint : 'transparent'
-            }}
-            className={`h-[70px] rounded-2xl items-center justify-center ${isSelected ? 'shadow-md shadow-indigo-900/30' : ''}`}
-        >
-            <Text className={`text-[11px] font-bold mb-0.5 uppercase ${isSelected ? 'text-indigo-100' : 'text-gray-400'}`}>
-                {format(item, 'EEE', { locale })}
-            </Text>
-            <Text className={`text-xl font-extrabold ${isSelected ? 'text-white' : 'text-foreground'}`}>
-                {format(item, 'd')}
-            </Text>
-            {isToday && !isSelected && (
-                <View className="w-1 h-1 rounded-full mt-1" style={{ backgroundColor: Colors[colorScheme ?? 'light'].tint }} />
-            )}
-        </View>
-      </TouchableOpacity>
+      />
     );
-  };
+  }, [selectedDate, colorScheme, locale, onSelectDate]);
 
   return (
-    <View className="mb-2" style={{ marginHorizontal: -20, overflow: 'visible' }}>
+    <View style={styles.container}>
        <FlatList
           inverted 
           ref={flatListRef}
@@ -101,6 +180,7 @@ export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
                   flatListRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0 });
               }, 100);
           }}
+          extraData={selectedDate}
        />
     </View>
   );

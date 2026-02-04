@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const [date, setDate] = useState(new Date());
   const formattedDate = format(date, 'yyyy-MM-dd');
   
-  const { data: dailyLog, isLoading, refetch, deleteEntry } = useDiary(formattedDate);
+  const { data: dailyLog, isLoading, isRefetching, refetch, deleteEntry } = useDiary(formattedDate);
 
   // Note: useFocusEffect removed - TanStack Query handles refetching automatically
   // with refetchOnMount and the configured staleTime
@@ -75,7 +75,7 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView 
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
       >
         
         <View className="flex-row justify-between items-center mb-2">
@@ -96,7 +96,7 @@ export default function HomeScreen() {
         >
             <View className="flex-row justify-between items-center mb-4">
                  <Text className="text-indigo-100 font-semibold text-base">{t('dashboard.caloriesResult')}</Text>
-                 <IconSymbol name="flame.fill" size={20} color={Colors[colorScheme ?? 'light'].charts.proteinBg || '#E0E7FF'} />
+                 <IconSymbol name="flame.fill" size={20} color="rgba(255, 255, 255, 0.8)" />
             </View>
 
             <View className="items-center mb-4">

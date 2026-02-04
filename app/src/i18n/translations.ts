@@ -258,7 +258,7 @@ export const translations = {
         fat: "Fat",
         carbs: "Carbs",
         portionLabel: "Portion Size (g)",
-        quantity: "Quantity",
+        quantity: "Enter amount",
         mealLabel: "Meal",
         save: "Save Entry",
         success: "Success",
@@ -285,7 +285,7 @@ export const translations = {
         protein: "Protein",
         fat: "Fat",
         carbs: "Carbs",
-        quantity: "Quantity"
+        quantity: "Enter amount"
     },
     meals: {
         breakfast: "Breakfast",
@@ -624,7 +624,7 @@ export const translations = {
         fat: "Tłuszcz",
         carbs: "Węglowodany",
         portionLabel: "Rozmiar porcji (g)",
-        quantity: "Ilość",
+        quantity: "Podaj ilość",
         mealLabel: "Posiłek",
         save: "Zapisz",
         success: "Sukces",
@@ -651,7 +651,7 @@ export const translations = {
         protein: "Białko",
         fat: "Tłuszcz",
         carbs: "Węglowodany",
-        quantity: "Ilość"
+        quantity: "Podaj ilość"
     },
     meals: {
         breakfast: "Śniadanie",

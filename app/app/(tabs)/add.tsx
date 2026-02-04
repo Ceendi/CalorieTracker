@@ -83,10 +83,14 @@ export default function AddScreen() {
             const mealType = MEAL_TYPE_MAP[mealToLog.meal_type] || MealType.SNACK;
             const today = formatDateForApi();
 
+            console.log('DEBUG: handleConfirmMeal payload inspection');
+            console.log('DEBUG: mealToLog:', JSON.stringify(mealToLog, null, 2));
+
             const bulkItems = mealToLog.items
                 .filter(item => item.status === 'matched' && item.product_id)
                 .map(item => {
                     const productId = String(item.product_id);
+                    console.log(`DEBUG: Processing item: ${item.name}, product_id: ${productId}, type: ${typeof item.product_id}`);
 
                     let unitGrams = 1;
                     if (item.unit_matched !== 'g' && item.unit_matched !== 'gram' && item.units) {
@@ -103,12 +107,16 @@ export default function AddScreen() {
                     };
                 });
 
+            console.log('DEBUG: Final bulkItems to send:', JSON.stringify(bulkItems, null, 2));
+
             if (bulkItems.length > 0) {
                 await logEntriesBulk({
                     date: today,
                     meal_type: mealType,
                     items: bulkItems,
                 });
+            } else {
+                console.warn('DEBUG: No items to log (bulkItems is empty)');
             }
 
             setShowConfirmation(false);

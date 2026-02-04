@@ -59,6 +59,7 @@ export function QuantitySelector({
     <View className="bg-card rounded-2xl p-4 mb-4 shadow-sm border border-border z-50">
       <Text className="text-sm font-medium text-muted-foreground mb-2">{t('manualEntry.quantity')}</Text>
       
+      {/* Quantity Input Row */}
       <View className="flex-row items-stretch gap-2 h-14">
         <TouchableOpacity
           className="w-12 bg-muted/50 rounded-xl items-center justify-center"
@@ -90,40 +91,41 @@ export function QuantitySelector({
         >
           <IconSymbol name="plus" size={20} color={Colors[theme].mutedForeground} />
         </TouchableOpacity>
+      </View>
 
+      {/* Unit Selector - Full Width Below */}
+      <View className="mt-3">
         {units && units.length > 0 ? (
-          <View className="flex-[1.5]">
-            <TouchableOpacity
-              className="bg-background px-4 h-full rounded-xl flex-row items-center justify-between border border-border active:border-primary"
-              accessibilityLabel={t('accessibility.selectUnit')}
-              accessibilityRole="button"
-              onPress={() => {
-                Alert.alert(
-                  t('foodDetails.selectUnit'),
-                  "",
-                  [
-                    {
-                      text: t('foodDetails.grams'),
-                      onPress: () => handleUnitChangeWithConversion(null)
-                    },
-                    ...(units?.map(u => ({
-                      text: `${u.label} (${u.grams}g)`,
-                      onPress: () => handleUnitChangeWithConversion(u)
-                    })) || []),
-                    { text: t('settings.cancel'), style: "cancel" }
-                  ],
-                  { cancelable: true }
-                );
-              }}
-            >
-              <Text className="text-foreground font-medium text-base" numberOfLines={1}>
-                {selectedUnit ? selectedUnit.label : t('foodDetails.grams')}
-              </Text>
-              <IconSymbol name="chevron.down" size={14} color={Colors[theme].mutedForeground} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            className="bg-background px-4 py-3.5 rounded-xl flex-row items-center justify-between border border-border active:border-primary"
+            accessibilityLabel={t('accessibility.selectUnit')}
+            accessibilityRole="button"
+            onPress={() => {
+              Alert.alert(
+                t('foodDetails.selectUnit'),
+                "",
+                [
+                  {
+                    text: t('foodDetails.grams'),
+                    onPress: () => handleUnitChangeWithConversion(null)
+                  },
+                  ...(units?.map(u => ({
+                    text: `${u.label} (${u.grams}g)`,
+                    onPress: () => handleUnitChangeWithConversion(u)
+                  })) || []),
+                  { text: t('settings.cancel'), style: "cancel" }
+                ],
+                { cancelable: true }
+              );
+            }}
+          >
+            <Text className="text-foreground font-medium text-base flex-1">
+              {selectedUnit ? `${selectedUnit.label} (${selectedUnit.grams}g)` : t('foodDetails.grams')}
+            </Text>
+            <IconSymbol name="chevron.down" size={14} color={Colors[theme].mutedForeground} />
+          </TouchableOpacity>
         ) : (
-          <View className="flex-[1.5] bg-background px-4 h-full rounded-xl justify-center border border-border">
+          <View className="bg-background px-4 py-3.5 rounded-xl border border-border">
             <Text className="text-muted-foreground font-medium text-base">{t('foodDetails.grams')}</Text>
           </View>
         )}

@@ -36,16 +36,16 @@ const queryClient = new QueryClient({
   },
 });
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
+function InitialLayout() {
+  const { colorScheme } = useColorScheme();
   const { user, isLoading, checkSession } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const navigationState = useRootNavigationState();
 
   useEffect(() => {
     checkSession();
   }, []);
-
-  const navigationState = useRootNavigationState();
 
   useEffect(() => {
     if (isLoading) return;
@@ -76,39 +76,28 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [user, segments, isLoading, navigationState?.key]);
 
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-         <ActivityIndicator size="large" color={Colors.light.tint} />
-      </View>
-    );
-  }
-
-  return <>{children}</>;
-}
-
-function ThemeLayout({ children }: { children: React.ReactNode }) {
-  const { colorScheme } = useColorScheme();
   return (
     <View className={`flex-1 ${colorScheme === 'dark' ? 'dark' : ''}`}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        {children}
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          <Stack.Screen name="scanner" options={{ headerShown: false, presentation: 'modal' }} />
+          <Stack.Screen name="food-details" options={{ headerShown: true, presentation: 'card' }} />
+          <Stack.Screen name="manual-entry" options={{ headerShown: true, presentation: 'card' }} />
+        </Stack>
         <StatusBar style="auto" />
+        {isLoading && (
+          <View 
+            className="absolute inset-0 bg-background justify-center items-center"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          >
+            <ActivityIndicator size="large" color={Colors.light.tint} />
+          </View>
+        )}
       </ThemeProvider>
     </View>
-  );
-}
-
-function RootNavigation() {
-  return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-      <Stack.Screen name="scanner" options={{ headerShown: false, presentation: 'modal' }} />
-      <Stack.Screen name="food-details" options={{ headerShown: true, presentation: 'card' }} />
-      <Stack.Screen name="manual-entry" options={{ headerShown: true, presentation: 'card' }} />
-    </Stack>
   );
 }
 
@@ -116,11 +105,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <AuthGuard>
-          <ThemeLayout>
-             <RootNavigation />
-          </ThemeLayout>
-        </AuthGuard>
+        <InitialLayout />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

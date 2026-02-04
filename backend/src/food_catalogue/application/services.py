@@ -1,5 +1,7 @@
 import uuid
 from typing import List, Optional
+from dataclasses import replace
+from loguru import logger
 
 from src.food_catalogue.application.ports import FoodRepositoryPort, ExternalFoodProviderPort
 from src.food_catalogue.domain.entities import Food
@@ -11,14 +13,49 @@ class FoodService:
         self.external = external
 
     async def search_food(self, query: str, user_id: Optional[uuid.UUID] = None, limit: int = 20) -> List[Food]:
+        # 1. Search local DB first
         results = await self.repo.search_by_name(query, limit=limit, owner_id=user_id)
 
         if len(results) >= limit:
             return results
 
-        external_results = await self.external.search(query, limit=limit)
+        # 2. If not enough results, search external provider
+        try:
+            external_results = await self.external.search(query, limit=limit)
+        except Exception as e:
+            logger.error(f"External search failed for query '{query}': {e}")
+            return results
 
-        return results + external_results
+        # 3. Persist new external products to ensure they have valid UUIDs in our system
+        ready_external_products = []
+        for food in external_results:
+            if food.id and isinstance(food.id, uuid.UUID):
+                ready_external_products.append(food)
+            else:
+                persisted = await self._persist_external_product(food)
+                if persisted:
+                    ready_external_products.append(persisted)
+
+        return results + ready_external_products
+
+    async def _persist_external_product(self, food: Food) -> Optional[Food]:
+        """
+        Persists an external product to the local database to generate a stable UUID.
+        Handles duplicates by checking if the product already exists by barcode.
+        """
+        try:
+            if food.barcode:
+                existing = await self.repo.get_by_barcode(food.barcode)
+                if existing:
+                    return existing
+
+            food_to_save = replace(food, id=None, source="openfoodfacts")
+            
+            return await self.repo.save_custom_food(food_to_save)
+
+        except Exception as e:
+            logger.warning(f"Failed to persist external food '{food.name}' (barcode: {food.barcode}): {e}")
+            return None
 
     async def get_by_barcode(self, barcode: str, user_id: Optional[uuid.UUID] = None) -> Optional[Food]:
         local = await self.repo.get_by_barcode(barcode)
@@ -27,7 +64,8 @@ class FoodService:
 
         external = await self.external.fetch_by_barcode(barcode)
         if external:
-            return external
+            # Auto-persist single product lookup as well
+            return await self._persist_external_product(external)
 
         return None
 

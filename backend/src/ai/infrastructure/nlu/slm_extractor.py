@@ -43,7 +43,14 @@ class SLMExtractor(BaseNLUExtractor):
                         "properties": {
                             "name": {"type": "string"},
                             "quantity_value": {"type": "number"},
-                            "quantity_unit": {"type": "string"}
+                            "quantity_unit": {
+                                "type": "string",
+                                "enum": [
+                                    "gram", "szklanka", "łyżka", "łyżeczka", "sztuka", 
+                                    "Sztuka (mała)", "Sztuka (średnia)", "Sztuka (duża)", 
+                                    "porcja", "Porcja (mała)", "Porcja (średnia)", "Porcja (duża)"
+                                ]
+                            }
                         },
                         "required": ["name", "quantity_value", "quantity_unit"]
                     }

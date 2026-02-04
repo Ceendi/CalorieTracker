@@ -55,6 +55,11 @@ docker-compose*.yml
 .env.*
 !.env.example
 
+# Tests & scripts (not needed in production image)
+tests/
+scripts/
+conftest.py
+
 # Local development
 *.log
 *.tmp

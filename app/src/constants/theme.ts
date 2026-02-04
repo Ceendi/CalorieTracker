@@ -35,9 +35,9 @@ export const Colors = {
         protein: '#8B5CF6', // violet-500
         carbs: '#3B82F6', // blue-500
         fat: '#F97316', // orange-500
-        proteinBg: '#F3E8FF', // violet-100
-        carbsBg: '#DBEAFE', // blue-100
-        fatBg: '#FFEDD5', // orange-100
+        proteinBg: 'rgba(139, 92, 246, 0.15)', // violet with opacity
+        carbsBg: 'rgba(59, 130, 246, 0.15)', // blue with opacity
+        fatBg: 'rgba(249, 115, 22, 0.15)', // orange with opacity
     }
   },
   dark: {
@@ -59,12 +59,12 @@ export const Colors = {
     warning: '#f59e0b', // amber-500
     success: '#10b981', // emerald-500
     charts: {
-        protein: '#8B5CF6', // violet-500
-        carbs: '#3B82F6', // blue-500
-        fat: '#F97316', // orange-500
-        proteinBg: '#2e1065', // violet-950
-        carbsBg: '#172554', // blue-950
-        fatBg: '#431407', // orange-950
+        protein: '#A78BFA', // violet-400 (brighter)
+        carbs: '#60A5FA', // blue-400 (brighter)
+        fat: '#FB923C', // orange-400 (brighter)
+        proteinBg: 'rgba(139, 92, 246, 0.25)', // violet with opacity
+        carbsBg: 'rgba(59, 130, 246, 0.25)', // blue with opacity
+        fatBg: 'rgba(249, 115, 22, 0.25)', // orange with opacity
     }
   },
 };

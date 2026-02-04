@@ -1,6 +1,7 @@
 import torch
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from loguru import logger
 
 from src.users.api.routes import router as access_control_router
@@ -13,8 +14,9 @@ from src.core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.models_ready = False
     logger.info("Preloading AI models...")
-    
+
     if torch.cuda.is_available():
         logger.info(f"CUDA Available: True")
         logger.info(f"Device Name: {torch.cuda.get_device_name(0)}")
@@ -29,6 +31,8 @@ async def lifespan(app: FastAPI):
         logger.info("AI models preloaded successfully!")
     except Exception as e:
         logger.warning(f"Failed to preload AI models: {e}")
+
+    app.state.models_ready = True
     yield
 
 
@@ -52,4 +56,6 @@ async def root():
 
 @app.get("/health")
 async def health():
+    if not getattr(app.state, "models_ready", False):
+        return JSONResponse(status_code=503, content={"status": "loading"})
     return {"status": "ok"}

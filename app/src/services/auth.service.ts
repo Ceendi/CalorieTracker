@@ -2,7 +2,7 @@ import { apiClient } from './api.client';
 import { storageService } from './storage.service';
 import { LoginInput, RegisterInput, ChangePasswordInput } from '@/utils/validators';
 import { User } from '@/types/user';
-import { TokenResponseSchema, UserResponseSchema, TokenResponse } from '@/schemas/api';
+import { TokenResponseSchema, UserResponseSchema, TokenResponse, UserResponse } from '@/schemas/api';
 
 /**
  * Map API user response to frontend User type
@@ -43,9 +43,9 @@ export const authService = {
     return response.data;
   },
 
-  async verify(token: string): Promise<TokenResponse> {
+  async verify(token: string): Promise<UserResponse> {
     const response = await apiClient.post('/auth/verify', { token });
-    return TokenResponseSchema.parse(response.data);
+    return UserResponseSchema.parse(response.data);
   },
 
   async requestVerifyToken(email: string): Promise<void> {
