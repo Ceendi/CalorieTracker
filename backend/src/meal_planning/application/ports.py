@@ -151,7 +151,8 @@ class FoodSearchPort(Protocol):
     async def find_product_by_name(
         self,
         session: AsyncSession,
-        name: str
+        name: str,
+        preferences: Optional[Dict] = None,
     ) -> Optional[Dict]:
         """
         Find single best matching product by name.
@@ -162,6 +163,7 @@ class FoodSearchPort(Protocol):
         Args:
             session: Database session for queries
             name: Product name to search for
+            preferences: Optional dietary preferences for allergen filtering
 
         Returns:
             Dict with product info and nutrition, or None if not found

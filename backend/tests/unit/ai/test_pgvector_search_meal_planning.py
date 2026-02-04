@@ -41,6 +41,12 @@ def _get_fts_query(mock_session) -> str:
     return call_kwargs[0][1]["query"]  # positional arg [1] is the params dict
 
 
+def _get_vector_weight(mock_session) -> float:
+    """Extract the vector weight passed to hybrid_food_search."""
+    call_kwargs = mock_session.execute.call_args
+    return call_kwargs[0][1]["weight"]
+
+
 class TestMealPlanningQueryBuilding:
     """Tests for query construction in search_for_meal_planning."""
 
@@ -81,10 +87,10 @@ class TestMealPlanningQueryBuilding:
         assert embedding_q == "Owsianka z bananem i migdalami sniadanie"
 
     @pytest.mark.asyncio
-    async def test_with_description_fts_is_broad(
+    async def test_with_description_fts_is_focused(
         self, search_service, mock_embedding_service, mock_session
     ):
-        """FTS query should contain description + full base query for keyword coverage."""
+        """FTS query should use only the description — no generic base keywords."""
         await search_service.search_for_meal_planning(
             session=mock_session,
             meal_type="breakfast",
@@ -92,9 +98,9 @@ class TestMealPlanningQueryBuilding:
         )
 
         fts_q = _get_fts_query(mock_session)
-        assert fts_q.startswith("Owsianka z bananem i migdalami")
-        assert "platki owsiane" in fts_q
-        assert "jajka" in fts_q
+        assert fts_q == "Owsianka z bananem i migdalami"
+        assert "platki owsiane" not in fts_q
+        assert "jajka" not in fts_q
 
     @pytest.mark.asyncio
     async def test_empty_string_description_treated_as_no_description(
@@ -143,6 +149,48 @@ class TestMealPlanningQueryBuilding:
 
         embedding_q = mock_embedding_service.encode_query.call_args[0][0]
         assert embedding_q == "Kurczak z ryzem obiad"
+
+    @pytest.mark.asyncio
+    async def test_vector_weight_increased_with_description(
+        self, search_service, mock_embedding_service, mock_session
+    ):
+        """When description provided, vector weight should be > 0.5."""
+        await search_service.search_for_meal_planning(
+            session=mock_session,
+            meal_type="snack",
+            meal_description="Zupa krem z dyni",
+        )
+
+        weight = _get_vector_weight(mock_session)
+        assert weight > 0.5
+
+    @pytest.mark.asyncio
+    async def test_no_description_keeps_balanced_weight(
+        self, search_service, mock_embedding_service, mock_session
+    ):
+        """Without description, vector weight should be 0.5."""
+        await search_service.search_for_meal_planning(
+            session=mock_session,
+            meal_type="breakfast",
+        )
+
+        weight = _get_vector_weight(mock_session)
+        assert weight == 0.5
+
+    @pytest.mark.asyncio
+    async def test_no_description_fts_uses_full_base_query_keywords(
+        self, search_service, mock_embedding_service, mock_session
+    ):
+        """Without description, FTS should use full base query with all keywords."""
+        await search_service.search_for_meal_planning(
+            session=mock_session,
+            meal_type="snack",
+        )
+
+        fts_q = _get_fts_query(mock_session)
+        assert "orzechy" in fts_q
+        assert "baton" in fts_q
+        assert "jogurt" in fts_q
 
 
 class TestDietFilteringWithDescription:
@@ -269,4 +317,5 @@ class TestDietFilteringWithDescription:
 
         fts_q = _get_fts_query(mock_session)
         assert "Owsianka z bananem" in fts_q
-        assert "platki owsiane" in fts_q
+        # With description provided, FTS is focused — no base keywords appended
+        assert "platki owsiane" not in fts_q

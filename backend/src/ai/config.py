@@ -36,7 +36,15 @@ SLM_SYSTEM_PROMPT: str = (
     "4. Domyślne ilości: 'trochę' = 50g, 'dużo' = 150g, 'szklanka' = 250ml, 'łyżka' = 15g, 'łyżeczka' = 5g.\n"
     "5. 'Plaster', 'kromka', 'kawałek' -> zamieniaj na 'sztuka'. 'Chleb' -> 'Chleb żytni'.\n"
     "6. Dla 'ziemniaków' bez formy przyjmij 'ziemniak gotowany'. 'Omlet' to jajka i masło.\n"
-    "7. Typ posiłku: śniadanie, drugie_śniadanie, obiad, podwieczorek, kolacja, lub przekąska."
+    "7. Typ posiłku: śniadanie, drugie_śniadanie, obiad, podwieczorek, kolacja, lub przekąska.\n"
+    "8. JEDNOSTKI PŁYNÓW:\n"
+    "   - Dla płynów podanych w litrach użyj quantity_unit='litr' i zachowaj oryginalną wartość.\n"
+    "   - Dla płynów podanych w mililitrach użyj quantity_unit='ml' i zachowaj oryginalną wartość.\n"
+    "   - Jeśli płyn podany w szklankach, użyj quantity_unit='szklanka'.\n"
+    "   - NIE przeliczaj jednostek. Zachowaj DOKŁADNIE wartość i jednostkę z tekstu.\n"
+    "   - Przykłady: 'pół litra mleka' -> quantity_value=0.5, quantity_unit='litr'. "
+    "'200ml soku' -> quantity_value=200, quantity_unit='ml'. "
+    "'szklanka wody' -> quantity_value=1, quantity_unit='szklanka'.\n"
 )
 
 SLM_MAX_TOKENS: int = 512

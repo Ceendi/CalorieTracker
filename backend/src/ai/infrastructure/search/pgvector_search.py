@@ -13,6 +13,39 @@ from src.ai.infrastructure.embedding.embedding_service import EmbeddingService
 from src.ai.domain.models import SearchCandidate
 
 
+# Maps each allergen keyword to Polish morphological stems that cover
+# inflected forms (e.g. jajko → jajka/jajecznica/jajeczny).
+ALLERGEN_KEYWORD_STEMS: Dict[str, List[str]] = {
+    "jajko": ["jajk", "jajec", "omlet", "frittata"],
+    "jaja": ["jajk", "jajec", "omlet", "frittata"],
+    "jajka": ["jajk", "jajec", "omlet", "frittata"],
+    "mleko": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan"],
+    "laktoza": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk"],
+    "gluten": ["gluten", "pszen", "żytn", "zytn", "orkisz", "owsian", "jęczmien", "jeczmien"],
+    "orzechy": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
+    "orzeszki": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
+    "ryby": ["ryb", "łosoś", "losos", "dorsz", "tuńczyk", "tunczyk", "pstrąg", "pstrag", "śledź", "sledz", "makrela"],
+    "ryba": ["ryb", "łosoś", "losos", "dorsz", "tuńczyk", "tunczyk", "pstrąg", "pstrag", "śledź", "sledz", "makrela"],
+    "skorupiaki": ["skorupiak", "krewet", "krab", "homar", "langust", "małż", "malz", "ostryg"],
+    "soja": ["soj", "tofu", "edamame", "tempeh"],
+    "seler": ["seler"],
+    "gorczyca": ["gorczyc", "musztard"],
+}
+
+# Maps allergens to food categories that should be blocked entirely.
+ALLERGEN_CATEGORY_MAP: Dict[str, List[str]] = {
+    "jajko": ["Dania z jaj", "Nabiał i jaja"],
+    "jaja": ["Dania z jaj", "Nabiał i jaja"],
+    "jajka": ["Dania z jaj", "Nabiał i jaja"],
+    "mleko": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "laktoza": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "gluten": ["Pieczywo", "Produkty zbożowe"],
+    "ryby": ["Ryby", "Owoce morza"],
+    "ryba": ["Ryby", "Owoce morza"],
+    "skorupiaki": ["Owoce morza"],
+}
+
+
 class PgVectorSearchService:
     """
     Hybrid search using pgvector + PostgreSQL FTS.
@@ -120,16 +153,20 @@ class PgVectorSearchService:
 
         base_query = MEAL_QUERIES.get(meal_type, meal_type)
         if meal_description:
-            query = f"{meal_description} {base_query}"
+            # Use only the description for FTS — specific dish name drives keyword
+            # matching. Generic base_query keywords (e.g. "baton", "orzechy") would
+            # overwhelm the description in FTS ranking, causing irrelevant matches.
+            query = meal_description
             # Focused embedding: description + Polish meal type word only.
-            # The full query has ~20 generic keywords that dilute the embedding,
-            # while FTS benefits from them. Since hybrid_food_search takes
-            # query (FTS) and embedding (vector) independently, we can optimize each.
             meal_type_word = base_query.split()[0]
             embedding_query = f"{meal_description} {meal_type_word}"
+            # Higher vector weight when description available — semantic similarity
+            # captures dish intent better than keyword matching alone.
+            vector_weight = 0.7
         else:
             query = base_query
             embedding_query = base_query
+            vector_weight = 0.5
 
         # Dynamic query adjustment based on diet preferences
         # This helps RAG find relevant products even before python filtering
@@ -160,11 +197,12 @@ class PgVectorSearchService:
         fetch_limit = limit * 10
 
         result = await session.execute(text("""
-            SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, 0.5)
+            SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, :weight)
         """), {
             "query": query,
             "embedding": embedding_str,
-            "limit": fetch_limit
+            "limit": fetch_limit,
+            "weight": vector_weight,
         })
 
         rows = result.fetchall()
@@ -189,6 +227,40 @@ class PgVectorSearchService:
 
         return products[:limit]
 
+    @staticmethod
+    def _matches_allergen(name_lower: str, category: str, allergies: List[str]) -> bool:
+        """
+        Check if a product matches any declared allergen.
+
+        Uses morphological stem matching for known allergens and falls back
+        to simple substring matching for unknown ones.
+
+        Args:
+            name_lower: Lowercased product name
+            category: Product category string
+            allergies: List of allergen keywords (lowercased)
+
+        Returns:
+            True if the product should be blocked
+        """
+        for allergen in allergies:
+            # Check category-based blocking
+            blocked_categories = ALLERGEN_CATEGORY_MAP.get(allergen, [])
+            if category in blocked_categories:
+                return True
+
+            # Check stem-based name matching
+            stems = ALLERGEN_KEYWORD_STEMS.get(allergen)
+            if stems:
+                if any(stem in name_lower for stem in stems):
+                    return True
+            else:
+                # Unknown allergen — fall back to simple substring
+                if allergen in name_lower:
+                    return True
+
+        return False
+
     def _filter_by_preferences(
         self,
         products: List[Dict],
@@ -196,6 +268,9 @@ class PgVectorSearchService:
     ) -> List[Dict]:
         """
         Filter products based on dietary preferences.
+
+        Uses morphological stem matching for allergens to handle Polish
+        word forms (e.g. jajko/jajecznica/jajeczny).
 
         Args:
             products: List of product dicts
@@ -225,8 +300,8 @@ class PgVectorSearchService:
             name_lower = p["name"].lower()
             category = p.get("category", "")
 
-            # Skip products containing allergens
-            if any(a in name_lower for a in allergies):
+            # Skip products containing allergens (stem-based)
+            if allergies and self._matches_allergen(name_lower, category, allergies):
                 continue
 
             # Skip excluded ingredients
@@ -246,7 +321,8 @@ class PgVectorSearchService:
     async def find_product_by_name(
         self,
         session: AsyncSession,
-        name: str
+        name: str,
+        preferences: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict]:
         """
         Find single best matching product by name.
@@ -257,6 +333,7 @@ class PgVectorSearchService:
         Args:
             session: Database session
             name: Product name to search for
+            preferences: Optional dietary preferences for allergen filtering
 
         Returns:
             Dict with product info and nutrition, or None if not found
@@ -273,7 +350,7 @@ class PgVectorSearchService:
 
             row = result.fetchone()
             if row:
-                return {
+                product = {
                     "id": str(row.id),
                     "name": row.name,
                     "category": row.category,
@@ -282,6 +359,17 @@ class PgVectorSearchService:
                     "fat_per_100g": row.fat,
                     "carbs_per_100g": row.carbs
                 }
+
+                # Filter by allergens if preferences provided
+                if preferences:
+                    allergies = [a.lower() for a in preferences.get("allergies", [])]
+                    if allergies and self._matches_allergen(
+                        row.name.lower(), row.category or "", allergies
+                    ):
+                        logger.debug(f"Product '{row.name}' blocked by allergen filter")
+                        return None
+
+                return product
 
         return None
 

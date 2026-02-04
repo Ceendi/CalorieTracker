@@ -289,6 +289,7 @@ class MealRecognitionService:
                     quantity_value=chunk.quantity_value or 1.0,
                     quantity_unit=chunk.quantity_unit or "porcja"
                 )
+                temp_item = self._normalize_liquid_units(temp_item)
 
                 grams = self._calculate_grams(temp_item, raw_product)
                 qty_scale = grams / 100.0
@@ -340,6 +341,32 @@ class MealRecognitionService:
             processing_time_ms=round(processing_time, 2)
         )
 
+    @staticmethod
+    def _normalize_liquid_units(item: ExtractedFoodItem) -> ExtractedFoodItem:
+        """Convert metric liquid units (litr*, ml) to szklanki (1 szklanka = 250ml)."""
+        if not item.quantity_unit:
+            return item
+        unit = item.quantity_unit.lower()
+        if re.match(r'^litr[ayóów]*$', unit):
+            glasses = (item.quantity_value * 1000) / 250
+            return ExtractedFoodItem(
+                name=item.name,
+                quantity_value=round(glasses, 2),
+                quantity_unit="szklanka",
+                confidence=item.confidence,
+                extraction_method=item.extraction_method
+            )
+        elif re.match(r'^(ml|mililitr[óy]?|mililit(?:rów)?)$', unit):
+            glasses = item.quantity_value / 250
+            return ExtractedFoodItem(
+                name=item.name,
+                quantity_value=round(glasses, 2),
+                quantity_unit="szklanka",
+                confidence=item.confidence,
+                extraction_method=item.extraction_method
+            )
+        return item
+
     def _calculate_grams(self, item: ExtractedFoodItem, product: Optional[Dict]) -> float:
         if not product:
             return DEFAULT_PORTION_GRAMS
@@ -350,6 +377,8 @@ class MealRecognitionService:
         if re.match(r'^(g|gramy?|gram[óo]w|ml|mililitr[óy]?|mililit(?:rów)?)$', unit, re.IGNORECASE):
             return val
         if re.match(r'^kg$', unit, re.IGNORECASE):
+            return val * 1000
+        if re.match(r'^litr[ayóów]*$', unit, re.IGNORECASE):
             return val * 1000
 
         if "units" in product:

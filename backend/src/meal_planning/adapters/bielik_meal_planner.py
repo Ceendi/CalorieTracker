@@ -134,7 +134,10 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         response_text = response["choices"][0]["text"]
         logger.debug(f"Template generation response: {response_text[:500]}...")
 
-        return self._parse_templates(response_text, profile, days)
+        templates = self._parse_templates(response_text, profile, days)
+
+        # Filter out templates whose descriptions contain allergens
+        return self._filter_templates_by_allergies(templates, profile)
 
     async def generate_meal(
         self,
@@ -163,6 +166,10 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         # Format products as indexed list (limit to context size)
         products_limited = available_products[:MAX_PRODUCTS_IN_PROMPT]
         products_text, index_map = self._format_products_indexed(products_limited)
+        
+        logger.debug(
+            f"  📋 Providing {len(products_limited)} products to LLM for '{template.description}'"
+        )
 
         # Format used ingredients (limit for context)
         used_limited = used_ingredients[-MAX_USED_INGREDIENTS_IN_PROMPT:]
@@ -441,13 +448,34 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             # Return default templates as fallback
             return self._generate_default_templates(profile, expected_days)
 
+        EXPECTED_MEAL_TYPES = ["breakfast", "second_breakfast", "lunch", "snack", "dinner"]
+
+        default_descriptions = {
+            "breakfast": "Sniadanie",
+            "second_breakfast": "Drugie sniadanie",
+            "lunch": "Obiad",
+            "snack": "Podwieczorek",
+            "dinner": "Kolacja",
+        }
+
         templates: List[List[MealTemplate]] = []
 
-        for day_data in data.get("days", []):
+        for day_idx, day_data in enumerate(data.get("days", [])):
             day_templates: List[MealTemplate] = []
+            seen_types: set = set()
 
             for meal_data in day_data.get("meals", []):
                 meal_type = meal_data.get("type", "snack")
+
+                # Deduplicate: skip duplicate meal types (keep first)
+                if meal_type in seen_types:
+                    logger.warning(
+                        f"Day {day_idx + 1}: duplicate meal_type '{meal_type}' "
+                        f"in LLM output, skipping"
+                    )
+                    continue
+                seen_types.add(meal_type)
+
                 ratio = self.MEAL_DISTRIBUTION.get(meal_type, 0.20)
 
                 template = MealTemplate(
@@ -459,6 +487,20 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                     description=meal_data.get("description", f"Posilek {meal_type}"),
                 )
                 day_templates.append(template)
+
+            # Fill missing meal types with defaults
+            for mt in EXPECTED_MEAL_TYPES:
+                if mt not in seen_types:
+                    ratio = self.MEAL_DISTRIBUTION.get(mt, 0.20)
+                    day_templates.append(MealTemplate(
+                        meal_type=mt,
+                        target_kcal=int(profile.daily_kcal * ratio),
+                        target_protein=round(profile.daily_protein * ratio, 1),
+                        target_fat=round(profile.daily_fat * ratio, 1),
+                        target_carbs=round(profile.daily_carbs * ratio, 1),
+                        description=default_descriptions.get(mt, "Posilek"),
+                    ))
+                    logger.debug(f"Day {day_idx + 1}: added missing meal type '{mt}'")
 
             templates.append(day_templates)
 
@@ -515,6 +557,72 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             ))
         return templates
 
+    def _filter_templates_by_allergies(
+        self,
+        templates: List[List[MealTemplate]],
+        profile: UserProfile,
+    ) -> List[List[MealTemplate]]:
+        """
+        Replace templates whose descriptions contain allergens with safe defaults.
+
+        Scans each template description against allergen stems and replaces
+        matching ones with generic descriptions.
+
+        Args:
+            templates: List of days, each with meal templates
+            profile: User profile containing preferences with allergies
+
+        Returns:
+            Templates with allergen-containing descriptions replaced
+        """
+        from src.ai.infrastructure.search.pgvector_search import ALLERGEN_KEYWORD_STEMS
+
+        allergies = [a.lower() for a in profile.preferences.get("allergies", [])]
+        if not allergies:
+            return templates
+
+        default_descriptions = {
+            "breakfast": "Sniadanie",
+            "second_breakfast": "Drugie sniadanie",
+            "lunch": "Obiad",
+            "snack": "Podwieczorek",
+            "dinner": "Kolacja",
+        }
+
+        for day_templates in templates:
+            for i, template in enumerate(day_templates):
+                desc_lower = template.description.lower()
+                blocked = False
+                for allergen in allergies:
+                    stems = ALLERGEN_KEYWORD_STEMS.get(allergen)
+                    if stems:
+                        if any(stem in desc_lower for stem in stems):
+                            blocked = True
+                            break
+                    else:
+                        if allergen in desc_lower:
+                            blocked = True
+                            break
+
+                if blocked:
+                    safe_desc = default_descriptions.get(
+                        template.meal_type, "Posilek"
+                    )
+                    logger.warning(
+                        f"Template '{template.description}' contains allergen, "
+                        f"replacing with '{safe_desc}'"
+                    )
+                    day_templates[i] = MealTemplate(
+                        meal_type=template.meal_type,
+                        target_kcal=template.target_kcal,
+                        target_protein=template.target_protein,
+                        target_fat=template.target_fat,
+                        target_carbs=template.target_carbs,
+                        description=safe_desc,
+                    )
+
+        return templates
+
     def _parse_meal_indexed(
         self,
         response: str,
@@ -567,7 +675,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             # Look up product by index
             product = index_map.get(idx)
             if not product:
-                logger.warning(f"Invalid product index {idx}, skipping")
+                logger.warning(f"  ⚠️ Invalid product index {idx}, skipping")
                 continue
 
             # Parse grams (support "grams", "amount_grams", "amount")
@@ -587,6 +695,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
             # Clamp to reasonable range
             grams = max(5.0, min(grams, 1000.0))
+            
+            logger.debug(f"  ✓ LLM selected [{idx}]: {product['name']} ({grams:.0f}g)")
 
             # Calculate nutrition from database values (not estimates!)
             factor = grams / 100.0

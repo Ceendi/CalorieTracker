@@ -46,9 +46,10 @@ class SLMExtractor(BaseNLUExtractor):
                             "quantity_unit": {
                                 "type": "string",
                                 "enum": [
-                                    "gram", "szklanka", "łyżka", "łyżeczka", "sztuka", 
-                                    "Sztuka (mała)", "Sztuka (średnia)", "Sztuka (duża)", 
-                                    "porcja", "Porcja (mała)", "Porcja (średnia)", "Porcja (duża)"
+                                    "gram", "szklanka", "łyżka", "łyżeczka", "sztuka",
+                                    "Sztuka (mała)", "Sztuka (średnia)", "Sztuka (duża)",
+                                    "porcja", "Porcja (mała)", "Porcja (średnia)", "Porcja (duża)",
+                                    "ml", "litr"
                                 ]
                             }
                         },
@@ -119,28 +120,57 @@ class SLMExtractor(BaseNLUExtractor):
             f"<|start_header_id|>assistant<|end_header_id|>\n\n"
         )
         
+    @staticmethod
+    def _convert_liquid_units(item: ExtractedFoodItem) -> ExtractedFoodItem:
+        """Convert metric liquid units (litr, ml) to szklanki programmatically.
+
+        1 szklanka = 250ml. This avoids relying on the SLM to do arithmetic.
+        """
+        unit_lower = item.quantity_unit.lower()
+        if unit_lower == "litr":
+            glasses = (item.quantity_value * 1000) / 250
+            return ExtractedFoodItem(
+                name=item.name,
+                quantity_value=round(glasses, 2),
+                quantity_unit="szklanka",
+                confidence=item.confidence,
+                extraction_method=item.extraction_method
+            )
+        elif unit_lower == "ml":
+            glasses = item.quantity_value / 250
+            return ExtractedFoodItem(
+                name=item.name,
+                quantity_value=round(glasses, 2),
+                quantity_unit="szklanka",
+                confidence=item.confidence,
+                extraction_method=item.extraction_method
+            )
+        return item
+
     def _parse_json_result(self, data: dict, raw_text: str) -> Tuple[MealExtraction, float]:
         meal_map = {
             "śniadanie": MealType.BREAKFAST,
-            "drugie_śniadanie": MealType.LUNCH, 
-            "obiad": MealType.LUNCH, 
+            "drugie_śniadanie": MealType.LUNCH,
+            "obiad": MealType.LUNCH,
             "podwieczorek": MealType.SNACK,
             "kolacja": MealType.DINNER,
             "przekąska": MealType.SNACK
         }
-        
+
         meal_str = data.get("meal_type", "przekąska")
         meal_type = meal_map.get(meal_str, MealType.SNACK)
-        
+
         items = []
         for i in data.get("items", []):
-            items.append(ExtractedFoodItem(
+            item = ExtractedFoodItem(
                 name=i["name"],
                 quantity_value=float(i["quantity_value"]),
                 quantity_unit=i["quantity_unit"],
-                confidence=0.95, 
+                confidence=0.95,
                 extraction_method=ExtractionMethod.SLM
-            ))
+            )
+            item = self._convert_liquid_units(item)
+            items.append(item)
             
         extraction = MealExtraction(
             meal_type=meal_type,

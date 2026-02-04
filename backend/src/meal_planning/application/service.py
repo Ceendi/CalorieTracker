@@ -394,15 +394,29 @@ class MealPlanService:
                 products = await self._search_products_for_meal(template, preferences)
 
                 # Generate meal with ingredients
+                logger.debug(
+                    f"  Generating meal with {len(products)} available products..."
+                )
                 meal = await self._planner.generate_meal(
                     template=template,
                     profile=profile,
                     used_ingredients=used_ingredients,
                     available_products=products
                 )
+                
+                # Log what LLM selected
+                logger.info(
+                    f"✅ Generated '{meal.name}' with {len(meal.ingredients)} ingredients: "
+                    f"{', '.join([ing.name for ing in meal.ingredients])}"
+                )
 
                 # Enrich ingredients that weren't found in initial search
-                meal = await self._enrich_meal_ingredients(meal)
+                enrich_prefs = {
+                    "allergies": preferences.allergies,
+                    "diet": preferences.diet,
+                    "excluded_ingredients": preferences.excluded_ingredients,
+                }
+                meal = await self._enrich_meal_ingredients(meal, enrich_prefs)
 
                 day_meals.append(meal)
 
@@ -423,6 +437,19 @@ class MealPlanService:
                         "progress": progress,
                         "message": f"Dzien {day_idx + 1}: {template.description}"
                     })
+
+            # Defense-in-depth: deduplicate by meal_type (keep first occurrence)
+            seen_types: set = set()
+            deduped_meals = []
+            for m in day_meals:
+                if m.meal_type not in seen_types:
+                    seen_types.add(m.meal_type)
+                    deduped_meals.append(m)
+                else:
+                    logger.warning(
+                        f"Day {day_idx + 1}: duplicate meal_type '{m.meal_type}' removed"
+                    )
+            day_meals = deduped_meals
 
             generated_days.append(GeneratedDay(
                 day_number=day_idx + 1,
@@ -470,13 +497,16 @@ class MealPlanService:
         )
 
         # Validate plan quality
-        validation = self.validate_plan_quality(generated_plan, profile.daily_kcal)
+        validation = self.validate_plan_quality(
+            generated_plan, profile.daily_kcal, preferences=preferences_dict
+        )
         generated_plan.generation_metadata["quality_validation"] = validation
 
         logger.info(
             f"Plan quality: {validation['food_id_percentage']:.1f}% ingredients matched, "
             f"{len(validation['empty_meals'])} empty meals, "
-            f"{len(validation['calorie_deviation_days'])} days with calorie deviation"
+            f"{len(validation['calorie_deviation_days'])} days with calorie deviation, "
+            f"{len(validation['allergen_violations'])} allergen violations"
         )
 
         if progress_callback:
@@ -536,14 +566,28 @@ class MealPlanService:
             meal_description=template.description,
         )
 
-        logger.debug(
-            f"Product search for meal '{template.meal_type}' ({template.description}): "
-            f"{len(products)} products found via pgvector"
+        logger.info(
+            f"🔍 Product search for '{template.meal_type}' ({template.description}): "
+            f"Found {len(products)} products"
         )
+        
+        # Log detailed product list for debugging
+        if products:
+            product_names = [p.get('name', 'Unknown') for p in products[:10]]
+            logger.debug(
+                f"  Top products: {', '.join(product_names)}"
+                f"{' ...' if len(products) > 10 else ''}"
+            )
+        else:
+            logger.warning(f"  ⚠️ No products found for {template.meal_type}!")
 
         return products
 
-    async def _enrich_meal_ingredients(self, meal: GeneratedMeal) -> GeneratedMeal:
+    async def _enrich_meal_ingredients(
+        self,
+        meal: GeneratedMeal,
+        preferences: Optional[Dict[str, Any]] = None,
+    ) -> GeneratedMeal:
         """
         Enrich meal ingredients by searching for products that weren't found.
 
@@ -552,6 +596,7 @@ class MealPlanService:
 
         Args:
             meal: Generated meal with potentially unmatched ingredients
+            preferences: Optional dietary preferences for allergen filtering
 
         Returns:
             Meal with enriched ingredients (food_id and accurate nutrition)
@@ -571,7 +616,8 @@ class MealPlanService:
             # Search for this specific ingredient
             product = await self._food_search.find_product_by_name(
                 session=self._session,
-                name=ing.name
+                name=ing.name,
+                preferences=preferences,
             )
 
             if product:
@@ -591,11 +637,11 @@ class MealPlanService:
                 )
                 enriched_ingredients.append(enriched_ing)
                 recalc_needed = True
-                logger.debug(f"Enriched ingredient: {ing.name} -> {product['name']}")
+                logger.info(f"  🔄 Enriched: '{ing.name}' → '{product['name']}' (ID: {food_id})")
             else:
                 # Still not found, keep original with estimates
                 enriched_ingredients.append(ing)
-                logger.debug(f"Ingredient not found after second search: {ing.name}")
+                logger.warning(f"  ⚠️ Ingredient not found in DB: '{ing.name}' (using estimates)")
 
         if not recalc_needed:
             return meal
@@ -621,7 +667,8 @@ class MealPlanService:
     def validate_plan_quality(
         self,
         plan: GeneratedPlan,
-        daily_target_kcal: int
+        daily_target_kcal: int,
+        preferences: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Validate the quality of a generated meal plan.
@@ -630,24 +677,37 @@ class MealPlanService:
         - Percentage of ingredients with valid food_id (should be 100%)
         - Daily calorie deviation from target (should be 80-120%)
         - Empty meals (meals with no ingredients)
+        - Allergen violations (ingredients matching declared allergies)
 
         Args:
             plan: Generated plan to validate
             daily_target_kcal: Target daily calories
+            preferences: Optional preferences dict with allergies list
 
         Returns:
             Dict with validation results:
             - food_id_percentage: float (0-100)
             - calorie_deviation_days: List of day numbers with deviation outside 80-120%
             - empty_meals: List of (day_number, meal_type) tuples
+            - allergen_violations: List of (day_number, meal_type, ingredient_name, allergen)
             - issues: List of human-readable issue strings
             - is_valid: bool (True if no critical issues)
         """
+        from src.ai.infrastructure.search.pgvector_search import (
+            ALLERGEN_KEYWORD_STEMS,
+        )
+
         total_ingredients = 0
         ingredients_with_food_id = 0
         calorie_deviation_days: List[int] = []
         empty_meals: List[tuple] = []
+        allergen_violations: List[tuple] = []
         issues: List[str] = []
+
+        # Build allergen stems for scanning
+        allergies = []
+        if preferences:
+            allergies = [a.lower() for a in preferences.get("allergies", [])]
 
         for day in plan.days:
             day_kcal = day.total_kcal
@@ -681,6 +741,25 @@ class MealPlanService:
                             f"'{ing.name}' bez food_id"
                         )
 
+                    # Check allergen violations
+                    if allergies:
+                        name_lower = ing.name.lower()
+                        for allergen in allergies:
+                            stems = ALLERGEN_KEYWORD_STEMS.get(allergen)
+                            matched = False
+                            if stems:
+                                matched = any(s in name_lower for s in stems)
+                            else:
+                                matched = allergen in name_lower
+                            if matched:
+                                allergen_violations.append(
+                                    (day.day_number, meal.meal_type, ing.name, allergen)
+                                )
+                                issues.append(
+                                    f"ALERGEN! Dzien {day.day_number}, {meal.meal_type}: "
+                                    f"'{ing.name}' zawiera alergen '{allergen}'"
+                                )
+
         # Calculate food_id percentage
         food_id_percentage = 0.0
         if total_ingredients > 0:
@@ -691,12 +770,14 @@ class MealPlanService:
             food_id_percentage >= 90.0  # At least 90% matched
             and len(empty_meals) == 0  # No empty meals
             and len(calorie_deviation_days) <= len(plan.days) // 2  # Max half days off
+            and len(allergen_violations) == 0  # No allergen violations
         )
 
         return {
             "food_id_percentage": round(food_id_percentage, 1),
             "calorie_deviation_days": calorie_deviation_days,
             "empty_meals": empty_meals,
+            "allergen_violations": allergen_violations,
             "issues": issues,
             "is_valid": is_valid,
             "total_ingredients": total_ingredients,

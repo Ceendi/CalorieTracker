@@ -170,9 +170,27 @@ class TestParseTemplates:
         templates = adapter._parse_templates(response, profile, 1)
 
         assert len(templates) == 1
-        assert len(templates[0]) == 2
-        assert templates[0][0].meal_type == "breakfast"
-        assert templates[0][0].description == "Owsianka"
+        # Implementation auto-fills missing meal types to ensure complete daily plans
+        assert len(templates[0]) == 5
+        
+        # Find the breakfast and lunch meals (order may vary due to auto-fill)
+        meals_by_type = {t.meal_type: t for t in templates[0]}
+        
+        assert "breakfast" in meals_by_type
+        assert meals_by_type["breakfast"].description == "Owsianka"
+        
+        assert "lunch" in meals_by_type
+        assert meals_by_type["lunch"].description == "Kurczak z ryzem"
+        
+        # Verify missing meals were auto-filled with defaults
+        assert "second_breakfast" in meals_by_type
+        assert meals_by_type["second_breakfast"].description == "Drugie sniadanie"
+        
+        assert "snack" in meals_by_type
+        assert meals_by_type["snack"].description == "Podwieczorek"
+        
+        assert "dinner" in meals_by_type
+        assert meals_by_type["dinner"].description == "Kolacja"
 
     def test_calculates_macros_from_profile_ratios(self, adapter):
         profile = make_profile(daily_kcal=2000, daily_protein=150, daily_fat=55, daily_carbs=225)

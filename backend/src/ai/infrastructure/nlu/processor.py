@@ -152,10 +152,17 @@ class NaturalLanguageProcessor:
         chunks = [c.strip() for c in raw_chunks if c.strip()]
         return chunks
 
+    UNIT_WORDS_PATTERN = (
+        r'\b(szklanki|szklankę|szklanka|łyżki|łyżkę|łyżka|łyżeczki|łyżeczkę|łyżeczka|'
+        r'kromki|kromkę|kromka|plastry|plasterki|plasterek|plaster|'
+        r'garść|szczypta|porcja|porcję|porcji|'
+        r'litry|litrów|litra|litr|sztuki|sztuk|sztuka|szt)\b'
+    )
+
     def _extract_quantity(self, chunk: str) -> Tuple[str, Optional[float], Optional[str]]:
         patterns = [
             (r'(\d+(?:[,.]\d+)?)\s*(g|gram[óowy]*|ml|mililitr[óów]*|sztuk[iy]?|szt\.?|kg|litr[óów]*)\b', True),
-            (r'\b(pół|półtora|półtorej)\s*(szklanki|szklankę|szklanka|łyżeczki|łyżeczka|łyżki|łyżka)\b', False),
+            (r'\b(pół|półtora|półtorej)\s*(szklanki|szklankę|szklanka|łyżeczki|łyżeczka|łyżki|łyżka|litra|litrów|litry|litr)\b', False),
             (r'\b(szklanka|szklankę|łyżka|łyżkę|łyżeczka|łyżeczkę|kromka|kromkę|plaster|plasterek)\b', False),
             (r'\b(garść|szczypta|odrobina|trochę|dużo|mało)\b', False),
         ]
@@ -172,7 +179,10 @@ class NaturalLanguageProcessor:
                     unit = match.group(2)
                 else:
                     word_qty = match.group(1).lower()
-                    if "pół" in word_qty:
+                    if word_qty in ("półtora", "półtorej"):
+                        val = 1.5
+                        unit = match.group(2) if len(match.groups()) > 1 else word_qty
+                    elif "pół" in word_qty:
                         val = 0.5
                         unit = match.group(2) if len(match.groups()) > 1 else word_qty
                     else:
@@ -185,6 +195,15 @@ class NaturalLanguageProcessor:
 
         if val is None:
             cleaned_text, val = self._extract_polish_numeral(cleaned_text)
+
+        # After Polish numeral extraction, try to capture a unit from remaining text
+        # e.g. "dwa litry mleka" → numeral gives val=2, cleaned="litry mleka" → capture "litry"
+        if val is not None and unit is None:
+            unit_match = re.search(self.UNIT_WORDS_PATTERN, cleaned_text, re.IGNORECASE)
+            if unit_match:
+                unit = unit_match.group(1)
+                cleaned_text = cleaned_text[:unit_match.start()] + cleaned_text[unit_match.end():]
+                cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
 
         return cleaned_text if cleaned_text else chunk, val, unit
 
