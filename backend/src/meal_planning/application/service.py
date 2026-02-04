@@ -532,7 +532,8 @@ class MealPlanService:
             session=self._session,
             meal_type=template.meal_type,
             preferences=preferences_dict,
-            limit=limit
+            limit=limit,
+            meal_description=template.description,
         )
 
         logger.debug(

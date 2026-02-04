@@ -89,7 +89,8 @@ class PgVectorSearchService:
         session: AsyncSession,
         meal_type: str,
         preferences: Optional[Dict[str, Any]] = None,
-        limit: int = 40
+        limit: int = 40,
+        meal_description: Optional[str] = None,
     ) -> List[Dict]:
         """
         Search products for meal planning.
@@ -117,7 +118,18 @@ class PgVectorSearchService:
             "dinner": "kolacja kanapka salata jajka ser wedlina warzywa pomidor ogorek papryka twarog chleb razowy salatka grecka omlet szynka"
         }
 
-        query = MEAL_QUERIES.get(meal_type, meal_type)
+        base_query = MEAL_QUERIES.get(meal_type, meal_type)
+        if meal_description:
+            query = f"{meal_description} {base_query}"
+            # Focused embedding: description + Polish meal type word only.
+            # The full query has ~20 generic keywords that dilute the embedding,
+            # while FTS benefits from them. Since hybrid_food_search takes
+            # query (FTS) and embedding (vector) independently, we can optimize each.
+            meal_type_word = base_query.split()[0]
+            embedding_query = f"{meal_description} {meal_type_word}"
+        else:
+            query = base_query
+            embedding_query = base_query
 
         # Dynamic query adjustment based on diet preferences
         # This helps RAG find relevant products even before python filtering
@@ -127,15 +139,19 @@ class PgVectorSearchService:
                 # Remove carb-heavy keywords and add fat/protein sources
                 for kw in ["chleb", "ziemniaki", "ryz", "makaron", "banan", "jablko", "platki", "owsiane"]:
                     query = query.replace(kw, "")
+                    embedding_query = embedding_query.replace(kw, "")
                 query += " awokado boczek jajka oliwa orzechy mieso ryby ser maslo"
+                embedding_query += " awokado oliwa orzechy"
             elif diet == "vegan":
                 # Remove animal products and add plant sources
                 for kw in ["jajka", "mieso", "kurczak", "ser", "wedlina", "twarog", "mleko", "maslo", "ryba", "jogurt"]:
                     query = query.replace(kw, "")
+                    embedding_query = embedding_query.replace(kw, "")
                 query += " tofu soczewica ciecierzyca warzywa orzechy fasola mleko_roslinne hummus"
+                embedding_query += " tofu soczewica warzywa"
 
         # Get more results for filtering
-        query_embedding = self._embedding_service.encode_query(query)
+        query_embedding = self._embedding_service.encode_query(embedding_query)
         # Format with 8 decimal places to match pgvector storage precision
         embedding_str = f"[{','.join(f'{x:.8f}' for x in query_embedding.tolist())}]"
 

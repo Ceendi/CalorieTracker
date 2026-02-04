@@ -123,7 +123,8 @@ class FoodSearchPort(Protocol):
         session: AsyncSession,
         meal_type: str,
         preferences: Optional[Dict] = None,
-        limit: int = 40
+        limit: int = 40,
+        meal_description: Optional[str] = None,
     ) -> List[Dict]:
         """
         Search products suitable for meal planning with nutrition data.
