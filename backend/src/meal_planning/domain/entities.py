@@ -52,6 +52,8 @@ class MealTemplate:
         target_fat: Target fat in grams
         target_carbs: Target carbohydrates in grams
         description: Short description of the meal concept (e.g., "Owsianka z owocami")
+        ingredient_keywords: List of ingredient keywords for focused product search
+                            (e.g., ["chleb", "twarog", "rzodkiewka"] for "Kanapki z twarogiem")
     """
     meal_type: str
     target_kcal: int
@@ -59,6 +61,7 @@ class MealTemplate:
     target_fat: float
     target_carbs: float
     description: str
+    ingredient_keywords: List[str] = field(default_factory=list)
 
 
 @dataclass

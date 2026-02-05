@@ -182,15 +182,18 @@ class TestParseTemplates:
         assert "lunch" in meals_by_type
         assert meals_by_type["lunch"].description == "Kurczak z ryzem"
         
-        # Verify missing meals were auto-filled with defaults
+        # Verify missing meals were auto-filled with specific default descriptions
         assert "second_breakfast" in meals_by_type
-        assert meals_by_type["second_breakfast"].description == "Drugie sniadanie"
-        
+        assert meals_by_type["second_breakfast"].description == "Jogurt z orzechami"
+        assert meals_by_type["second_breakfast"].ingredient_keywords  # Should have keywords
+
         assert "snack" in meals_by_type
-        assert meals_by_type["snack"].description == "Podwieczorek"
-        
+        assert meals_by_type["snack"].description == "Owoce z orzechami"
+        assert meals_by_type["snack"].ingredient_keywords  # Should have keywords
+
         assert "dinner" in meals_by_type
-        assert meals_by_type["dinner"].description == "Kolacja"
+        assert meals_by_type["dinner"].description == "Kanapki z serem i warzywami"
+        assert meals_by_type["dinner"].ingredient_keywords  # Should have keywords
 
     def test_calculates_macros_from_profile_ratios(self, adapter):
         profile = make_profile(daily_kcal=2000, daily_protein=150, daily_fat=55, daily_carbs=225)

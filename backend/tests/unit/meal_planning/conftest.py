@@ -123,6 +123,7 @@ def make_template(
     target_fat: float = 15.0,
     target_carbs: float = 60.0,
     description: str = "Sniadanie",
+    ingredient_keywords: list = None,
 ) -> MealTemplate:
     """Create a test MealTemplate."""
     return MealTemplate(
@@ -132,6 +133,7 @@ def make_template(
         target_fat=target_fat,
         target_carbs=target_carbs,
         description=description,
+        ingredient_keywords=ingredient_keywords or [],
     )
 
 
@@ -162,9 +164,10 @@ def make_product(
     protein_per_100g: float = 10.0,
     fat_per_100g: float = 5.0,
     carbs_per_100g: float = 30.0,
+    score: float = None,
 ) -> dict:
     """Create a test product dict (as returned by RAG search)."""
-    return {
+    product = {
         "id": id or str(uuid4()),
         "name": name,
         "category": category,
@@ -173,6 +176,9 @@ def make_product(
         "fat_per_100g": fat_per_100g,
         "carbs_per_100g": carbs_per_100g,
     }
+    if score is not None:
+        product["score"] = score
+    return product
 
 
 # ---------------------------------------------------------------------------

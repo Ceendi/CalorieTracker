@@ -19,29 +19,22 @@ Zasady:
 
 
 # =============================================================================
-# TEMPLATE GENERATION PROMPT
+# TEMPLATE GENERATION PROMPT (per-day, simpler for small models)
 # =============================================================================
 
-TEMPLATE_GENERATION_PROMPT: str = """Zaplanuj strukture {days} dni posilkow dla osoby o zapotrzebowaniu {kcal} kcal dziennie.
-
-Rozklad kalorii:
-- Sniadanie: 25% ({breakfast_kcal} kcal)
-- II sniadanie: 10% ({snack1_kcal} kcal)
-- Obiad: 35% ({lunch_kcal} kcal)
-- Podwieczorek: 10% ({snack2_kcal} kcal)
-- Kolacja: 20% ({dinner_kcal} kcal)
+TEMPLATE_GENERATION_PROMPT_SINGLE_DAY: str = """Zaplanuj 5 ROZNYCH posilkow na 1 dzien ({kcal} kcal).
 
 Preferencje: {preferences}
+{previous_days_context}
+ZASADA: Kazdy posilek MUSI byc INNY niz wymienione wyzej. Uzyj innych skladnikow i innych dan.
 
-Zasady roznorodnosci (BARDZO WAZNE):
-1. Ten sam typ posilku NIE MOZE sie powtarzac dzien po dniu (np. jesli jajecznica w poniedzialek, to we wtorek cos innego).
-2. Unikaj powtarzania glownego skladnika (np. kurczak) czesciej niz raz na 2 dni.
-3. Zadbaj o urozmaicenie zrodel bialka (jajka, nabial, mieso, ryby, roslinne).
+Dla kazdego posilku podaj opis i 2-4 skladniki (PRODUKTY, nie nazwy dan).
 
-Dla kazdego dnia podaj krotki opis posilku (np. "Owsianka z bananem", "Zupa pomidorowa").
+Odpowiedz TYLKO JSON:
+{{"meals": [{{"type": "breakfast", "description": "opis", "keywords": ["produkt1", "produkt2"]}}, {{"type": "second_breakfast", "description": "opis", "keywords": ["produkt1"]}}, {{"type": "lunch", "description": "opis", "keywords": ["produkt1", "produkt2"]}}, {{"type": "snack", "description": "opis", "keywords": ["produkt1"]}}, {{"type": "dinner", "description": "opis", "keywords": ["produkt1", "produkt2"]}}]}}"""
 
-Odpowiedz w formacie JSON:
-{{"days": [{{"day": 1, "meals": [{{"type": "breakfast", "description": "..."}}, {{"type": "second_breakfast", "description": "..."}}, {{"type": "lunch", "description": "..."}}, {{"type": "snack", "description": "..."}}, {{"type": "dinner", "description": "..."}}]}}]}}"""
+# Legacy prompt (kept for reference, not used)
+TEMPLATE_GENERATION_PROMPT: str = TEMPLATE_GENERATION_PROMPT_SINGLE_DAY
 
 
 # =============================================================================
@@ -70,9 +63,61 @@ FORMAT ODPOWIEDZI (TYLKO JSON):
 # MODEL PARAMETERS
 # =============================================================================
 
-MAX_TOKENS_TEMPLATES: int = 2048
+MAX_TOKENS_TEMPLATES: int = 1024  # Reduced - now generating 1 day at a time
 MAX_TOKENS_MEAL: int = 512
-TEMPERATURE: float = 0.7
+TEMPERATURE_TEMPLATES: float = 0.5  # Lower for more consistent structure
+TEMPERATURE_MEAL: float = 0.7  # Higher for creative meal names
+
+
+# =============================================================================
+# JSON SCHEMAS FOR GRAMMAR-BASED GENERATION
+# =============================================================================
+
+# Schema for single-day template generation
+DAY_TEMPLATE_JSON_SCHEMA: str = """{
+  "type": "object",
+  "properties": {
+    "meals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string", "enum": ["breakfast", "second_breakfast", "lunch", "snack", "dinner"]},
+          "description": {"type": "string"},
+          "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 5}
+        },
+        "required": ["type", "description", "keywords"]
+      },
+      "minItems": 5,
+      "maxItems": 5
+    }
+  },
+  "required": ["meals"]
+}"""
+
+# Schema for meal generation
+MEAL_JSON_SCHEMA: str = """{
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "preparation_time": {"type": "integer"},
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "idx": {"type": "integer"},
+          "grams": {"type": "integer"}
+        },
+        "required": ["idx", "grams"]
+      },
+      "minItems": 2,
+      "maxItems": 8
+    }
+  },
+  "required": ["name", "ingredients"]
+}"""
 
 # Context size limits (Bielik has n_ctx=2048, likely supports more with RoPE scaling but keeping safe)
 MAX_PRODUCTS_IN_PROMPT: int = 50   # Increased from 12 to 50

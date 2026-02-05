@@ -527,11 +527,11 @@ class MealPlanService:
         """
         Search for relevant products for a meal template using pgvector hybrid search.
 
-        Uses the new PgVectorSearchService with session-based search for better
-        semantic matching compared to the old SQL LIKE approach.
+        If the template has ingredient_keywords, searches for each keyword separately
+        and merges results. Otherwise falls back to description-based search.
 
         Args:
-            template: Meal template with description and meal_type
+            template: Meal template with description, meal_type, and ingredient_keywords
             preferences: User preferences for filtering (allergies, diet, exclusions)
             limit: Maximum products to return
 
@@ -553,24 +553,34 @@ class MealPlanService:
             "excluded_ingredients": preferences.excluded_ingredients,
         }
 
-        # Use new pgvector-based search for meal planning
-        # The PgVectorSearchService handles:
-        # - Meal type to query mapping (breakfast -> sniadanie platki owsiane...)
-        # - Hybrid vector + FTS search with RRF scoring
-        # - Preference-based filtering (allergies, diet, exclusions)
-        products = await self._food_search.search_for_meal_planning(
-            session=self._session,
-            meal_type=template.meal_type,
-            preferences=preferences_dict,
-            limit=limit,
-            meal_description=template.description,
-        )
+        # Check if template has ingredient keywords
+        keywords = getattr(template, 'ingredient_keywords', [])
+        if keywords:
+            # Use keyword-based search for better ingredient matching
+            products = await self._search_products_by_keywords(
+                keywords=keywords,
+                meal_type=template.meal_type,
+                preferences=preferences_dict,
+                limit=limit,
+            )
+            logger.info(
+                f"🔍 Keyword search for '{template.meal_type}' with {len(keywords)} keywords: "
+                f"Found {len(products)} unique products"
+            )
+        else:
+            # Fallback to description-based search
+            products = await self._food_search.search_for_meal_planning(
+                session=self._session,
+                meal_type=template.meal_type,
+                preferences=preferences_dict,
+                limit=limit,
+                meal_description=template.description,
+            )
+            logger.info(
+                f"🔍 Description search for '{template.meal_type}' ({template.description}): "
+                f"Found {len(products)} products"
+            )
 
-        logger.info(
-            f"🔍 Product search for '{template.meal_type}' ({template.description}): "
-            f"Found {len(products)} products"
-        )
-        
         # Log detailed product list for debugging
         if products:
             product_names = [p.get('name', 'Unknown') for p in products[:10]]
@@ -582,6 +592,60 @@ class MealPlanService:
             logger.warning(f"  ⚠️ No products found for {template.meal_type}!")
 
         return products
+
+    async def _search_products_by_keywords(
+        self,
+        keywords: List[str],
+        meal_type: str,
+        preferences: Dict[str, Any],
+        limit: int = 15,
+    ) -> List[dict]:
+        """
+        Search for products using individual ingredient keywords.
+
+        Searches for each keyword separately and merges results,
+        ensuring better ingredient matching than searching for the full description.
+
+        Args:
+            keywords: List of ingredient keywords (e.g., ["chleb", "twarog", "rzodkiewka"])
+            meal_type: Type of meal (for logging)
+            preferences: Dietary preferences for filtering
+            limit: Maximum total products to return
+
+        Returns:
+            List of unique product dicts sorted by score
+        """
+        if not keywords:
+            return []
+
+        all_products: Dict[str, dict] = {}  # Keyed by product ID for deduplication
+        products_per_keyword = max(5, limit // len(keywords))
+
+        for keyword in keywords:
+            logger.debug(f"  Searching for keyword: '{keyword}'")
+
+            results = await self._food_search.search_for_meal_planning(
+                session=self._session,
+                meal_type=meal_type,
+                preferences=preferences,
+                limit=products_per_keyword,
+                meal_description=keyword,  # Use keyword as the search query
+            )
+
+            for product in results:
+                product_id = str(product.get("id", ""))
+                if product_id and product_id not in all_products:
+                    all_products[product_id] = product
+                    logger.debug(f"    Found: {product.get('name', 'Unknown')}")
+
+        # Sort by score (if available) and return top results
+        sorted_products = sorted(
+            all_products.values(),
+            key=lambda p: p.get("score", 0),
+            reverse=True
+        )
+
+        return sorted_products[:limit]
 
     async def _enrich_meal_ingredients(
         self,
