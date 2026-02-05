@@ -61,13 +61,13 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
   );
   const [selectedMeal, setSelectedMeal] = useState<MealType>(getInitialMealType());
 
-  // Reset state when food changes (but not when editing key)
+  // Reset state when food changes (but not when editing or when initialAmount provided)
   useEffect(() => {
-    if (food && !entryId) {
+    if (food && !entryId && !initialAmount) {
       setSelectedUnit(null);
       setQuantity('100');
     }
-  }, [food, entryId]);
+  }, [food, entryId, initialAmount]);
 
   // --- Derived Values ---
   const currentWeight = useMemo(() => {

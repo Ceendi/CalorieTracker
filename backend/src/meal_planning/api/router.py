@@ -22,6 +22,7 @@ from src.meal_planning.api.schemas import (
     PlanPreferencesSchema,
     GeneratePlanRequest,
     GeneratePlanResponse,
+    UpdatePlanStatusRequest,
 )
 from src.meal_planning.application.service import MealPlanService, UserData
 from src.meal_planning.domain.entities import PlanPreferences
@@ -175,6 +176,42 @@ async def delete_meal_plan(
     """
     deleted = await service.delete_plan(plan_id, current_user.id)
     if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Meal plan not found"
+        )
+    return None
+
+
+@router.patch("/{plan_id}/status", status_code=status.HTTP_204_NO_CONTENT)
+async def update_plan_status(
+    plan_id: UUID,
+    request: UpdatePlanStatusRequest,
+    current_user: User = Depends(get_current_user),
+    service: MealPlanService = Depends(get_meal_plan_service),
+):
+    """
+    Update the status of a meal plan.
+
+    Args:
+        plan_id: ID of the meal plan
+        request: Request body with new status
+        current_user: Authenticated user
+        service: Meal plan service
+
+    Raises:
+        HTTPException 400: If invalid status provided
+        HTTPException 404: If plan not found or not owned by user
+    """
+    valid_statuses = {"active", "archived"}
+    if request.status not in valid_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+        )
+
+    updated = await service.update_plan_status(plan_id, current_user.id, request.status)
+    if not updated:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Meal plan not found"

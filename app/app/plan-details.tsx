@@ -5,17 +5,18 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 
-import { useMealPlan } from '@/hooks/useMealPlan';
+import { useMealPlan, useUpdatePlanStatus } from '@/hooks/useMealPlan';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Day, Meal, Ingredient } from '@/schemas/meal-plan';
+import { FoodProduct } from '@/types/food';
 
 // Meal type icons and colors
 const MEAL_TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
@@ -33,9 +34,71 @@ export default function PlanDetailsScreen() {
   const { colorScheme } = useColorScheme();
 
   const { data: plan, isLoading, error } = useMealPlan(params.planId || null);
+  const updateStatusMutation = useUpdatePlanStatus();
 
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [expandedMeals, setExpandedMeals] = useState<Set<string>>(new Set());
+
+  const handleActivatePlan = () => {
+    if (!params.planId) return;
+
+    updateStatusMutation.mutate(
+      { planId: params.planId, status: 'active' },
+      {
+        onSuccess: () => {
+          Alert.alert(t('manualEntry.success'), t('mealPlan.activateSuccess'));
+        },
+        onError: () => {
+          Alert.alert(t('manualEntry.error'), t('mealPlan.statusUpdateError'));
+        },
+      }
+    );
+  };
+
+  const handleArchivePlan = () => {
+    if (!params.planId) return;
+
+    updateStatusMutation.mutate(
+      { planId: params.planId, status: 'archived' },
+      {
+        onSuccess: () => {
+          Alert.alert(t('manualEntry.success'), t('mealPlan.archiveSuccess'));
+        },
+        onError: () => {
+          Alert.alert(t('manualEntry.error'), t('mealPlan.statusUpdateError'));
+        },
+      }
+    );
+  };
+
+  const handleAddIngredientToDiary = (ingredient: Ingredient, mealType: string) => {
+    // Convert ingredient macros (for amount_grams) to per-100g values
+    const amountGrams = ingredient.amount_grams || 100;
+    const multiplier = 100 / amountGrams;
+
+    // Map meal plan types to tracking types (second_breakfast -> breakfast)
+    const trackingMealType = mealType === 'second_breakfast' ? 'breakfast' : mealType;
+
+    const foodProduct: FoodProduct = {
+      id: ingredient.food_id || null,
+      name: ingredient.name,
+      nutrition: {
+        calories_per_100g: Math.round((ingredient.kcal ?? 0) * multiplier),
+        protein_per_100g: Math.round((ingredient.protein ?? 0) * multiplier * 10) / 10,
+        fat_per_100g: Math.round((ingredient.fat ?? 0) * multiplier * 10) / 10,
+        carbs_per_100g: Math.round((ingredient.carbs ?? 0) * multiplier * 10) / 10,
+      },
+    };
+
+    router.push({
+      pathname: '/food-details' as any,
+      params: {
+        item: JSON.stringify(foodProduct),
+        initialAmount: String(Math.round(amountGrams)),
+        initialMealType: trackingMealType,
+      },
+    });
+  };
 
   const toggleDay = (dayId: string) => {
     setExpandedDays(prev => {
@@ -69,21 +132,29 @@ export default function PlanDetailsScreen() {
     }
   }, [plan]);
 
-  const renderIngredient = (ingredient: Ingredient) => (
-    <View key={ingredient.id} className="flex-row justify-between py-2 border-b border-border/50">
-      <View className="flex-1 pr-4">
+  const renderIngredient = (ingredient: Ingredient, mealType: string) => (
+    <TouchableOpacity
+      key={ingredient.id}
+      onPress={() => handleAddIngredientToDiary(ingredient, mealType)}
+      className="flex-row items-center py-3 border-b border-border/50"
+      activeOpacity={0.6}
+    >
+      <View className="flex-1 pr-3">
         <Text className="text-foreground text-sm">{ingredient.name}</Text>
         <Text className="text-muted-foreground text-xs">
           {Math.round(ingredient.amount_grams)}g
           {ingredient.unit_label && ` (${ingredient.unit_label})`}
         </Text>
       </View>
-      <View className="items-end">
-        <Text className="text-foreground text-sm font-medium">
-          {Math.round(ingredient.kcal ?? 0)} kcal
-        </Text>
-      </View>
-    </View>
+      <Text className="text-foreground text-sm font-medium mr-3">
+        {Math.round(ingredient.kcal ?? 0)} kcal
+      </Text>
+      <IconSymbol
+        name="plus.circle.fill"
+        size={22}
+        color={Colors[colorScheme ?? 'light'].tint}
+      />
+    </TouchableOpacity>
   );
 
   const renderMeal = (meal: Meal) => {
@@ -158,11 +229,11 @@ export default function PlanDetailsScreen() {
               </View>
             )}
 
-            {/* Ingredients */}
+            {/* Ingredients - tap to add to diary */}
             <Text className="text-foreground font-semibold mb-2">
               {t('mealPlan.details.ingredients')}
             </Text>
-            {meal.ingredients.map(renderIngredient)}
+            {meal.ingredients.map(ing => renderIngredient(ing, meal.meal_type))}
 
             {/* Description / Preparation */}
             {meal.description && (
@@ -282,16 +353,73 @@ export default function PlanDetailsScreen() {
       >
         {/* Plan Header */}
         <View className="bg-card rounded-2xl p-5 mb-6 border border-border">
-          <Text className="text-foreground font-bold text-xl mb-2">
-            {plan.name || t('mealPlan.untitledPlan')}
-          </Text>
-          <Text className="text-muted-foreground mb-3">
-            {format(startDate, 'dd.MM.yyyy')} - {format(endDate, 'dd.MM.yyyy')}
-          </Text>
+          <View className="flex-row justify-between items-start mb-2">
+            <View className="flex-1">
+              <Text className="text-foreground font-bold text-xl">
+                {plan.name || t('mealPlan.untitledPlan')}
+              </Text>
+              <Text className="text-muted-foreground mt-1">
+                {format(startDate, 'dd.MM.yyyy')} - {format(endDate, 'dd.MM.yyyy')}
+              </Text>
+            </View>
+            {/* Status badge */}
+            <View className={`px-3 py-1 rounded-full ${
+              plan.status === 'active' ? 'bg-green-100 dark:bg-green-900' :
+              plan.status === 'draft' ? 'bg-yellow-100 dark:bg-yellow-900' :
+              'bg-muted'
+            }`}>
+              <Text className={`text-xs font-medium ${
+                plan.status === 'active' ? 'text-green-700 dark:text-green-300' :
+                plan.status === 'draft' ? 'text-yellow-700 dark:text-yellow-300' :
+                'text-muted-foreground'
+              }`}>
+                {t(`mealPlan.status.${plan.status}`)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Activate/Archive button */}
+          {plan.status === 'draft' && (
+            <TouchableOpacity
+              onPress={handleActivatePlan}
+              disabled={updateStatusMutation.isPending}
+              className="bg-primary py-3 rounded-xl mt-3 flex-row items-center justify-center"
+            >
+              {updateStatusMutation.isPending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <IconSymbol name="checkmark.circle.fill" size={18} color="#FFFFFF" />
+                  <Text className="text-primary-foreground font-semibold ml-2">
+                    {t('mealPlan.activatePlan')}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {plan.status === 'active' && (
+            <TouchableOpacity
+              onPress={handleArchivePlan}
+              disabled={updateStatusMutation.isPending}
+              className="bg-muted py-3 rounded-xl mt-3 flex-row items-center justify-center"
+            >
+              {updateStatusMutation.isPending ? (
+                <ActivityIndicator size="small" color={Colors[colorScheme ?? 'light'].mutedForeground} />
+              ) : (
+                <>
+                  <IconSymbol name="archivebox" size={18} color={Colors[colorScheme ?? 'light'].mutedForeground} />
+                  <Text className="text-muted-foreground font-semibold ml-2">
+                    {t('mealPlan.archivePlan')}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
 
           {/* Daily targets */}
           {plan.daily_targets && (
-            <View className="flex-row justify-around py-3 bg-muted/50 rounded-xl">
+            <View className="flex-row justify-around py-3 bg-muted/50 rounded-xl mt-3">
               <View className="items-center">
                 <Text className="text-xs text-muted-foreground mb-1">{t('dashboard.goal')}</Text>
                 <Text className="text-lg font-bold text-primary">

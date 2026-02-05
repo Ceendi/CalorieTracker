@@ -77,6 +77,23 @@ export function useDeleteMealPlan() {
   });
 }
 
+/**
+ * Hook to update meal plan status (activate or archive).
+ */
+export function useUpdatePlanStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, status }: { planId: string; status: 'active' | 'archived' }) =>
+      mealPlanService.updatePlanStatus(planId, status),
+    onSuccess: (_, { planId }) => {
+      // Invalidate both the specific plan and the list
+      queryClient.invalidateQueries({ queryKey: mealPlanKeys.detail(planId) });
+      queryClient.invalidateQueries({ queryKey: mealPlanKeys.lists() });
+    },
+  });
+}
+
 // Progress state for generation
 export interface GenerationProgress {
   status: 'idle' | 'started' | 'generating' | 'completed' | 'error';

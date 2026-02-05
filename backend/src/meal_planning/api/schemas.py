@@ -236,3 +236,10 @@ class DailyTargetsResponse(BaseModel):
     protein: float = Field(description="Target daily protein in grams")
     fat: float = Field(description="Target daily fat in grams")
     carbs: float = Field(description="Target daily carbohydrates in grams")
+
+
+class UpdatePlanStatusRequest(BaseModel):
+    """Request body for updating plan status."""
+    status: str = Field(
+        description="New status: active or archived"
+    )

@@ -76,4 +76,13 @@ export const mealPlanService = {
     });
     return DailyTargetsResponseSchema.parse(response.data);
   },
+
+  /**
+   * Update the status of a meal plan.
+   * @param planId UUID of the meal plan
+   * @param status New status: 'active' or 'archived'
+   */
+  async updatePlanStatus(planId: string, status: 'active' | 'archived'): Promise<void> {
+    await apiClient.patch(`/api/v1/meal-plans/${planId}/status`, { status });
+  },
 };

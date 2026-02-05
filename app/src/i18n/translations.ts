@@ -364,7 +364,12 @@ export const translations = {
             prepTime: "Prep time",
             minutes: "min"
         },
-        loadingTargets: "Loading..."
+        loadingTargets: "Loading...",
+        activatePlan: "Activate Plan",
+        archivePlan: "Archive Plan",
+        activateSuccess: "Plan activated!",
+        archiveSuccess: "Plan archived!",
+        statusUpdateError: "Failed to update plan status"
     }
   },
   pl: {
@@ -730,7 +735,12 @@ export const translations = {
             prepTime: "Czas przygotowania",
             minutes: "min"
         },
-        loadingTargets: "Ładowanie..."
+        loadingTargets: "Ładowanie...",
+        activatePlan: "Aktywuj plan",
+        archivePlan: "Archiwizuj plan",
+        activateSuccess: "Plan aktywowany!",
+        archiveSuccess: "Plan zarchiwizowany!",
+        statusUpdateError: "Nie udało się zaktualizować statusu planu"
     }
   }
 };
