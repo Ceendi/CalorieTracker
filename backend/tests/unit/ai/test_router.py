@@ -13,7 +13,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.ai.api.router import router, get_audio_service, get_vision_service
+from src.ai.api.router import router, get_audio_service, get_vision_service, current_active_user
+from src.users.domain.models import User
 from src.ai.application.dto import ProcessedMealDTO, ProcessedFoodItemDTO
 from src.ai.domain.exceptions import (
     AudioProcessingException,
@@ -80,9 +81,13 @@ def client(mock_audio_service, mock_vision_service):
     async def mock_db_session():
         yield MagicMock()
 
+    async def mock_user():
+        return User(id=uuid.uuid4(), email="test@example.com", is_active=True, is_superuser=False, hashed_password="pwd")
+
     app.dependency_overrides[get_audio_service] = lambda: mock_audio_service
     app.dependency_overrides[get_vision_service] = lambda: mock_vision_service
     app.dependency_overrides[get_db_session] = mock_db_session
+    app.dependency_overrides[current_active_user] = mock_user
 
     return TestClient(app)
 

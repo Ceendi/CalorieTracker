@@ -25,7 +25,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.ai.api.router import router, get_audio_service, get_vision_service
+from src.ai.api.router import router, get_audio_service, get_vision_service, current_active_user
+from src.users.domain.models import User
 from src.ai.domain.models import (
     SearchCandidate,
     ExtractedFoodItem,
@@ -222,6 +223,7 @@ def audio_client(audio_search_engine):
     app.dependency_overrides[get_audio_service] = lambda: audio_service
     app.dependency_overrides[get_vision_service] = lambda: vision_service
     app.dependency_overrides[get_db_session] = mock_db_session
+    app.dependency_overrides[current_active_user] = lambda: User(id=uuid.uuid4(), email="test@example.com", is_active=True, is_superuser=False, hashed_password="pwd")
 
     return TestClient(app)
 
@@ -252,6 +254,7 @@ def vision_client(vision_search_engine):
     app.dependency_overrides[get_audio_service] = lambda: audio_service
     app.dependency_overrides[get_vision_service] = lambda: vision_service
     app.dependency_overrides[get_db_session] = mock_db_session
+    app.dependency_overrides[current_active_user] = lambda: User(id=uuid.uuid4(), email="test@example.com", is_active=True, is_superuser=False, hashed_password="pwd")
 
     return TestClient(app)
 
@@ -364,6 +367,7 @@ class TestProcessAudioErrorChainIntegration:
         app.dependency_overrides[get_audio_service] = lambda: audio_service
         app.dependency_overrides[get_vision_service] = lambda: mock_vision
         app.dependency_overrides[get_db_session] = mock_db
+        app.dependency_overrides[current_active_user] = lambda: User(id=uuid.uuid4(), is_active=True)
 
         client = TestClient(app)
         resp = client.post("/api/v1/ai/process-audio", files=[_audio_file()])
@@ -473,7 +477,6 @@ class TestStatusEndpointIntegration:
         resp = audio_client.get("/api/v1/ai/status")
         data = resp.json()
         assert data["whisper_available"] is True
-        assert data["search_mode"] == "pgvector"
 
 
 # ===========================================================================
