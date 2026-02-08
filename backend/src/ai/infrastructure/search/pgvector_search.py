@@ -21,7 +21,7 @@ ALLERGEN_KEYWORD_STEMS: Dict[str, List[str]] = {
     "jajka": ["jajk", "jajec", "omlet", "frittata"],
     "mleko": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan"],
     "laktoza": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk"],
-    "gluten": ["gluten", "pszen", "żytn", "zytn", "orkisz", "owsian", "jęczmien", "jeczmien"],
+    "gluten": ["gluten", "pszen", "żytn", "zytn", "orkisz", "owsian", "jęczmien", "jeczmien", "chleb", "bułk", "bulk", "makaron", "pierog", "nalezni", "naleśni", "kanapk", "bagiet", "tost"],
     "orzechy": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
     "orzeszki": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
     "ryby": ["ryb", "łosoś", "losos", "dorsz", "tuńczyk", "tunczyk", "pstrąg", "pstrag", "śledź", "sledz", "makrela"],
@@ -30,6 +30,10 @@ ALLERGEN_KEYWORD_STEMS: Dict[str, List[str]] = {
     "soja": ["soj", "tofu", "edamame", "tempeh"],
     "seler": ["seler"],
     "gorczyca": ["gorczyc", "musztard"],
+    # Frontend aliases
+    "nabiał": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk", "twaroz"],
+    "nabial": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk", "twaroz"],
+    "owoce morza": ["skorupiak", "krewet", "krab", "homar", "langust", "małż", "malz", "ostryg", "osmiornic", "kalmar"],
 }
 
 # Maps allergens to food categories that should be blocked entirely.
@@ -38,11 +42,14 @@ ALLERGEN_CATEGORY_MAP: Dict[str, List[str]] = {
     "jaja": ["Dania z jaj", "Nabiał i jaja"],
     "jajka": ["Dania z jaj", "Nabiał i jaja"],
     "mleko": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "nabiał": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "nabial": ["Nabiał", "Nabiał i jaja", "Sery"],
     "laktoza": ["Nabiał", "Nabiał i jaja", "Sery"],
     "gluten": ["Pieczywo", "Produkty zbożowe"],
     "ryby": ["Ryby", "Owoce morza"],
     "ryba": ["Ryby", "Owoce morza"],
     "skorupiaki": ["Owoce morza"],
+    "owoce morza": ["Owoce morza"],
 }
 
 
@@ -234,6 +241,9 @@ class PgVectorSearchService:
 
         Uses morphological stem matching for known allergens and falls back
         to simple substring matching for unknown ones.
+        
+        NOW IMPROVED: Checks if known allergens are present within user's allergy strings.
+        For example "uczulenie na jajka" triggers "jajka" rules.
 
         Args:
             name_lower: Lowercased product name
@@ -243,21 +253,33 @@ class PgVectorSearchService:
         Returns:
             True if the product should be blocked
         """
-        for allergen in allergies:
-            # Check category-based blocking
-            blocked_categories = ALLERGEN_CATEGORY_MAP.get(allergen, [])
-            if category in blocked_categories:
+        # 1. Identify active stems based on known allergens found in user's strings
+        active_stems = []
+        for known_allergen, stems in ALLERGEN_KEYWORD_STEMS.items():
+            # Check if this known allergen is mentioned in any of user's allergy strings
+            is_active = False
+            for user_allergy in allergies:
+                if known_allergen in user_allergy:
+                    is_active = True
+                    break
+            
+            if is_active:
+                active_stems.extend(stems)
+                
+                # Check category blocking for this known allergen
+                blocked_categories = ALLERGEN_CATEGORY_MAP.get(known_allergen, [])
+                if category in blocked_categories:
+                    return True
+
+        # 2. Check against active stems
+        for stem in active_stems:
+            if stem in name_lower:
                 return True
 
-            # Check stem-based name matching
-            stems = ALLERGEN_KEYWORD_STEMS.get(allergen)
-            if stems:
-                if any(stem in name_lower for stem in stems):
-                    return True
-            else:
-                # Unknown allergen — fall back to simple substring
-                if allergen in name_lower:
-                    return True
+        # 3. Fallback: Check against raw user allergy strings (for unknown allergies)
+        for user_allergy in allergies:
+            if user_allergy in name_lower:
+                return True
 
         return False
 

@@ -304,6 +304,34 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             logger.warning(f"Failed to create meal grammar: {e}")
             return None
 
+    def _clean_description(self, description: str) -> str:
+        """
+        Clean meal description from LLM artifacts.
+        
+        Removes parentheses, comments, and meta-text.
+        Example: "Kanapka (bez sera)" -> "Kanapka"
+        Example: "Jajecznica - bo zdrowa" -> "Jajecznica"
+        """
+        if not description:
+            return "Posilek"
+            
+        # Remove content in parentheses
+        cleaned = re.sub(r'\(.*?\)', '', description)
+        
+        # Remove comments after - or :
+        if " - " in cleaned:
+            cleaned = cleaned.split(" - ")[0]
+        if ": " in cleaned:
+             cleaned = cleaned.split(": ")[0]
+             
+        # Remove common meta-phrases if they appear at start
+        meta_phrases = ["zamiast", "uwaga", "zakaz", "alternatywa"]
+        for phrase in meta_phrases:
+            if cleaned.lower().startswith(phrase):
+                cleaned = cleaned.replace(phrase, "", 1)
+                
+        return cleaned.strip()
+
     def _parse_single_day_templates(
         self,
         response: str,
@@ -358,7 +386,9 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             seen_types.add(meal_type)
 
             ratio = self.MEAL_DISTRIBUTION.get(meal_type, 0.20)
-            description = meal_data.get("description", default_descriptions.get(meal_type, "Posilek"))
+            
+            raw_desc = meal_data.get("description", default_descriptions.get(meal_type, "Posilek"))
+            description = self._clean_description(raw_desc)
 
             # Extract keywords
             raw_keywords = meal_data.get("keywords", [])
@@ -505,20 +535,61 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             Optimized list of days with adjusted portions
         """
         for day in days:
-            day_kcal = day.total_kcal
+            # 1. Per-Meal Normalization
+            # Check if individual meals are too far off their expected share
+            for meal in day.meals:
+                target_ratio = self.MEAL_DISTRIBUTION.get(meal.meal_type, 0.20)
+                meal_target = profile.daily_kcal * target_ratio
+                
+                scale_correction = 1.0
+                
+                # If meal is very small (< 60% of target), boost it
+                if meal.total_kcal < meal_target * 0.6:
+                     # Target 75% as safe minimum
+                     desired = meal_target * 0.75
+                     if meal.total_kcal > 0:
+                        scale_correction = desired / meal.total_kcal
+                
+                # If meal is very large (> 140% of target), reduce it
+                elif meal.total_kcal > meal_target * 1.4:
+                     # Target 125% as safe maximum
+                     desired = meal_target * 1.25
+                     scale_correction = desired / meal.total_kcal
+                
+                # Apply correction if significant
+                if abs(scale_correction - 1.0) > 0.05:
+                    logger.debug(
+                        f"Day {day.day_number}, {meal.meal_type}: correcting imbalance "
+                        f"(current {meal.total_kcal:.0f}, target {meal_target:.0f}) -> scale {scale_correction:.2f}"
+                    )
+                    for ing in meal.ingredients:
+                        ing.amount_grams *= scale_correction
+                        ing.kcal *= scale_correction
+                        ing.protein *= scale_correction
+                        ing.fat *= scale_correction
+                        ing.carbs *= scale_correction
+                    
+                    meal.total_kcal *= scale_correction
+                    meal.total_protein *= scale_correction
+                    meal.total_fat *= scale_correction
+                    meal.total_carbs *= scale_correction
+
+            # 2. Global Scaling
+            # Recalculate day total after corrections
+            day_kcal = sum(m.total_kcal for m in day.meals)
 
             if day_kcal > 0:
                 # Calculate ratio to target
                 ratio = profile.daily_kcal / day_kcal
 
-                # Only adjust if significantly off (>10%)
-                if abs(ratio - 1.0) > 0.1:
+                # Only adjust if significantly off (>5% - tighter tolerance)
+                if abs(ratio - 1.0) > 0.05:
                     # Limit scaling to reasonable range
-                    # Increased upper limit to 3.0 to handle cases where initial plan is much lower
-                    scale = min(max(ratio, 0.85), 3.0)
+                    # Relaxed lower limit to 0.5 to handle huge overshoots
+                    scale = min(max(ratio, 0.5), 3.0)
 
                     logger.debug(
-                        f"Day {day.day_number}: scaling by {scale:.2f} "
+                        f"Day {day.day_number}: global scaling by {scale:.2f} "
                         f"(current {day_kcal:.0f} kcal, target {profile.daily_kcal})"
                     )
 
@@ -583,22 +654,26 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         if preferences.get("diet"):
             diets = {
-                "vegetarian": "wegetarianska",
-                "vegan": "weganska",
-                "keto": "ketogeniczna",
+                "vegetarian": "WEGETARIANSKA (ZAKAZ MIESA, WEDLIN, RYB, OWOCOW MORZA)",
+                "vegan": "WEGANSKA (ZAKAZ PRODUKTOW ZWIERZECYCH: MIESA, JAJ, NABIALU, MIODU)",
+                "keto": "KETOGENICZNA (DUZO TLUSZCZU, BARDZO MALO WEGLOWODANOW. ZAKAZ: CUKIER, MĄKA, ZIEMNIAKI, RYŻ, MAKARON)",
+                "paleo": "PALEO (ZAKAZ ZBOZ, NABIALU, PRZETWORZONEJ ZYWNOSCI, CUKRU)",
+                "mediterranean": "SRODZIEMNOMORSKA (DUZO WARZYW, OLIWY, RYB, ORZECHOW. ZAKAZ PRZETWORZONEJ ZYWNOSCI)",
             }
-            parts.append(f"dieta {diets.get(preferences['diet'], preferences['diet'])}")
+            diet_name = diets.get(preferences['diet'], preferences['diet']).upper()
+            parts.append(f"DIETA: {diet_name}")
 
         if preferences.get("allergies"):
-            parts.append(f"bez: {', '.join(preferences['allergies'])}")
+            allergies_list = ", ".join(preferences['allergies']).upper()
+            parts.append(f"ALERGIA NA: {allergies_list} (BEZWZGLEDNY ZAKAZ!)")
 
         if preferences.get("cuisine_preferences"):
-            parts.append(f"kuchnia: {', '.join(preferences['cuisine_preferences'])}")
+            parts.append(f"PREFEROWANA KUCHNIA: {', '.join(preferences['cuisine_preferences']).upper()}")
 
         if preferences.get("excluded_ingredients"):
-            parts.append(f"wykluczone: {', '.join(preferences['excluded_ingredients'])}")
+            parts.append(f"WYKLUCZONE SKLADNIKI: {', '.join(preferences['excluded_ingredients']).upper()}")
 
-        return ", ".join(parts) if parts else "standardowa polska kuchnia"
+        return "\n".join(parts) if parts else "BRAK SZCZEGOLNYCH WYMAGAN - standardowa polska kuchnia"
 
     def _extract_json(self, text: str) -> str:
         """
@@ -1089,54 +1164,146 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         """
         from src.ai.infrastructure.search.pgvector_search import ALLERGEN_KEYWORD_STEMS
 
-        allergies = [a.lower() for a in profile.preferences.get("allergies", [])]
-        if not allergies:
+        user_allergies = [a.lower() for a in profile.preferences.get("allergies", [])]
+        
+        # Add implicit allergies based on diet
+        diet = profile.preferences.get("diet", "").lower()
+        if diet in ["vegetarian", "wegetarianska"]:
+            user_allergies.extend(["mieso", "mięso", "kurczak", "wolowina", "wołowina", "wieprzowina", "ryba", "dorsz", "losos", "łosoś", "tunczyk", "tuńczyk", "sledz", "śledź", "kielbasa", "kiełbasa", "szynka", "boczek"])
+        elif diet in ["vegan", "weganska"]:
+            user_allergies.extend(["mieso", "mięso", "kurczak", "ryba", "jajka", "jajko", "mleko", "ser", "jogurt", "miod", "miód", "maslo", "masło", "smietana", "śmietana"])
+        elif diet in ["keto", "ketogeniczna"]:
+             user_allergies.extend(["cukier", "maka", "mąka", "ziemniaki", "ryz", "ryż", "makaron", "chleb", "bulka", "bułka", "kasza", "banan", "winogrona", "jablko", "jabłko", "gruszka", "platki", "płatki", "owsianka", "kanapka", "kanapki", "nalesniki", "naleśniki", "pierogi"])
+        elif diet in ["paleo"]:
+             user_allergies.extend(["nabial", "nabiał", "ser", "jogurt", "zboza", "zboża", "chleb", "makaron", "ryz", "ryż", "cukier", "przetworzona", "owsianka", "kanapka", "kanapki"])
+        elif diet in ["mediterranean", "srodziemnomorska"]:
+             user_allergies.extend(["przetworzona", "fast food", "chipsy", "cola", "slodycze", "słodycze", "cukier", "maka pszenna", "mąka pszenna", "bialy chleb", "biały chleb"])
+
+        if not user_allergies:
             return templates
 
-        # Safe default descriptions (allergen-free options)
-        default_descriptions = {
-            "breakfast": "Owsianka z owocami",
-            "second_breakfast": "Owoce z orzechami",
-            "lunch": "Kurczak z warzywami i ryzem",
-            "snack": "Owoce z orzechami",
-            "dinner": "Salatka z kurczakiem",
+        # Identify which known allergens are present in the user's allergy list
+        # We check if any known allergen key (e.g. "jajka") appears in the user's string (e.g. "uczulenie na jajka")
+        active_stems = []
+        
+        # Also keep track of raw strings for direct matching in case of unknown allergies
+        active_raw_allergies = list(user_allergies)
+
+        for known_allergen, stems in ALLERGEN_KEYWORD_STEMS.items():
+            # Check if this known allergen is mentioned in any of user's allergy strings
+            is_active = False
+            for user_allergy in user_allergies:
+                if known_allergen in user_allergy:
+                    is_active = True
+                    break
+            
+            if is_active:
+                active_stems.extend(stems)
+        
+        # Dynamic safe meal pool
+        # Format: "meal_type": [ (description, keywords, [allergens_in_dish]) ]
+        # The system will pick the first dish that doesn't contain user's allergies.
+        
+        SAFE_MEALS_POOL = {
+            "breakfast": [
+                ("Jajecznica z pomidorami", ["jajko", "pomidor", "szczypiorek"], ["jajko", "jaja", "jajka"]),
+                ("Owsianka na wodzie z owocami", ["platki owsiane", "woda", "jablko", "banan"], ["gluten", "owsian"]),
+                ("Kasza jaglana z jablkiem", ["kasza jaglana", "jablko", "cynamon"], ["gluten"]),
+                ("Jajecznica z boczkiem", ["jajko", "boczek", "cebula"], ["jajko", "mieso", "wieprzowina"]), # Keto safe
+            ],
+            "second_breakfast": [
+                ("Jogurt naturalny z orzechami", ["jogurt", "orzechy"], ["mleko", "laktoza", "nabiał", "orzechy"]),
+                ("Kanapka z szynka", ["chleb", "maslo", "szynka", "pomidor"], ["gluten", "mleko", "laktoza", "nabiał", "mieso", "wieprzowina", "chleb"]), 
+                ("Sałatka z awokado i jajkiem", ["awokado", "jajko", "oliwa"], ["jajko"]), # Keto/Paleo safe
+                ("Salatka owocowa", ["jablko", "banan", "gruszka", "winogrona"], ["cukier"]),
+            ],
+            "lunch": [
+                ("Makaron z sosem pomidorowym", ["makaron", "sos pomidorowy", "bazylia"], ["gluten", "jajko", "makaron"]),
+                ("Kurczak z ryzem i warzywami", ["pierś z kurczaka", "ryz", "marchew", "groszek"], ["mieso", "kurczak", "ryz"]),
+                ("Ryż z ciecierzycą i warzywami", ["ryz", "ciecierzyca", "papryka", "cukinia"], ["ryz"]), 
+                ("Piers z kurczaka z warzywami na parze", ["pierś z kurczaka", "brokuly", "kalafior", "oliwa"], ["mieso", "kurczak"]), # Keto/Paleo safe
+                ("Pieczony losos ze szpinakiem", ["losos", "szpinak", "czosnek", "cytryna"], ["ryba", "ryby"]), # Keto/Paleo/Med safe
+            ],
+            "snack": [
+                ("Kefir z owocami", ["kefir", "truskawki"], ["mleko", "laktoza", "nabiał"]),
+                ("Orzechy i owoce", ["orzechy wloskie", "jablko"], ["orzechy", "cukier"]),
+                ("Słupki marchewki z hummusem", ["marchew", "hummus"], ["sezam"]), 
+                ("Garsc orzechow", ["orzechy wloskie", "migdaly"], ["orzechy"]), # Keto safe
+            ],
+            "dinner": [
+                ("Twarozek z rzodkiewka", ["twarog", "rzodkiewka", "szczypiorek"], ["mleko", "laktoza", "nabiał"]),
+                ("Salatka z tunczykiem", ["tunczyk", "salata", "kukurydza", "ogorek"], ["ryby", "ryba", "mieso"]),
+                ("Salatka grecka bez sera", ["pomidor", "ogorek", "oliwki", "oliwa"], []), 
+                ("Satatka z grillowanym kurczakiem", ["kurczak", "salata", "pomidor", "oliwa"], ["mieso", "kurczak"]), # Keto safe
+            ]
         }
 
-        # Safe default keywords (allergen-free)
-        default_keywords = {
-            "breakfast": ["platki owsiane", "banan", "jagody", "miod"],
-            "second_breakfast": ["jablko", "orzechy", "banan"],
-            "lunch": ["kurczak", "ryz", "warzywa", "marchew"],
-            "snack": ["jablko", "orzechy", "banan"],
-            "dinner": ["kurczak", "salata", "pomidor", "ogorek"],
-        }
+        def _get_safe_meal(meal_type: str, blocked_allergens: List[str]) -> Tuple[str, List[str]]:
+            options = SAFE_MEALS_POOL.get(meal_type, [])
+            # Try to find first option that doesn't have any blocked allergens
+            for desc, keywords, dish_allergens in options:
+                is_safe = True
+                for dish_allergen in dish_allergens:
+                    # Check if this dish allergen is one of the user's blocked triggers
+                    if dish_allergen in blocked_allergens:
+                        is_safe = False
+                        break
+                
+                # Also check against user's raw allergy strings just in case
+                # e.g. if user has "uczulenie na pomidory" and dish is "Omlet z pomidorami"
+                start_safe_check = is_safe
+                if is_safe:
+                    desc_lower = desc.lower()
+                    for user_allergy in active_raw_allergies: # active_raw_allergies from outer scope
+                        if user_allergy in desc_lower:
+                            is_safe = False
+                            break
+                            
+                if is_safe:
+                    return desc, keywords
+            
+            # If nothing found (super allergic user), return the last option as best effort fallback
+            # or a truly generic safe fallback
+            if options:
+                return options[-1][0], options[-1][1]
+            return "Posilek owocowy", ["jablko", "banan"]
 
         for day_templates in templates:
             for i, template in enumerate(day_templates):
                 desc_lower = template.description.lower()
                 blocked = False
-                for allergen in allergies:
-                    stems = ALLERGEN_KEYWORD_STEMS.get(allergen)
-                    if stems:
-                        if any(stem in desc_lower for stem in stems):
-                            blocked = True
-                            break
-                    else:
-                        if allergen in desc_lower:
+                
+                # Check against active stems (derived from known allergies)
+                for stem in active_stems:
+                    if stem in desc_lower:
+                        blocked = True
+                        break
+                
+                # Fallback: check against raw allergy strings if not blocked yet
+                if not blocked:
+                    for raw_allergy in active_raw_allergies:
+                        if raw_allergy in desc_lower:
                             blocked = True
                             break
 
                 if blocked:
-                    safe_desc = default_descriptions.get(
-                        template.meal_type, "Posilek z warzywami"
-                    )
-                    safe_keywords = default_keywords.get(
-                        template.meal_type, ["warzywa", "kurczak"]
-                    )
+                    # Determine which known allergens are active for this user to pass to safe meal selector
+                    # We can use active_stems, but we need high-level categories (like 'gluten')
+                    # So we reconstruct a set of blocked keys.
+                    blocked_keys = []
+                    for k, stems in ALLERGEN_KEYWORD_STEMS.items():
+                        if any(stem in active_stems for stem in stems):
+                             blocked_keys.append(k)
+                    
+                    # Also include raw allergies
+                    blocked_keys.extend(active_raw_allergies)
+
+                    safe_desc, safe_keywords = _get_safe_meal(template.meal_type, blocked_keys)
+                    
                     logger.warning(
-                        f"Template '{template.description}' contains allergen, "
-                        f"replacing with '{safe_desc}'"
+                        f"Template '{template.description}' blocked. Replaced with safe option: '{safe_desc}'"
                     )
+                    
                     day_templates[i] = MealTemplate(
                         meal_type=template.meal_type,
                         target_kcal=template.target_kcal,

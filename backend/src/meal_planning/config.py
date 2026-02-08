@@ -9,13 +9,16 @@ for the Bielik-based meal planner.
 # SYSTEM PROMPT
 # =============================================================================
 
-MEAL_PLANNER_SYSTEM_PROMPT: str = """Jestes polskim dietetykiem i kucharzem. Tworzysz zdrowe, smaczne plany zywieniowe.
-Zasady:
-1. Uzywaj TYLKO produktow z podanej listy dostepnych skladnikow.
-2. Komponuj posilki typowe dla polskiej kuchni.
-3. Dbaj o roznorodnosc - nie powtarzaj tych samych skladnikow zbyt czesto.
-4. Podawaj realistyczne gramatury.
-5. Odpowiadaj TYLKO w formacie JSON."""
+MEAL_PLANNER_SYSTEM_PROMPT: str = """Jestes ekspert dietetykiem. Twoim priorytetem jest ZDROWIE i BEZPIECZENSTWO uzytkownika.
+BEZWZGLĘDNE ZASADY KRYTYCZNE:
+1. DIETA I ALERGIE SA NAJWAZNIEJSZE. Jesli uzytkownik ma diete wegetarianska, ZABRANIA SIE uzywania miesa, ryb i owocow morza.
+2. Jesli uzytkownik ma alergie, ZABRANIA SIE uzywania produktow zawierajacych alergen.
+3. Ignorowanie tych zasad jest NIEDOPUSZCZALNE.
+
+Zasady ogolne:
+1. Tworz smaczne, polskie posilki.
+2. Dbaj o roznorodnosc w ciagu dnia.
+3. Odpowiadaj TYLKO w formacie JSON."""
 
 
 # =============================================================================
@@ -24,11 +27,14 @@ Zasady:
 
 TEMPLATE_GENERATION_PROMPT_SINGLE_DAY: str = """Zaplanuj 5 ROZNYCH posilkow na 1 dzien ({kcal} kcal).
 
-Preferencje: {preferences}
-{previous_days_context}
-ZASADA: Kazdy posilek MUSI byc INNY niz wymienione wyzej. Uzyj innych skladnikow i innych dan.
+WYMAGANIA DIETETYCZNE (KRYTYCZNE):
+{preferences}
 
-Dla kazdego posilku podaj opis i 2-4 skladniki (PRODUKTY, nie nazwy dan).
+{previous_days_context}
+ZASADA RÓŻNORODNOŚCI: Kazdy posilek MUSI byc INNY niz wymienione wyzej w 'ZAKAZANE'.
+
+Dla kazdego posilku podaj 'description' (po polsku) oraz 'keywords' (2-4 glowne skladniki).
+ZASADA OPISU: Opis musi byc KROTKA nazwa dania (np. "Jajecznica", "Kanapka"). ZABRANIA SIE uzywania nawiasow i komentarzy typu "zamiast X".
 
 Odpowiedz TYLKO JSON:
 {{"meals": [{{"type": "breakfast", "description": "opis", "keywords": ["produkt1", "produkt2"]}}, {{"type": "second_breakfast", "description": "opis", "keywords": ["produkt1"]}}, {{"type": "lunch", "description": "opis", "keywords": ["produkt1", "produkt2"]}}, {{"type": "snack", "description": "opis", "keywords": ["produkt1"]}}, {{"type": "dinner", "description": "opis", "keywords": ["produkt1", "produkt2"]}}]}}"""
