@@ -3,13 +3,14 @@ import { storageService } from '../services/storage.service';
 import { authService } from '../services/auth.service';
 import { User, LoginInput, RegisterInput } from '../utils/validators';
 import { setOnUnauthorizedCallback } from '../services/api.client';
-import { isNetworkError, isAuthError, toAppError, AppError } from '../utils/errors';
+import { isNetworkError, isAuthError, toAppError, AppError, ErrorCode } from '../utils/errors';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 // Initialize Google Sign-In (should essentially be done at app start, but safe here too)
 // You need to replace this with your actual Web Client ID from Google Cloud Console
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, 
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   offlineAccess: true,
 });
 
@@ -70,7 +71,7 @@ export const useAuth = create<AuthState>((set) => ({
         return;
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
-        throw new AppError('Google Play Services not available', 'AUTH_GOOGLE_PLAY_SERVICES');
+        throw new AppError('Google Play Services not available', ErrorCode.AUTH_GOOGLE_PLAY_SERVICES);
       } else {
         // some other error happened
         throw error;

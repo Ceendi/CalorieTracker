@@ -5,6 +5,7 @@ import secrets
 import string
 
 from src.users.api.schemas import GoogleLogin
+from src.core.config import settings
 
 from src.users.application.manager import get_user_manager
 from src.users.application.services import AuthService
@@ -60,6 +61,16 @@ async def google_login(
         )
 
     google_data = response.json()
+    
+    # Security: Verify that the token was issued for OUR app
+    # We check against the Web Client ID (because that's what mobile app sends as 'audience')
+    audience = google_data.get("aud")
+    if audience != settings.GOOGLE_CLIENT_ID:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="INVALID_GOOGLE_TOKEN_AUDIENCE"
+        )
+    
     email = google_data.get("email")
     if not email:
         raise HTTPException(
