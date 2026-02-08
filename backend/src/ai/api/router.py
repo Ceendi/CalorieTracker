@@ -4,6 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from loguru import logger
 
 from src.ai.application.audio_service import AudioProcessingService
+from src.users.api.routes import current_active_user
 from src.ai.application.vision_service import VisionProcessingService
 from src.ai.application.dto import ProcessedMealDTO
 from src.ai.domain.exceptions import (
@@ -74,7 +75,8 @@ async def process_audio_meal(
         description="Audio file (mp3, wav, m4a, etc.)"
     ),
     language: str = "pl",
-    service: AudioProcessingService = Depends(get_audio_service)
+    service: AudioProcessingService = Depends(get_audio_service),
+    user=Depends(current_active_user)
 ):
     if not audio.filename:
         raise HTTPException(
@@ -158,7 +160,8 @@ async def process_audio_meal(
 async def transcribe_audio(
     audio: UploadFile = File(..., description="Audio file"),
     language: str = "pl",
-    service: AudioProcessingService = Depends(get_audio_service)
+    service: AudioProcessingService = Depends(get_audio_service),
+    user=Depends(current_active_user)
 ):
     try:
         audio_bytes = await audio.read()
@@ -206,7 +209,8 @@ async def transcribe_audio(
 async def process_food_image(
     session: DBSession,
     image: UploadFile = File(..., description="Image file (jpg, png, webp)"),
-    service: VisionProcessingService = Depends(get_vision_service)
+    service: VisionProcessingService = Depends(get_vision_service),
+    user=Depends(current_active_user)
 ):
     if not image.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
@@ -245,7 +249,8 @@ async def process_food_image(
 )
 async def get_status(
     audio_service: AudioProcessingService = Depends(get_audio_service),
-    vision_service: VisionProcessingService = Depends(get_vision_service)
+    vision_service: VisionProcessingService = Depends(get_vision_service),
+    user=Depends(current_active_user)
 ):
     status = audio_service.get_system_status()
     status.update(vision_service.get_system_status())

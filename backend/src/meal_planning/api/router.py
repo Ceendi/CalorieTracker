@@ -319,7 +319,10 @@ async def generate_meal_plan(
 
 
 @router.get("/generate/{task_id}/progress")
-async def get_generation_progress(task_id: str):
+async def get_generation_progress(
+    task_id: str,
+    user=Depends(get_current_user)
+):
     """
     SSE endpoint for tracking generation progress.
 
@@ -370,7 +373,10 @@ async def get_generation_progress(task_id: str):
 
 
 @router.get("/generate/{task_id}/status")
-async def get_generation_status(task_id: str):
+async def get_generation_status(
+    task_id: str,
+    user=Depends(get_current_user)
+):
     """
     Get current generation status (non-streaming alternative).
 
