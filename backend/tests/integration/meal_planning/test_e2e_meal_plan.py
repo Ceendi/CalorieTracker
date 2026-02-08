@@ -30,23 +30,20 @@ async def test_e2e_meal_generation_logic():
     # We provide a fixed response to ensure determinism for the test, 
     # but we test the *parsing* and *matching* logic which are the critical complex parts.
     
-    mock_template_json = """
+    # Updated mock JSON to match single-day generation logic
+    mock_template_json_day1 = """
     {
-        "days": [
-            {
-                "day": 1, 
-                "meals": [
-                    {"type": "breakfast", "description": "Jajecznica z pomidorami"},
-                    {"type": "lunch", "description": "Kurczak z ryżem"}
-                ]
-            },
-            {
-                "day": 2, 
-                "meals": [
-                    {"type": "breakfast", "description": "Owsianka z bananem"},
-                    {"type": "lunch", "description": "Ryba z ziemniakami"}
-                ]
-            }
+        "meals": [
+            {"type": "breakfast", "description": "Jajecznica z pomidorami"},
+            {"type": "lunch", "description": "Kurczak z ryżem"}
+        ]
+    }
+    """
+    mock_template_json_day2 = """
+    {
+        "meals": [
+            {"type": "breakfast", "description": "Owsianka z bananem"},
+            {"type": "lunch", "description": "Ryba z ziemniakami"}
         ]
     }
     """
@@ -93,8 +90,18 @@ async def test_e2e_meal_generation_logic():
     # Our mock_llm_call is async? No, let's make it sync for the mock.
     
     def mock_llm_sync(prompt, **kwargs):
-        if "Zaplanuj strukture" in prompt:
-            return {"choices": [{"text": mock_template_json}]}
+        if "Zaplanuj 5 ROZNYCH posilkow" in prompt:
+            # Check which day is being requested in prompt context if possible, 
+            # but usually it's better to just return day1 then day2 for the test sequence.
+            # The adapter calls it for day 1 then day 2.
+            if not hasattr(mock_llm_sync, "call_count"):
+                mock_llm_sync.call_count = 0
+            
+            if mock_llm_sync.call_count == 0:
+                mock_llm_sync.call_count += 1
+                return {"choices": [{"text": mock_template_json_day1}]}
+            else:
+                return {"choices": [{"text": mock_template_json_day2}]}
         elif "Jajecznica" in prompt:
             return {"choices": [{"text": mock_meal_json_1}]}
         else:
