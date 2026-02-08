@@ -35,6 +35,11 @@ export const authService = {
     return TokenResponseSchema.parse(response.data);
   },
 
+  async loginGoogle(idToken: string): Promise<TokenResponse> {
+    const response = await apiClient.post('/auth/google', { token: idToken });
+    return TokenResponseSchema.parse(response.data);
+  },
+
   async register(data: RegisterInput): Promise<{ id: string; email: string }> {
     const response = await apiClient.post('/auth/register', {
       email: data.email,

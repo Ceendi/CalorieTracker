@@ -60,6 +60,10 @@ class UserUpdate(schemas.BaseUserUpdate):
         return v
 
 
+class GoogleLogin(schemas.BaseModel):
+    token: str
+
+
 class ChangePassword(schemas.BaseModel):
     old_password: str
     new_password: str

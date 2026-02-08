@@ -68,6 +68,7 @@ export const translations = {
     },
     auth: {
       welcomeBack: "Welcome Back",
+      orContinueWith: "Or continue with",
       signInSubtitle: "Sign in to continue your journey",
       email: "Email",
       password: "Password",
@@ -439,6 +440,7 @@ export const translations = {
     },
     auth: {
       welcomeBack: "Witaj z powrotem",
+      orContinueWith: "Lub kontynuuj z",
       signInSubtitle: "Zaloguj się, aby kontynuować",
       email: "Email",
       password: "Hasło",

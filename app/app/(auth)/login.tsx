@@ -17,7 +17,7 @@ import { Colors } from '@/constants/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();

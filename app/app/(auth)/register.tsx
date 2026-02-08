@@ -17,7 +17,7 @@ import { Colors } from '@/constants/theme';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -146,6 +146,22 @@ export default function RegisterScreen() {
                )}
               </LinearGradient>
             </TouchableOpacity>
+
+            <View className="mb-8">
+               <View className="flex-row items-center mb-6">
+                 <View className="flex-1 h-px bg-border" />
+                 <Text className="mx-4 text-muted-foreground">{t('auth.orContinueWith')}</Text>
+                 <View className="flex-1 h-px bg-border" />
+               </View>
+
+                <TouchableOpacity
+                 onPress={() => signInWithGoogle()}
+                 className="flex-row items-center justify-center p-4 bg-card rounded-xl border border-border"
+               >
+                 <IconSymbol name="chrome" size={24} color={Colors[colorScheme ?? 'light'].text} />
+                  <Text className="ml-3 font-semibold text-foreground">Google</Text>
+               </TouchableOpacity>
+             </View>
 
             <View className="flex-row justify-center mt-4 mb-8">
               <Text className="text-muted-foreground">{t('auth.alreadyHaveAccount')} </Text>
