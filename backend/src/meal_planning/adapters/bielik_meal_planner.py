@@ -183,6 +183,13 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             )
 
             full_prompt = self._build_prompt(MEAL_PLANNER_SYSTEM_PROMPT, user_prompt)
+            
+            # --- LOGGING DEBUG INFO ---
+            logger.info(f"Day {day_num} Generation Context:")
+            logger.info(f"Diet: {profile.preferences.get('diet')}")
+            logger.info(f"Allergies: {profile.preferences.get('allergies')}")
+            logger.debug(f"Full Prompt to LLM:\n{full_prompt}")
+            # --------------------------
 
             # Try with grammar first, fallback without if it fails
             day_templates = await self._generate_single_day_templates(
@@ -664,11 +671,55 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             parts.append(f"DIETA: {diet_name}")
 
         if preferences.get("allergies"):
-            allergies_list = ", ".join(preferences['allergies']).upper()
+            # Translate common English allergies to Polish for the LLM
+            translation_map = {
+                "eggs": "JAJKA",
+                "egg": "JAJKA",
+                "milk": "MLEKO",
+                "dairy": "NABIAŁ",
+                "nuts": "ORZECHY",
+                "peanuts": "ORZECHY ZIEMNE",
+                "fish": "RYBY",
+                "seafood": "OWOCE MORZA",
+                "shellfish": "OWOCE MORZA",
+                "wheat": "PSZENICA (GLUTEN)",
+                "gluten": "GLUTEN",
+                "soy": "SOJA",
+                "celery": "SELER",
+                "mustard": "GORCZYCA",
+            }
+            
+            raw_allergies = preferences['allergies']
+            translated_allergies = []
+            for a in raw_allergies:
+                a_lower = a.lower().strip()
+                translated_allergies.append(translation_map.get(a_lower, a))
+                
+            allergies_list = ", ".join(translated_allergies).upper()
             parts.append(f"ALERGIA NA: {allergies_list} (BEZWZGLEDNY ZAKAZ!)")
 
         if preferences.get("cuisine_preferences"):
-            parts.append(f"PREFEROWANA KUCHNIA: {', '.join(preferences['cuisine_preferences']).upper()}")
+            # Translate cuisine names to Polish
+            cuisine_translation = {
+                "polish": "POLSKA",
+                "italian": "WŁOSKA",
+                "mexican": "MEKSYKAŃSKA",
+                "asian": "AZJATYCKA",
+                "indian": "INDYJSKA",
+                "american": "AMERYKAŃSKA",
+                "french": "FRANCUSKA",
+                "mediterranean": "ŚRÓDZIEMNOMORSKA",
+                "vegetarian": "WEGETARIAŃSKA",
+                "vegan": "WEGAŃSKA",
+            }
+            
+            raw_cuisines = preferences['cuisine_preferences']
+            translated_cuisines = []
+            for c in raw_cuisines:
+                c_lower = c.lower().strip()
+                translated_cuisines.append(cuisine_translation.get(c_lower, c))
+                
+            parts.append(f"PREFEROWANA KUCHNIA: {', '.join(translated_cuisines).upper()}")
 
         if preferences.get("excluded_ingredients"):
             parts.append(f"WYKLUCZONE SKLADNIKI: {', '.join(preferences['excluded_ingredients']).upper()}")
@@ -1164,10 +1215,10 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         """
         from src.ai.infrastructure.search.pgvector_search import ALLERGEN_KEYWORD_STEMS
 
-        user_allergies = [a.lower() for a in profile.preferences.get("allergies", [])]
+        user_allergies = [a.lower() for a in profile.preferences.get("allergies", []) if a]
         
         # Add implicit allergies based on diet
-        diet = profile.preferences.get("diet", "").lower()
+        diet = (profile.preferences.get("diet") or "").lower()
         if diet in ["vegetarian", "wegetarianska"]:
             user_allergies.extend(["mieso", "mięso", "kurczak", "wolowina", "wołowina", "wieprzowina", "ryba", "dorsz", "losos", "łosoś", "tunczyk", "tuńczyk", "sledz", "śledź", "kielbasa", "kiełbasa", "szynka", "boczek"])
         elif diet in ["vegan", "weganska"]:

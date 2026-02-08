@@ -34,6 +34,19 @@ ALLERGEN_KEYWORD_STEMS: Dict[str, List[str]] = {
     "nabiał": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk", "twaroz"],
     "nabial": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk", "twaroz"],
     "owoce morza": ["skorupiak", "krewet", "krab", "homar", "langust", "małż", "malz", "ostryg", "osmiornic", "kalmar"],
+    # English mappings
+    "eggs": ["jajk", "jajec", "omlet", "frittata"],
+    "milk": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan"],
+    "dairy": ["mleko", "mlecz", "jogurt", "kefir", "smietan", "śmietan", "ser ", "serek", "twarog", "twarożk", "twarozk", "twaroz"],
+    "nuts": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
+    "peanuts": ["orzech", "orzesz", "migdał", "migdal", "pistacj", "arachid"],
+    "fish": ["ryb", "łosoś", "losos", "dorsz", "tuńczyk", "tunczyk", "pstrąg", "pstrag", "śledź", "sledz", "makrela"],
+    "shellfish": ["skorupiak", "krewet", "krab", "homar", "langust", "małż", "malz", "ostryg"],
+    "seafood": ["skorupiak", "krewet", "krab", "homar", "langust", "małż", "malz", "ostryg", "osmiornic", "kalmar", "ryb"],
+    "soy": ["soj", "tofu", "edamame", "tempeh"],
+    "wheat": ["gluten", "pszen", "żytn", "zytn", "orkisz", "chleb", "bułk", "bulk", "makaron", "pierog", "nalezni", "naleśni"],
+    "celery": ["seler"],
+    "mustard": ["gorczyc", "musztard"],
 }
 
 # Maps allergens to food categories that should be blocked entirely.
@@ -41,14 +54,21 @@ ALLERGEN_CATEGORY_MAP: Dict[str, List[str]] = {
     "jajko": ["Dania z jaj", "Nabiał i jaja"],
     "jaja": ["Dania z jaj", "Nabiał i jaja"],
     "jajka": ["Dania z jaj", "Nabiał i jaja"],
+    "eggs": ["Dania z jaj", "Nabiał i jaja"],
     "mleko": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "milk": ["Nabiał", "Nabiał i jaja", "Sery"],
+    "dairy": ["Nabiał", "Nabiał i jaja", "Sery"],
     "nabiał": ["Nabiał", "Nabiał i jaja", "Sery"],
     "nabial": ["Nabiał", "Nabiał i jaja", "Sery"],
     "laktoza": ["Nabiał", "Nabiał i jaja", "Sery"],
     "gluten": ["Pieczywo", "Produkty zbożowe"],
+    "wheat": ["Pieczywo", "Produkty zbożowe"],
     "ryby": ["Ryby", "Owoce morza"],
+    "fish": ["Ryby", "Owoce morza"],
     "ryba": ["Ryby", "Owoce morza"],
     "skorupiaki": ["Owoce morza"],
+    "shellfish": ["Owoce morza"],
+    "seafood": ["Owoce morza", "Ryby"],
     "owoce morza": ["Owoce morza"],
 }
 
