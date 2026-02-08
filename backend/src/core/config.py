@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
     GEMINI_API_KEY: str
 
     WHISPER_MODEL_SIZE: str = "small"  # tiny, base, small, medium, large

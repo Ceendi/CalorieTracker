@@ -106,6 +106,8 @@ const MAPPING: Record<string, LucideIcon> = {
   'trash': Trash2,
   'checkmark.circle.fill': CheckCircle,
   'exclamationmark.triangle': AlertTriangle,
+  'chrome': Globe,
+  'google': Globe,
 };
 
 export type IconSymbolName = keyof typeof MAPPING;

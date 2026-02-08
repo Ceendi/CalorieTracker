@@ -12,7 +12,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ceendi.calorietracker",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan food barcodes."
+        "NSCameraUsageDescription": "This app uses the camera to scan food barcodes.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.480830911363-spj1gi9ruv8rvf3tb7cnmn4ojjtgh5a6"
+            ]
+          }
+        ]
       }
     },
     "android": {

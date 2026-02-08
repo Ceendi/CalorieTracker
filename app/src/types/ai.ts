@@ -1,7 +1,7 @@
 import { UnitInfo } from './food';
 
 export interface ProcessedFoodItem {
-  product_id: string | null;
+  product_id: number | null;
   name: string;
   quantity_grams: number;
   kcal: number;

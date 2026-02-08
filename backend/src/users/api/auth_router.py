@@ -86,9 +86,14 @@ async def google_login(
 
     # 3. If not, register new user
     if not user:
-        # Generate random secure password for social login users
-        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-        password = ''.join(secrets.choice(alphabet) for i in range(20))
+        # Generate random secure password that meets complexities: 8+ chars, 1 digit, 1 upper
+        while True:
+            alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+            password = ''.join(secrets.choice(alphabet) for i in range(20))
+            if (any(c.islower() for c in password)
+                    and any(c.isupper() for c in password)
+                    and any(c.isdigit() for c in password)):
+                break
         
         try:
             user_create = schemas.UserCreate(

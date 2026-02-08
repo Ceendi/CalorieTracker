@@ -41,18 +41,13 @@ router.include_router(
     tags=["Auth"]
 )
 
-google_oauth_client: BaseOAuth2 = GoogleOAuth2(
-    settings.GOOGLE_CLIENT_ID,
-    settings.GOOGLE_CLIENT_SECRET,
-)
+if settings.GOOGLE_CLIENT_SECRET:
+    google_oauth_client: BaseOAuth2 = GoogleOAuth2(
+        settings.GOOGLE_CLIENT_ID,
+        settings.GOOGLE_CLIENT_SECRET,
+    )
 
-router.include_router(
-    auth_router,
-    prefix="/auth",
-    tags=["Auth"]
-)
-
-router.include_router(
+    router.include_router(
     fastapi_users.get_oauth_router(
         google_oauth_client,
         auth_backend,
@@ -60,6 +55,12 @@ router.include_router(
         associate_by_email=True,
     ),
     prefix="/oauth/google",
+    tags=["Auth"]
+)
+
+router.include_router(
+    auth_router,
+    prefix="/auth",
     tags=["Auth"]
 )
 

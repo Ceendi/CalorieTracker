@@ -155,9 +155,22 @@ export default function RegisterScreen() {
                </View>
 
                 <TouchableOpacity
-                 onPress={() => signInWithGoogle()}
-                 className="flex-row items-center justify-center p-4 bg-card rounded-xl border border-border"
-               >
+                  onPress={async () => {
+                    setErrorMsg(null);
+                    try {
+                      await signInWithGoogle();
+                    } catch (error: any) {
+                       if (isAxiosError(error) && error.response?.data?.detail) {
+                           setErrorMsg(String(error.response.data.detail));
+                       } else if (error instanceof Error) {
+                           setErrorMsg(error.message);
+                       } else {
+                           setErrorMsg(t('auth.unexpectedError'));
+                       }
+                    }
+                  }}
+                  className="flex-row items-center justify-center p-4 bg-card rounded-xl border border-border"
+                >
                  <IconSymbol name="chrome" size={24} color={Colors[colorScheme ?? 'light'].text} />
                   <Text className="ml-3 font-semibold text-foreground">Google</Text>
                </TouchableOpacity>

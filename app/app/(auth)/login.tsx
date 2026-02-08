@@ -132,6 +132,35 @@ export default function LoginScreen() {
               </LinearGradient>
             </TouchableOpacity>
 
+            <View className="mb-8">
+              <View className="flex-row items-center mb-6">
+                <View className="flex-1 h-px bg-border" />
+                <Text className="mx-4 text-muted-foreground text-sm">{t('auth.orContinueWith')}</Text>
+                <View className="flex-1 h-px bg-border" />
+              </View>
+
+              <TouchableOpacity 
+                onPress={async () => {
+                   setErrorMsg(null);
+                   try {
+                     await signInWithGoogle();
+                   } catch (error: any) {
+                      if (isAxiosError(error) && error.response?.data?.detail) {
+                          setErrorMsg(String(error.response.data.detail));
+                      } else if (error instanceof Error) {
+                          setErrorMsg(error.message);
+                      } else {
+                          setErrorMsg(t('auth.unexpectedError'));
+                      }
+                   }
+                }}
+                className="flex-row items-center justify-center p-4 bg-card rounded-xl border border-border"
+              >
+                <IconSymbol name="google" size={24} color={Colors[colorScheme ?? 'light'].text} />
+                <Text className="ml-3 font-semibold text-foreground">Google</Text>
+              </TouchableOpacity>
+            </View>
+
             <View className="flex-row justify-center mt-4">
               <Text className="text-muted-foreground">{t('auth.noAccount')} </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
