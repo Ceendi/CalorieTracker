@@ -63,6 +63,9 @@ class UserManager(UUIDIDMixin, BaseUserManager):
     async def on_after_register(self, user: User, request: Optional = None):
         logger.info(f"User {user.id} has registered.")
 
+        if user.is_verified:
+            return
+
         await self.request_verify(user, request)
 
     async def on_after_request_verify(self, user: User, token: str, request: Optional[Request] = None):

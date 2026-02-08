@@ -35,7 +35,8 @@
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ceendi.calorietracker"
+      "package": "com.ceendi.calorietracker",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
