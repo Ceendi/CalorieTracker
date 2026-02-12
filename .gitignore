@@ -4,3 +4,10 @@
 # Generated diagrams (regenerate from .puml sources)
 docs/*.png
 docs/*.svg
+
+# Local tooling
+.android-tools/
+.claude/
+
+# Test coverage reports
+app/coverage/
