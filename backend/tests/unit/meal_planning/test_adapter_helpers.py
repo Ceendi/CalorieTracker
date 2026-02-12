@@ -39,6 +39,10 @@ class TestFormatPreferences:
         result = adapter._format_preferences({"diet": "keto"})
         assert "KETOGENICZNA" in result
 
+    def test_low_gi_translated_to_polish(self, adapter):
+        result = adapter._format_preferences({"diet": "low_gi"})
+        assert "NISKOINDEKSOWA GLIKEMICZNIE" in result
+
     def test_unknown_diet_used_as_is(self, adapter):
         result = adapter._format_preferences({"diet": "paleo"})
         assert "PALEO" in result

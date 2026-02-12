@@ -666,6 +666,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 "keto": "KETOGENICZNA (DUZO TLUSZCZU, BARDZO MALO WEGLOWODANOW. ZAKAZ: CUKIER, MĄKA, ZIEMNIAKI, RYŻ, MAKARON)",
                 "paleo": "PALEO (ZAKAZ ZBOZ, NABIALU, PRZETWORZONEJ ZYWNOSCI, CUKRU)",
                 "mediterranean": "SRODZIEMNOMORSKA (DUZO WARZYW, OLIWY, RYB, ORZECHOW. ZAKAZ PRZETWORZONEJ ZYWNOSCI)",
+                "low_gi": "NISKOINDEKSOWA GLIKEMICZNIE (TYLKO PRODUKTY O NISKIM INDEKSIE GLIKEMICZNYM IG<55. ZAKAZ: BIALY CHLEB, BIALY RYZ, ZIEMNIAKI, CUKIER, SLODYCZE, NAPOJE SLODZONE. PREFERUJ: KASZE, PELNOZIARNISTE PIECZYWO, WARZYWA, ROSLINY STRACZKOWE, ORZECHY)",
             }
             diet_name = diets.get(preferences['diet'], preferences['diet']).upper()
             parts.append(f"DIETA: {diet_name}")

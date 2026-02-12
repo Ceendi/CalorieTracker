@@ -347,7 +347,8 @@ export const translations = {
             vegetarian: "Vegetarian",
             vegan: "Vegan",
             keto: "Keto",
-            mediterranean: "Mediterranean"
+            mediterranean: "Mediterranean",
+            low_gi: "Low GI"
         },
         allergens: {
             gluten: "Gluten",
@@ -719,7 +720,8 @@ export const translations = {
             vegetarian: "Wegetariańska",
             vegan: "Wegańska",
             keto: "Keto",
-            mediterranean: "Śródziemnomorska"
+            mediterranean: "Śródziemnomorska",
+            low_gi: "Niski IG"
         },
         allergens: {
             gluten: "Gluten",

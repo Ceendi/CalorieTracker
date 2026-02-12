@@ -28,6 +28,7 @@ const DIET_OPTIONS = [
   { value: 'vegan', label: 'vegan' },
   { value: 'keto', label: 'keto' },
   { value: 'mediterranean', label: 'mediterranean' },
+  { value: 'low_gi', label: 'low_gi' },
 ];
 
 // Common allergens
