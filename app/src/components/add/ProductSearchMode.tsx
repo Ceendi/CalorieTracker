@@ -35,6 +35,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
 
   const renderItem = ({ item }: { item: FoodProduct }) => (
     <TouchableOpacity
+      testID={`search-result-${item.id || item.name}`}
       className="bg-card p-3 rounded-2xl mb-2 shadow-sm border border-border"
       onPress={() => onItemPress(item)}
     >
@@ -71,6 +72,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
       <View className="flex-row items-center bg-card rounded-xl px-4 border border-border shadow-sm mb-4 h-14">
         <IconSymbol name="magnifyingglass" size={20} color={iconColor} />
         <TextInput
+          testID="search-input"
           className="flex-1 ml-3 text-foreground h-full py-0"
           style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
           placeholder={t('addFood.searchPlaceholder')}
@@ -86,7 +88,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
             <IconSymbol name="xmark.circle.fill" size={20} color={iconColor} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={onManualPress}>
+          <TouchableOpacity testID="manual-entry-button" onPress={onManualPress}>
             <IconSymbol name="pencil.circle.fill" size={24} color={tintColor} />
           </TouchableOpacity>
         )}

@@ -25,6 +25,7 @@ export function MealTypeSelector({ selectedMeal, onSelect }: MealTypeSelectorPro
         {mealTypeOptions.map((option) => (
           <TouchableOpacity
             key={option.label}
+            testID={`meal-type-${option.value}`}
             className={`px-4 py-2 rounded-full ${selectedMeal === option.value ? 'bg-primary' : 'bg-muted/50'}`}
             onPress={() => onSelect(option.value)}
           >

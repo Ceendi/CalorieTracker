@@ -72,8 +72,8 @@ export default function HomeScreen() {
   const mealTypes = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView 
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} testID="diary-screen">
+      <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
       >

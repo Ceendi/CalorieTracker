@@ -53,6 +53,7 @@ export default function ActivityScreen() {
           {activities.map((item) => (
             <TouchableOpacity
               key={item.id}
+              testID={`onboarding-activity-${item.id}`}
               onPress={() => setLevel(item.id)}
               className={`mb-3 p-4 rounded-xl border ${
                 level === item.id 
@@ -71,7 +72,8 @@ export default function ActivityScreen() {
         </View>
 
         <View className="mt-8 mb-10">
-          <TouchableOpacity 
+          <TouchableOpacity
+            testID="onboarding-complete"
             onPress={onComplete}
             disabled={!level || isLoading}
           >

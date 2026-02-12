@@ -54,7 +54,7 @@ export const InfoItem = ({
       
       {isEditing ? (
         isSelect ? (
-           <TouchableOpacity onPress={onOpenSelection} className="flex-row items-center flex-1 justify-end">
+           <TouchableOpacity testID={`profile-select-${fieldKey}`} onPress={onOpenSelection} className="flex-row items-center flex-1 justify-end">
               <Text className="text-primary font-bold text-lg text-right mr-2">
                {value ? getDisplayValue() : t('options.select')}
              </Text>
@@ -62,6 +62,7 @@ export const InfoItem = ({
            </TouchableOpacity>
         ) : (
             <TextInput
+              testID={`profile-input-${fieldKey}`}
               value={value}
               onChangeText={onChangeText}
               keyboardType={isNumber ? 'numeric' : 'default'}

@@ -241,7 +241,7 @@ export default function PlanScreen() {
   };
 
   const renderEmptyState = () => (
-    <View className="items-center py-16 px-6">
+    <View testID="plan-empty-state" className="items-center py-16 px-6">
       <View className="w-20 h-20 bg-muted rounded-full items-center justify-center mb-4">
         <IconSymbol name="calendar" size={40} color={Colors[colorScheme ?? 'light'].mutedForeground} />
       </View>
@@ -384,7 +384,7 @@ export default function PlanScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} testID="plan-screen">
       <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}

@@ -104,7 +104,7 @@ export default function FoodDetailsScreen() {
   if (!food) return null;
 
   return (
-     <View className="flex-1 bg-background">
+     <View className="flex-1 bg-background" testID="food-details-screen">
       <Stack.Screen options={{ title: params.entryId ? t('dashboard.edit') : t('foodDetails.title'), headerBackTitle: t('settings.cancel') }} />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -119,7 +119,7 @@ export default function FoodDetailsScreen() {
                 showsVerticalScrollIndicator={false}
               >
                  <View className="mb-6">
-                     <Text className="text-2xl font-bold text-foreground pt-1" style={{ lineHeight: 32 }}>
+                     <Text testID="food-details-name" className="text-2xl font-bold text-foreground pt-1" style={{ lineHeight: 32 }}>
                          {food.name}
                          {food.source === 'fineli' && (
                              <Text style={{ lineHeight: 32 }}>
@@ -157,7 +157,8 @@ export default function FoodDetailsScreen() {
              <View className="bg-card border-t border-border">
               <SafeAreaView edges={['bottom']}>
                 <View className="p-5">
-                    <TouchableOpacity 
+                    <TouchableOpacity
+                      testID="food-details-save"
                       className={`w-full py-4 rounded-xl items-center ${isGlobalBusy ? 'bg-primary/70' : 'bg-primary'}`}
                       onPress={saveEntry}
                       disabled={isGlobalBusy}

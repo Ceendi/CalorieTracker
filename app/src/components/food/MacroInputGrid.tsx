@@ -27,13 +27,14 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         control={control}
                         name="calories"
                         render={({ field: { onChange, value } }) => (
-                            <TextInput 
-                                className="text-foreground w-full" 
+                            <TextInput
+                                testID="macro-calories"
+                                className="text-foreground w-full"
                                 style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
-                                value={value?.toString()} 
-                                onChangeText={onChange} 
-                                keyboardType="numeric" 
-                                placeholder="0" 
+                                value={value?.toString()}
+                                onChangeText={onChange}
+                                keyboardType="numeric"
+                                placeholder="0"
                                 placeholderTextColor={Colors[theme].placeholder}
                             />
                         )}
@@ -47,14 +48,15 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         control={control}
                         name="protein"
                         render={({ field: { onChange, value } }) => (
-                            <TextInput 
-                                className="text-foreground w-full" 
+                            <TextInput
+                                testID="macro-protein"
+                                className="text-foreground w-full"
                                 style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
-                                value={value?.toString()} 
-                                onChangeText={onChange} 
-                                keyboardType="numeric" 
-                                placeholder="0" 
-                                placeholderTextColor={Colors[theme].placeholder} 
+                                value={value?.toString()}
+                                onChangeText={onChange}
+                                keyboardType="numeric"
+                                placeholder="0"
+                                placeholderTextColor={Colors[theme].placeholder}
                             />
                         )}
                     />
@@ -69,14 +71,15 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         control={control}
                         name="fat"
                         render={({ field: { onChange, value } }) => (
-                            <TextInput 
-                                className="text-foreground w-full" 
+                            <TextInput
+                                testID="macro-fat"
+                                className="text-foreground w-full"
                                 style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
-                                value={value?.toString()} 
-                                onChangeText={onChange} 
-                                keyboardType="numeric" 
-                                placeholder="0" 
-                                placeholderTextColor={Colors[theme].placeholder} 
+                                value={value?.toString()}
+                                onChangeText={onChange}
+                                keyboardType="numeric"
+                                placeholder="0"
+                                placeholderTextColor={Colors[theme].placeholder}
                             />
                         )}
                     />
@@ -89,14 +92,15 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                         control={control}
                         name="carbs"
                         render={({ field: { onChange, value } }) => (
-                            <TextInput 
-                                className="text-foreground w-full" 
+                            <TextInput
+                                testID="macro-carbs"
+                                className="text-foreground w-full"
                                 style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
-                                value={value?.toString()} 
-                                onChangeText={onChange} 
-                                keyboardType="numeric" 
-                                placeholder="0" 
-                                placeholderTextColor={Colors[theme].placeholder} 
+                                value={value?.toString()}
+                                onChangeText={onChange}
+                                keyboardType="numeric"
+                                placeholder="0"
+                                placeholderTextColor={Colors[theme].placeholder}
                             />
                         )}
                     />

@@ -154,13 +154,13 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" testID="profile-screen">
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 120 }}>
         
         <View className="flex-row justify-between items-center mb-6 h-12">
            <View className="min-w-[60px] items-start justify-center">
              {isEditing && (
-               <TouchableOpacity onPress={() => setIsEditing(false)} className="py-2">
+               <TouchableOpacity testID="profile-cancel-button" onPress={() => setIsEditing(false)} className="py-2">
                  <Text className="text-muted-foreground font-medium text-lg">{t('profile.cancel')}</Text>
                </TouchableOpacity>
              )}
@@ -168,12 +168,12 @@ export default function ProfileScreen() {
            
            <View className="min-w-[60px] items-end justify-center">
              {isEditing ? (
-               <TouchableOpacity onPress={handleSave} disabled={isLoading} className="py-2">
+               <TouchableOpacity testID="profile-done-button" onPress={handleSave} disabled={isLoading} className="py-2">
                   <Text className="text-primary font-bold text-lg">{t('profile.done')}</Text>
                </TouchableOpacity>
              ) : (
-               <TouchableOpacity onPress={() => setSettingsVisible(true)} className="p-2 bg-card rounded-full border border-border shadow-sm">
-                 <IconSymbol name="gear" size={24} color={Colors[colorScheme ?? 'light'].tint} /> 
+               <TouchableOpacity testID="settings-gear" onPress={() => setSettingsVisible(true)} className="p-2 bg-card rounded-full border border-border shadow-sm">
+                 <IconSymbol name="gear" size={24} color={Colors[colorScheme ?? 'light'].tint} />
                </TouchableOpacity>
              )}
            </View>
@@ -190,8 +190,9 @@ export default function ProfileScreen() {
           </Text>
           <Text className="text-muted-foreground mb-3">{user?.email}</Text>
           
-          <TouchableOpacity 
-            onPress={toggleEdit} 
+          <TouchableOpacity
+            testID="profile-edit-button"
+            onPress={toggleEdit}
             disabled={isEditing}
             className={`bg-card px-6 py-2.5 rounded-full border border-border shadow-sm active:bg-muted ${isEditing ? 'opacity-0' : 'opacity-100'}`}
           >

@@ -56,11 +56,16 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-background">
+      <View
+        className="flex-1 bg-background"
+        testID="settings-modal"
+        style={{ paddingTop: insets.top }}
+      >
         <View className="flex-row justify-center items-center p-4 border-b border-border bg-background relative">
           <Text className="text-xl font-bold text-foreground">{t('settings.title')}</Text>
-          <TouchableOpacity 
-            onPress={onClose} 
+          <TouchableOpacity
+            testID="settings-close"
+            onPress={onClose}
             className="p-2 bg-muted/50 rounded-full absolute right-4"
           >
             <IconSymbol name="xmark" size={20} color={Colors[colorScheme ?? 'light'].text} />
@@ -80,15 +85,16 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
                 </View>
                 <Text className="text-base font-medium text-foreground">{t('settings.darkMode')}</Text>
               </View>
-              <Switch 
-                value={isDarkLocal} 
+              <Switch
+                testID="settings-dark-mode-toggle"
+                value={isDarkLocal}
                 onValueChange={handleThemeToggle}
                 trackColor={{ false: '#E5E7EB', true: Colors.light.tint }}
-                thumbColor={'#fff'} 
+                thumbColor={'#fff'}
               />
             </View>
 
-            <TouchableOpacity onPress={handleChangeLanguage} className="flex-row items-center justify-between p-4">
+            <TouchableOpacity testID="settings-language-button" onPress={handleChangeLanguage} className="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
                 <View className="p-2 bg-emerald-500/10 rounded-full">
                   <IconSymbol name="globe" size={20} color="#10B981" />
@@ -124,7 +130,8 @@ export function SettingsModal({ visible, onClose, mode = 'authenticated' }: Sett
 
               </View>
               
-               <TouchableOpacity 
+               <TouchableOpacity
+                 testID="settings-logout"
                  onPress={handleLogout}
                  className="flex-row items-center justify-center p-4 bg-card rounded-2xl border border-border shadow-sm mt-2 active:bg-muted"
                >

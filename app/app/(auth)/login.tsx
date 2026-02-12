@@ -62,27 +62,28 @@ export default function LoginScreen() {
       }}
     >
       <View style={{ position: 'absolute', top: insets.top + 10, right: 20, zIndex: 10 }}>
-        <TouchableOpacity 
-          onPress={() => setSettingsVisible(true)} 
+        <TouchableOpacity
+          testID="login-settings-gear"
+          onPress={() => setSettingsVisible(true)}
           className="p-2 bg-card rounded-full border border-border shadow-sm"
         >
           <IconSymbol name="gear" size={24} color={Colors[colorScheme ?? 'light'].tint} />
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 px-6 justify-center">
+          <View className="flex-1 px-6 justify-center" testID="login-screen">
             <View className="mb-8">
               <Text className="text-3xl font-bold text-foreground">{t('auth.welcomeBack')}</Text>
               <Text className="text-muted-foreground mt-2">{t('auth.signInSubtitle')}</Text>
             </View>
 
             {errorMsg && (
-              <View className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
+              <View testID="login-error" className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
                 <Text className="text-destructive text-center">{errorMsg}</Text>
               </View>
             )}
@@ -95,6 +96,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               error={errors.username?.message}
+              testID="login-email"
             />
 
             <ControlledInput
@@ -104,6 +106,7 @@ export default function LoginScreen() {
               placeholder={t('auth.passwordPlaceholder')}
               secureTextEntry
               error={errors.password?.message}
+              testID="login-password"
             />
 
             <TouchableOpacity 
@@ -115,7 +118,8 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
+              testID="login-submit"
               className="mt-6 mb-4"
               onPress={handleSubmit(onSubmit)}
               disabled={isLoading}
@@ -163,7 +167,7 @@ export default function LoginScreen() {
 
             <View className="flex-row justify-center mt-4">
               <Text className="text-muted-foreground">{t('auth.noAccount')} </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+              <TouchableOpacity testID="login-register-link" onPress={() => router.push('/(auth)/register')}>
                 <Text className="text-primary font-semibold">{t('auth.signUp')}</Text>
               </TouchableOpacity>
             </View>

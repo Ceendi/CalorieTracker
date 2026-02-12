@@ -87,7 +87,7 @@ export default function VerifyEmailScreen() {
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 px-6 justify-center">
+          <View className="flex-1 px-6 justify-center" testID="verify-email-screen">
             <View className="mb-8">
               <Text className="text-3xl font-bold text-foreground">{t('auth.verifyEmail')}</Text>
               <Text className="text-muted-foreground mt-2">
@@ -110,9 +110,11 @@ export default function VerifyEmailScreen() {
               maxLength={6}
               error={errors.code?.message}
               style={{ letterSpacing: 8, textAlign: 'center', fontSize: 24 }}
+              testID="verify-code"
             />
 
-            <TouchableOpacity 
+            <TouchableOpacity
+              testID="verify-submit"
               className="mt-6 mb-4"
               onPress={handleSubmit(onSubmit)}
               disabled={isLoading}

@@ -49,6 +49,7 @@ export default function MeasurementsScreen() {
                 <View className="flex-row items-center">
                   <View className="flex-1 bg-card border border-border rounded-lg h-14 justify-center px-3">
                     <TextInput
+                      testID="onboarding-height"
                       className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="175"
@@ -67,6 +68,7 @@ export default function MeasurementsScreen() {
                 <View className="flex-row items-center">
                   <View className="flex-1 bg-card border border-border rounded-lg h-14 justify-center px-3">
                     <TextInput
+                      testID="onboarding-weight"
                       className="text-foreground flex-1 h-full"
                       style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                       placeholder="70"
@@ -82,7 +84,8 @@ export default function MeasurementsScreen() {
             </ScrollView>
 
             <View className="py-6 pb-10">
-              <TouchableOpacity 
+              <TouchableOpacity
+                testID="onboarding-next-2"
                 onPress={onNext}
                 disabled={!height || !weight}
               >

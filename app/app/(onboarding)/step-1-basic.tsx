@@ -52,9 +52,12 @@ export default function BasicInfoScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 pt-10">
-            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+            <ScrollView 
+              showsVerticalScrollIndicator={false} 
+              className="flex-1"
+              keyboardShouldPersistTaps="handled"
+            >
               <Text className="text-sm font-bold text-primary mb-2">{t('onboarding.step1')}</Text>
               <Text className="text-3xl font-bold text-foreground mb-4">{t('onboarding.basicDetails')}</Text>
               <Text className="text-muted-foreground mb-8">{t('onboarding.basicDetailsSubtitle')}</Text>
@@ -63,6 +66,7 @@ export default function BasicInfoScreen() {
                 <Text className="text-foreground font-medium mb-2">{t('profile.age')}</Text>
                 <View className="bg-card border border-border rounded-lg h-14 justify-center px-3">
                   <TextInput
+                    testID="onboarding-age"
                     className="text-foreground flex-1 h-full"
                     style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                     placeholder={t('onboarding.agePlaceholder')}
@@ -80,6 +84,7 @@ export default function BasicInfoScreen() {
                   {genders.map((g) => (
                     <TouchableOpacity
                       key={g}
+                      testID={`onboarding-gender-${g.toLowerCase()}`}
                       onPress={() => setGender(g)}
                       className={`flex-1 mx-1 p-3 rounded-xl border ${
                         gender === g 
@@ -101,7 +106,8 @@ export default function BasicInfoScreen() {
             </ScrollView>
 
             <View className="py-6 pb-10">
-              <TouchableOpacity 
+              <TouchableOpacity
+                testID="onboarding-next-1"
                 onPress={onNext}
                 disabled={!age || !gender}
               >
@@ -114,7 +120,6 @@ export default function BasicInfoScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </View>
   );

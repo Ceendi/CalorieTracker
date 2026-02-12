@@ -48,6 +48,7 @@ export default function GoalScreen() {
             {goals.map((item) => (
               <TouchableOpacity
                 key={item.id}
+                testID={`onboarding-goal-${item.id}`}
                 onPress={() => setGoal(item.id)}
                 className={`mb-3 p-4 rounded-xl border flex-row items-center ${
                   goal === item.id 
@@ -68,7 +69,8 @@ export default function GoalScreen() {
         </ScrollView>
 
         <View className="py-6 pb-10">
-           <TouchableOpacity 
+           <TouchableOpacity
+            testID="onboarding-next-3"
             onPress={onNext}
             disabled={!goal}
           >

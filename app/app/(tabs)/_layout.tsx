@@ -32,6 +32,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t('tabs.home'),
+          tabBarButtonTestID: 'tab-home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
@@ -39,6 +40,7 @@ export default function TabLayout() {
         name="plan"
         options={{
           title: t('tabs.plan'),
+          tabBarButtonTestID: 'tab-plan',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
         }}
       />
@@ -51,6 +53,7 @@ export default function TabLayout() {
             return (
               <TouchableOpacity
                 {...rest as any}
+                testID="tab-add"
                 delayLongPress={delayLongPress ?? undefined}
                 disabled={disabled ?? undefined}
                 style={styles.customButtonContainer}
@@ -70,6 +73,7 @@ export default function TabLayout() {
         name="stats"
         options={{
           title: t('tabs.stats'),
+          tabBarButtonTestID: 'tab-stats',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
         }}
       />
@@ -77,6 +81,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: t('tabs.profile'),
+          tabBarButtonTestID: 'tab-profile',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />

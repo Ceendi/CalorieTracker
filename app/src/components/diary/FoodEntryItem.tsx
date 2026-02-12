@@ -14,8 +14,19 @@ interface FoodEntryItemProps {
 export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) {
     const { t } = useLanguage();
 
+    const handleLongPress = () => {
+        Alert.alert(
+            t('dashboard.delete'),
+            '',
+            [
+                { text: t('profile.cancel'), style: 'cancel' },
+                { text: t('dashboard.delete'), style: 'destructive', onPress: () => onDelete(entry.id) },
+            ]
+        );
+    };
+
     const renderRightActions = () => (
-        <TouchableOpacity 
+        <TouchableOpacity
             className="bg-destructive justify-center items-center w-20 h-full rounded-xl ml-2"
             onPress={() => onDelete(entry.id)}
         >
@@ -26,9 +37,11 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
     return (
         <View className="mb-3">
             <Swipeable renderRightActions={renderRightActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
+                    testID={`food-entry-${entry.id}`}
                     activeOpacity={0.7}
                     onPress={() => onPress(entry)}
+                    onLongPress={handleLongPress}
                     className="flex-row justify-between items-center py-3 bg-card px-4 rounded-xl border border-border"
                 >
                     <View className="flex-1">

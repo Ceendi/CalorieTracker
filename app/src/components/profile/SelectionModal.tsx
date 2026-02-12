@@ -30,6 +30,7 @@ export const SelectionModal = ({ visible, title, options, selectedValue, onSelec
         {options.map((option) => (
           <TouchableOpacity 
             key={option.value} 
+            testID={`selection-option-${option.value}`}
             onPress={() => onSelect(option.value)}
             className="p-4 border-b border-border last:border-0 active:bg-muted"
           >

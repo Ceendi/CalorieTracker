@@ -28,7 +28,7 @@ export default function ManualEntryScreen() {
   const selectedMeal = watch('mealType');
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" testID="manual-entry-screen">
       <Stack.Screen options={{ title: t('manualEntry.title'), headerBackTitle: t('settings.cancel') }} />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -52,8 +52,9 @@ export default function ManualEntryScreen() {
                             name="name"
                             render={({ field: { onChange, value } }) => (
                                 <TextInput
+                                    testID="manual-entry-name"
                                     className="text-foreground w-full py-0"
-                                    style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }} 
+                                    style={{ fontSize: 18, paddingVertical: 0, includeFontPadding: false }}
                                     placeholder={t('manualEntry.namePlaceholder')}
                                     value={value}
                                     onChangeText={onChange}
@@ -69,7 +70,8 @@ export default function ManualEntryScreen() {
                 <View className="bg-card rounded-2xl p-4 mb-4 shadow-sm border border-border">
                     <Text className="text-sm font-medium text-muted-foreground mb-2">{t('manualEntry.portionLabel')}</Text>
                     <View className="flex-row items-stretch gap-2 h-14">
-                        <TouchableOpacity 
+                        <TouchableOpacity
+                            testID="manual-entry-weight-minus"
                             className="w-12 bg-muted/50 rounded-xl items-center justify-center"
                             onPress={() => setValue('weight', Math.max(10, (Number(weight) || 0) - 10))}
                         >
@@ -81,6 +83,7 @@ export default function ManualEntryScreen() {
                                 name="weight"
                                 render={({ field: { onChange, value } }) => (
                                     <TextInput
+                                        testID="manual-entry-weight"
                                         className="flex-1 font-bold text-foreground text-center"
                                         style={{ fontSize: 20, height: '100%' }}
                                         value={value?.toString()}
@@ -91,7 +94,8 @@ export default function ManualEntryScreen() {
                             />
                             <Text className="text-base text-muted-foreground ml-1">g</Text>
                         </View>
-                        <TouchableOpacity 
+                        <TouchableOpacity
+                            testID="manual-entry-weight-plus"
                             className="w-12 bg-muted/50 rounded-xl items-center justify-center"
                             onPress={() => setValue('weight', (Number(weight) || 0) + 10)}
                         >
@@ -116,7 +120,8 @@ export default function ManualEntryScreen() {
               <View className="bg-card border-t border-border">
                 <SafeAreaView edges={['bottom']}>
                   <View className="p-5">
-                      <TouchableOpacity 
+                      <TouchableOpacity
+                        testID="manual-entry-save"
                         className={`w-full py-4 rounded-xl items-center ${isBusy ? 'bg-primary/70' : 'bg-primary'}`}
                         onPress={submit}
                         disabled={isBusy}

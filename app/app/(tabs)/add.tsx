@@ -146,7 +146,7 @@ export default function AddScreen() {
     ];
 
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}> 
+        <SafeAreaView className="flex-1 bg-background" edges={['top']} testID="add-screen">
             <View className="px-5 pt-2 pb-4">
                  <Text className="text-3xl font-bold text-foreground tracking-tight">{t('addFood.title')}</Text>
                  <Text className="text-muted-foreground text-sm mt-1 font-medium">
@@ -162,6 +162,7 @@ export default function AddScreen() {
                         return (
                             <TouchableOpacity
                                 key={mode.id}
+                                testID={`add-mode-${mode.id}`}
                                 style={{
                                   flex: 1,
                                   flexDirection: 'row',

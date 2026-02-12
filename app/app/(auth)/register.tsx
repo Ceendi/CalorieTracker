@@ -90,14 +90,14 @@ export default function RegisterScreen() {
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} className="px-6" keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} className="px-6" keyboardShouldPersistTaps="handled" testID="register-screen">
             <View className="mb-8">
               <Text className="text-3xl font-bold text-foreground">{t('auth.createAccount')}</Text>
               <Text className="text-muted-foreground mt-2">{t('auth.signUpSubtitle')}</Text>
             </View>
 
             {errorMsg && (
-                <View className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
+                <View testID="register-error" className="mb-4 p-3 bg-destructive/15 border border-destructive rounded-lg">
                     <Text className="text-destructive text-center">{errorMsg}</Text>
                 </View>
             )}
@@ -110,6 +110,7 @@ export default function RegisterScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               error={errors.email?.message}
+              testID="register-email"
             />
 
             <ControlledInput
@@ -119,6 +120,7 @@ export default function RegisterScreen() {
               placeholder={t('auth.minPasswordPlaceholder')}
               secureTextEntry
               error={errors.password?.message}
+              testID="register-password"
             />
 
             <ControlledInput
@@ -128,9 +130,11 @@ export default function RegisterScreen() {
               placeholder={t('auth.confirmPasswordPlaceholder')}
               secureTextEntry
               error={errors.confirmPassword?.message}
+              testID="register-confirm-password"
             />
 
-            <TouchableOpacity 
+            <TouchableOpacity
+              testID="register-submit"
               className="mt-6 mb-4"
               onPress={handleSubmit(onSubmit)}
               disabled={isLoading}

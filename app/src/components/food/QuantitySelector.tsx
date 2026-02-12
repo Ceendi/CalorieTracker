@@ -62,6 +62,7 @@ export function QuantitySelector({
       {/* Quantity Input Row */}
       <View className="flex-row items-stretch gap-2 h-14">
         <TouchableOpacity
+          testID="quantity-minus"
           className="w-12 bg-muted/50 rounded-xl items-center justify-center"
           onPress={handleDecrement}
           accessibilityLabel={t('accessibility.decreaseQuantity')}
@@ -71,6 +72,7 @@ export function QuantitySelector({
         </TouchableOpacity>
         
         <TextInput
+          testID="quantity-input"
           className="flex-1 font-bold text-foreground px-4 bg-background border border-border rounded-xl text-center"
           style={{ fontSize: 20 }}
           value={quantity}
@@ -84,6 +86,7 @@ export function QuantitySelector({
         />
         
         <TouchableOpacity
+          testID="quantity-plus"
           className="w-12 bg-muted/50 rounded-xl items-center justify-center"
           onPress={handleIncrement}
           accessibilityLabel={t('accessibility.increaseQuantity')}
