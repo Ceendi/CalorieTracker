@@ -1,0 +1,6 @@
+# Build tools
+*.jar
+
+# Generated diagrams (regenerate from .puml sources)
+docs/*.png
+docs/*.svg

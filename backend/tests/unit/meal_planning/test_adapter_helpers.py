@@ -28,35 +28,42 @@ class TestFormatPreferences:
 
     def test_vegetarian_translated_to_polish(self, adapter):
         result = adapter._format_preferences({"diet": "vegetarian"})
-        assert "wegetarianska" in result
+        assert "WEGETARIANSKA" in result
+        assert result.startswith("DIETA:")
 
     def test_vegan_translated_to_polish(self, adapter):
         result = adapter._format_preferences({"diet": "vegan"})
-        assert "weganska" in result
+        assert "WEGANSKA" in result
 
     def test_keto_translated_to_polish(self, adapter):
         result = adapter._format_preferences({"diet": "keto"})
-        assert "ketogeniczna" in result
+        assert "KETOGENICZNA" in result
 
     def test_unknown_diet_used_as_is(self, adapter):
         result = adapter._format_preferences({"diet": "paleo"})
-        assert "paleo" in result
+        assert "PALEO" in result
 
     def test_allergies_formatted(self, adapter):
         result = adapter._format_preferences({"allergies": ["gluten", "laktoza"]})
-        assert "bez: gluten, laktoza" in result
+        assert "ALERGIA NA:" in result
+        assert "GLUTEN" in result
+        assert "LAKTOZA" in result
 
     def test_cuisine_preferences_formatted(self, adapter):
         result = adapter._format_preferences({"cuisine_preferences": ["polska", "wloska"]})
-        assert "kuchnia: polska, wloska" in result
+        assert "PREFEROWANA KUCHNIA:" in result
+        assert "POLSKA" in result
+        assert "WLOSKA" in result
 
     def test_excluded_ingredients_formatted(self, adapter):
         result = adapter._format_preferences({"excluded_ingredients": ["cukier", "sol"]})
-        assert "wykluczone: cukier, sol" in result
+        assert "WYKLUCZONE SKLADNIKI:" in result
+        assert "CUKIER" in result
+        assert "SOL" in result
 
     def test_empty_preferences_returns_default(self, adapter):
         result = adapter._format_preferences({})
-        assert result == "standardowa polska kuchnia"
+        assert "BRAK SZCZEGOLNYCH WYMAGAN" in result
 
     def test_multiple_preferences_combined(self, adapter):
         result = adapter._format_preferences({
@@ -64,13 +71,13 @@ class TestFormatPreferences:
             "allergies": ["gluten"],
             "excluded_ingredients": ["cukier"],
         })
-        assert "weganska" in result
-        assert "gluten" in result
-        assert "cukier" in result
+        assert "WEGANSKA" in result
+        assert "GLUTEN" in result
+        assert "CUKIER" in result
 
     def test_none_values_ignored(self, adapter):
         result = adapter._format_preferences({"diet": None, "allergies": []})
-        assert result == "standardowa polska kuchnia"
+        assert "BRAK SZCZEGOLNYCH WYMAGAN" in result
 
 
 # ---------------------------------------------------------------------------

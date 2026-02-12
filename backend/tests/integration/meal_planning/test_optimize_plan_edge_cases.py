@@ -41,17 +41,46 @@ def _make_day_with_kcal(kcal: float, day_number: int = 1) -> GeneratedDay:
     return GeneratedDay(day_number=day_number, meals=[meal])
 
 
+def _make_balanced_day(total_kcal: float, day_number: int = 1) -> GeneratedDay:
+    """Create a day with meals distributed per MEAL_DISTRIBUTION ratios.
+
+    This avoids triggering per-meal normalization, so only global scaling
+    is exercised.
+    """
+    distribution = [
+        ("breakfast", 0.25), ("second_breakfast", 0.10), ("lunch", 0.35),
+        ("snack", 0.10), ("dinner", 0.20),
+    ]
+    meals = []
+    for meal_type, ratio in distribution:
+        meal_kcal = total_kcal * ratio
+        ing = GeneratedIngredient(
+            food_id=uuid4(), name="Test", amount_grams=100.0,
+            unit_label=None, kcal=meal_kcal, protein=meal_kcal * 0.1,
+            fat=meal_kcal * 0.05, carbs=meal_kcal * 0.15,
+        )
+        meal = GeneratedMeal(
+            meal_type=meal_type, name="Test Meal", description="Test",
+            preparation_time_minutes=15, ingredients=[ing],
+            total_kcal=meal_kcal, total_protein=meal_kcal * 0.1,
+            total_fat=meal_kcal * 0.05, total_carbs=meal_kcal * 0.15,
+        )
+        meals.append(meal)
+    return GeneratedDay(day_number=day_number, meals=meals)
+
+
 class TestOptimizePlanScaling:
     """Tests for plan optimization scaling behavior."""
 
     @pytest.mark.asyncio
-    async def test_no_scaling_when_within_10_percent(self, adapter):
+    async def test_no_scaling_when_within_5_percent(self, adapter):
         profile = make_profile(daily_kcal=2000)
-        day = _make_day_with_kcal(1950)  # ratio 1.026, within 10%
+        day = _make_balanced_day(1950)  # ratio 1.026, within 5% threshold
 
         result = await adapter.optimize_plan([day], profile)
 
-        assert result[0].meals[0].total_kcal == 1950  # Unchanged
+        # Balanced meals stay within per-meal tolerance, global ratio < 5%
+        assert abs(result[0].total_kcal - 1950) < 5  # Unchanged
 
     @pytest.mark.asyncio
     async def test_scales_up_when_below_target(self, adapter):
@@ -65,15 +94,15 @@ class TestOptimizePlanScaling:
         assert abs(result[0].total_kcal - 2000) < 10
 
     @pytest.mark.asyncio
-    async def test_scale_floor_at_0_85(self, adapter):
+    async def test_overshoot_optimized_toward_target(self, adapter):
         profile = make_profile(daily_kcal=2000)
-        day = _make_day_with_kcal(3000)  # ratio 0.667 -> clamped to 0.85
+        day = _make_day_with_kcal(3000)  # way above target
 
         result = await adapter.optimize_plan([day], profile)
 
-        # 3000 * 0.85 = 2550 (not 3000 * 0.667 = 2001)
-        expected = 3000 * 0.85
-        assert abs(result[0].total_kcal - expected) < 1
+        # Per-meal normalization + global scaling bring it close to target
+        assert result[0].total_kcal < 3000
+        assert abs(result[0].total_kcal - 2000) < 50
 
     @pytest.mark.asyncio
     async def test_scale_ceiling_at_3_0(self, adapter):
