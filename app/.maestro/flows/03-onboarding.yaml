@@ -1,0 +1,134 @@
+appId: com.ceendi.calorietracker
+name: "Onboarding flow"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+# Wait for boot
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 90000
+
+# Login with not- runFlow: ../helpers/launch.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000
+
+# Login with not-onboarded user
+- tapOn:
+    id: "login-email"
+- inputText: "e2e-onboard@calorietracker.dev"
+
+- tapOn:
+    id: "login-password"
+- inputText: "TestPass123!"
+
+- tapOn:
+    id: "login-submit"
+
+# Wait for onboarding start
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-age"
+    timeout: 30000
+
+# Step 1: Basic details
+- tapOn:
+    id: "onboarding-age"
+- inputText: "25"
+
+# Wait for gender button to be fully ready
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-gender-male"
+    timeout: 10000
+
+# Multi-strategy tap for Gender selection
+- tapOn:
+    id: "onboarding-gender-male"
+    optional: true
+- tapOn:
+    text: "(Male|Mężczyzna)"
+    optional: true
+
+# Next button (Primary by ID, fallback by text)
+- tapOn:
+    id: "onboarding-next-1"
+    optional: true
+- tapOn:
+    text: "(Next|Dalej)"
+    optional: true
+
+# Step 2: Measurements
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-height"
+    timeout: 15000
+
+- tapOn:
+    id: "onboarding-height"
+- inputText: "180"
+
+- tapOn:
+    id: "onboarding-weight"
+- inputText: "75"
+
+# Next button 
+- tapOn:
+    id: "onboarding-next-2"
+    optional: true
+- tapOn:
+    text: "(Next|Dalej)"
+    optional: true
+
+# Step 3: Goal
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-goal-maintain"
+    timeout: 15000
+
+# Select Goal (Primary by ID, fallback by text)
+- tapOn:
+    id: "onboarding-goal-maintain"
+    optional: true
+- tapOn:
+    text: "(Maintain weight|Utrzymaj wagę)"
+    optional: true
+
+# Next button
+- tapOn:
+    id: "onboarding-next-3"
+    optional: true
+- tapOn:
+    text: "(Next|Dalej)"
+    optional: true
+
+# Step 4: Activity
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-activity-moderate"
+    timeout: 15000
+
+# Select Activity (Primary by ID, fallback by text)
+- tapOn:
+    id: "onboarding-activity-moderate"
+    optional: true
+
+# Complete button
+- tapOn:
+    id: "onboarding-complete"
+    optional: true
+
+# Should land on diary after completing onboarding
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "diary-screen"

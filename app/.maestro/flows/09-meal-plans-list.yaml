@@ -1,0 +1,31 @@
+appId: com.ceendi.calorietracker
+name: "Meal plans list"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to meal plans via tab
+- tapOn:
+    id: "tab-plan"
+
+# List should be visible
+- extendedWaitUntil:
+    visible:
+      text: "(Meal Plans|Plany posiłków)"
+    timeout: 20000
+
+- assertVisible:
+    text: "(Meal Plans|Plany posiłków)"

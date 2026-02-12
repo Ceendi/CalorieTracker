@@ -1,0 +1,88 @@
+appId: com.ceendi.calorietracker
+name: "Manual food entry"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to add screen via tab
+- tapOn:
+    id: "tab-add"
+
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 15000
+
+# Tap manual entry button
+- tapOn:
+    id: "manual-entry-button"
+
+# Wait for manual entry screen
+- extendedWaitUntil:
+    visible:
+      id: "manual-entry-name"
+    timeout: 15000
+
+# Fill in food name
+- tapOn:
+    id: "manual-entry-name"
+- inputText: "E2E Test Food"
+
+# Fill in macros
+- tapOn:
+    id: "macro-calories"
+- inputText: "250"
+
+- tapOn:
+    id: "macro-protein"
+- inputText: "20"
+
+- tapOn:
+    id: "macro-fat"
+- inputText: "10"
+
+- tapOn:
+    id: "macro-carbs"
+- inputText: "15"
+
+# Set weight
+- doubleTapOn:
+    id: "manual-entry-weight"
+- eraseText: 50
+- inputText: "150"
+
+# Dismiss keyboard safely (swipe from top to avoid keyboard)
+- swipe:
+    start: 50%, 30%
+    end: 50%, 50%
+    duration: 400
+
+# Select meal type
+- tapOn:
+    id: "meal-type-lunch"
+
+# Save
+- tapOn:
+    id: "manual-entry-save"
+
+# Should return to diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "diary-screen"

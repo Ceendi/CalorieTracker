@@ -1,0 +1,75 @@
+appId: com.ceendi.calorietracker
+name: "Profile view"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to profile via tab
+- tapOn:
+    id: "tab-profile"
+
+# Profile screen should be visible
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "profile-screen"
+
+# Edit Profile
+- tapOn:
+    id: "profile-edit-button"
+
+# Change Weight
+- tapOn:
+    id: "profile-input-weight"
+- eraseText: 50
+- inputText: "80"
+
+# Change Goal
+- scrollUntilVisible:
+    element:
+      id: "profile-select-goal"
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: "profile-select-goal"
+- tapOn: # Retry tap if first one failed to register
+    id: "profile-select-goal"
+
+- extendedWaitUntil:
+    visible:
+      id: "selection-option-lose"
+    timeout: 5000
+
+- tapOn:
+    id: "selection-option-lose"
+
+# Save
+- scrollUntilVisible:
+    element:
+      id: "profile-done-button"
+    direction: UP
+- tapOn:
+    id: "profile-done-button"
+
+# Confirm success alert
+- tapOn: "OK"
+
+# Verify we are back
+- assertVisible:
+    id: "profile-edit-button"

@@ -1,0 +1,15 @@
+appId: com.ceendi.calorietracker
+---
+# Helper flow for logging in
+- tapOn:
+    id: "login-email"
+- eraseText: 50
+- inputText: ${EMAIL}
+
+- tapOn:
+    id: "login-password"
+- eraseText: 50
+- inputText: ${PASSWORD}
+
+- tapOn:
+    id: "login-submit"

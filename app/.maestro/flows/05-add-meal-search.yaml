@@ -1,0 +1,80 @@
+appId: com.ceendi.calorietracker
+name: "Add meal via search"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to add screen via tab
+- tapOn:
+    id: "tab-add"
+
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 15000
+
+# Search for a common food
+- tapOn:
+    id: "search-input"
+- inputText: "chicken"
+
+# Wait for results to load
+- extendedWaitUntil:
+    visible:
+      text: ".*kcal.*"
+    timeout: 20000
+
+# Tap first search result
+- tapOn:
+    text: ".*chicken.*"
+    index: 1
+
+# Food details screen should open
+- extendedWaitUntil:
+    visible:
+      id: "food-details-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "food-details-screen"
+
+# Set quantity
+- doubleTapOn:
+    id: "quantity-input"
+- eraseText: 50
+- inputText: "150"
+
+# Select meal type
+- tapOn:
+    id: "meal-type-breakfast"
+
+# Dismiss keyboard safely
+- swipe:
+    direction: DOWN
+    duration: 400
+
+# Save
+- tapOn:
+    id: "food-details-save"
+
+# Should return to diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "diary-screen"

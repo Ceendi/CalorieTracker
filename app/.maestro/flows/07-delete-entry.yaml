@@ -1,0 +1,82 @@
+appId: com.ceendi.calorietracker
+name: "Delete entry"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# First add an entry to delete
+- tapOn:
+    id: "tab-add"
+
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 15000
+
+- tapOn:
+    id: "search-input"
+- inputText: "apple"
+
+- extendedWaitUntil:
+    visible:
+      text: ".*kcal.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*apple.*"
+    index: 1
+
+- extendedWaitUntil:
+    visible:
+      id: "food-details-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "food-details-save"
+
+# Return to diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 15000
+
+# Scroll until entry is visible
+- scrollUntilVisible:
+    element:
+      text: ".*apple.*"
+    direction: DOWN
+
+# Long press to delete (or tap delete icon if visible)
+- tapOn:
+    id: "entry-delete-icon"
+    optional: true
+
+# If using long press
+- longPressOn:
+    text: ".*apple.*"
+    optional: true
+
+# Confirm deletion
+- tapOn:
+    text: "(Delete|Usuń)"
+    optional: true
+
+- tapOn:
+    text: "OK"
+    optional: true
+
+# Verify it's gone
+- assertNotVisible: ".*apple.*"

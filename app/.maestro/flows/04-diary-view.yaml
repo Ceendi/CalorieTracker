@@ -1,0 +1,38 @@
+appId: com.ceendi.calorietracker
+name: "Diary view"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary to load
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Verify meal sections are visible (English or Polish)
+- assertVisible:
+    text: "(Breakfast|Śniadanie)"
+- assertVisible:
+    text: "(Lunch|Obiad)"
+- scrollUntilVisible:
+    element:
+      text: "(Dinner|Kolacja)"
+    direction: DOWN
+    timeout: 20000
+    speed: 40
+    visibilityPercentage: 100
+- scrollUntilVisible:
+    element:
+      text: "(Snack|Przekąska)"
+    direction: DOWN
+    timeout: 20000
+    speed: 40
+    visibilityPercentage: 100

@@ -1,0 +1,54 @@
+appId: com.ceendi.calorietracker
+name: "Logout flow"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to profile via tab
+- tapOn:
+    id: "tab-profile"
+
+# Wait for profile and open settings
+- extendedWaitUntil:
+    visible:
+      id: "settings-gear"
+    timeout: 15000
+
+- tapOn:
+    id: "settings-gear"
+
+- tapOn:
+    id: "settings-logout"
+
+# Confirm logout
+- tapOn:
+    text: "OK"
+    optional: true
+
+- tapOn:
+    text: ".*[Ll]og.*[Oo]ut|Wyloguj.*"
+    optional: true
+
+# Should return to login screen
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000
+
+- assertVisible:
+    id: "login-screen"

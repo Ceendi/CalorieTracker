@@ -1,0 +1,80 @@
+appId: com.ceendi.calorietracker
+name: "Settings flow"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to profile via tab
+- tapOn:
+    id: "tab-profile"
+
+# Open settings
+- extendedWaitUntil:
+    visible:
+      id: "settings-gear"
+    timeout: 15000
+
+- tapOn:
+    id: "settings-gear"
+
+# Settings modal should open
+- extendedWaitUntil:
+    visible:
+      id: "settings-modal"
+    timeout: 15000
+
+- assertVisible:
+    id: "settings-modal"
+
+# Toggle dark mode
+- tapOn:
+    id: "settings-dark-mode-toggle"
+
+# Close settings
+- tapOn:
+    id: "settings-close"
+
+# Re-open settings to test language
+- tapOn:
+    id: "settings-gear"
+
+# Change Language to Polish
+- tapOn:
+    id: "settings-language-button"
+- tapOn: "Polski"
+
+# Verify Language Change (Check for Polish text)
+- assertVisible:
+    text: "Język"
+- assertVisible:
+    text: "Polski"
+
+# Change Language back to English
+- tapOn:
+    id: "settings-language-button"
+- tapOn: "English"
+
+# Verify Language Change (Check for English text)
+- assertVisible:
+    text: "Language"
+- assertVisible:
+    text: "English"
+
+# Close settings
+- tapOn:
+    id: "settings-close"

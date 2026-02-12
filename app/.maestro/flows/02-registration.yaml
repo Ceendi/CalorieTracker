@@ -1,0 +1,63 @@
+appId: com.ceendi.calorietracker
+name: "Registration flow"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+# Wait for boot
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 90000
+
+- assertVisible:
+    id: "login-screen"
+
+# Go to registration
+- tapOn:
+    id: "login-register-link"
+
+- extendedWaitUntil:
+    visible:
+      id: "register-screen"
+    timeout: 15000
+
+# Fill form
+- tapOn:
+    id: "register-email"
+- inputText: "e2e-reg-${Date.now()}@calorietracker.dev"
+
+- tapOn:
+    id: "register-password"
+- inputText: "TestPass123!"
+
+- tapOn:
+    id: "register-confirm-password"
+- inputText: "TestPass123!"
+
+- tapOn:
+    id: "register-submit"
+
+# Verify Email Screen
+- extendedWaitUntil:
+    visible:
+      id: "verify-email-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "verify-code"
+- inputText: "123456"
+
+- tapOn:
+    id: "verify-submit"
+
+# Should land on onboarding after registration
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-age"
+    timeout: 30000
+
+- assertVisible:
+    id: "onboarding-age"

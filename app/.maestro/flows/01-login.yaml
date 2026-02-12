@@ -1,0 +1,55 @@
+appId: com.ceendi.calorietracker
+name: "Login flow"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+# Wait for app to boot and login screen to be visible
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 90000
+
+# Assert login screen is visible
+- assertVisible:
+    id: "login-screen"
+
+# Test invalid credentials
+- tapOn:
+    id: "login-email"
+- inputText: "wrong@email.com"
+
+- tapOn:
+    id: "login-password"
+- inputText: "WrongPass123!"
+
+- tapOn:
+    id: "login-submit"
+
+- assertVisible:
+    id: "login-error"
+
+# Clear and enter valid credentials
+- tapOn:
+    id: "login-email"
+- eraseText: 50
+- inputText: "e2e-test@calorietracker.dev"
+
+- tapOn:
+    id: "login-password"
+- eraseText: 50
+- inputText: "TestPass123!"
+
+- tapOn:
+    id: "login-submit"
+
+# Diary screen should load
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+- assertVisible:
+    id: "diary-screen"

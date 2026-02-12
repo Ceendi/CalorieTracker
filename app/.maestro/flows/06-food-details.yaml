@@ -1,0 +1,85 @@
+appId: com.ceendi.calorietracker
+name: "Food details screen"
+env:
+  EMAIL: "e2e-test@calorietracker.dev"
+  PASSWORD: "TestPass123!"
+
+---
+
+# Clear state and launch via dev client deep link
+- runFlow: ../helpers/launch.yaml
+
+- runFlow: ../helpers/login.yaml
+
+# Wait for diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 30000
+
+# Navigate to add screen via tab
+- tapOn:
+    id: "tab-add"
+
+- extendedWaitUntil:
+    visible:
+      id: "search-input"
+    timeout: 15000
+
+# Search for rice
+- tapOn:
+    id: "search-input"
+- inputText: "rice"
+
+- extendedWaitUntil:
+    visible:
+      text: ".*kcal.*"
+    timeout: 20000
+
+# Tap first result
+- tapOn:
+    text: ".*rice.*"
+    index: 1
+
+# Verify food details elements
+- extendedWaitUntil:
+    visible:
+      id: "food-details-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "food-details-screen"
+
+- assertVisible:
+    id: "quantity-input"
+
+- assertVisible:
+    id: "quantity-plus"
+
+- assertVisible:
+    id: "quantity-minus"
+
+# Test quantity increment
+- tapOn:
+    id: "quantity-plus"
+
+# Test quantity decrement
+- tapOn:
+    id: "quantity-minus"
+
+# Select lunch
+- tapOn:
+    id: "meal-type-lunch"
+
+# Save entry
+- tapOn:
+    id: "food-details-save"
+
+# Back to diary
+- extendedWaitUntil:
+    visible:
+      id: "diary-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "diary-screen"

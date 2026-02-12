@@ -1,0 +1,23 @@
+appId: com.ceendi.calorietracker
+---
+# Restart app with clean state (wipes async storage/secure store)
+- launchApp:
+    clearState: true
+    stopApp: true
+
+# Reconnect to Expo Dev Server (required because clearState wipes the previous connection)
+- openLink: "exp+app://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+
+# If deep link lands on selection screen, tap the URL manually
+- tapOn:
+    text: "http://10.0.2.2:8081"
+
+# Dismiss Expo Dev Client modal (Tap X regardless of position)
+- tapOn:
+    text: "Close"
+
+# Wait for app to load (Expo splash -> App)
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000
