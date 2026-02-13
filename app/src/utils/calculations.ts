@@ -46,11 +46,11 @@ export const calculateBMR = (
  * Kept for fallback purposes when API is unavailable.
  */
 export const ActivityMultipliers: Record<string, number> = {
-    sedentary: 1.2,      // little or no exercise
-    light: 1.375,        // light exercise 1-3 days/week
-    moderate: 1.55,      // moderate exercise 3-5 days/week
-    high: 1.725,         // hard exercise 6-7 days/week
-    very_high: 1.9       // very hard exercise & physical job
+    sedentary: 1.4,      // little or no exercise
+    light: 1.55,         // light exercise 1-3 days/week
+    moderate: 1.70,      // moderate exercise 3-5 days/week
+    high: 1.85,          // hard exercise 6-7 days/week
+    very_high: 2.0       // very hard exercise & physical job
 };
 
 /**
@@ -83,7 +83,7 @@ export const calculateDailyGoal = (profile: Partial<User>) => {
 
     const bmr = calculateBMR(profile.weight, profile.height, profile.age, profile.gender);
 
-    const activityMultiplier = ActivityMultipliers[profile.activity_level || 'sedentary'] || 1.2;
+    const activityMultiplier = ActivityMultipliers[profile.activity_level || 'sedentary'] || 1.4;
     const tdee = bmr * activityMultiplier;
 
     const goalModifier = GoalModifiers[profile.goal || 'maintain'] || 0;

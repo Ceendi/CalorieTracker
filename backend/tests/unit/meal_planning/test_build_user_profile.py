@@ -29,7 +29,7 @@ class TestBuildUserProfile:
 
         profile = service.build_user_profile(user, prefs)
 
-        assert profile.daily_kcal == 2759
+        assert profile.daily_kcal == 3026
 
     def test_profile_has_correct_macros(self, service):
         user = make_user_data(goal="maintain")
@@ -37,9 +37,9 @@ class TestBuildUserProfile:
 
         profile = service.build_user_profile(user, prefs)
 
-        assert profile.daily_protein == round(2759 * 0.30 / 4, 1)
-        assert profile.daily_fat == round(2759 * 0.25 / 9, 1)
-        assert profile.daily_carbs == round(2759 * 0.45 / 4, 1)
+        assert profile.daily_protein == round(3026 * 0.20 / 4, 1)
+        assert profile.daily_fat == round(3026 * 0.30 / 9, 1)
+        assert profile.daily_carbs == round(3026 * 0.50 / 4, 1)
 
     def test_profile_includes_user_id(self, service):
         user_id = uuid4()

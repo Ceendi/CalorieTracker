@@ -59,40 +59,45 @@ describe('calculateDailyGoal', () => {
   it('calculates goals with sedentary activity and maintain goal', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'sedentary', goal: 'maintain' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(2136);
-    expect(result.protein).toBe(107);
-    expect(result.fat).toBe(71);
-    expect(result.carbs).toBe(267);
+    // BMR=1780 * 1.4 = 2492
+    expect(result.calories).toBe(2492);
+    expect(result.protein).toBe(125); // 2492 * 0.2 / 4 = 124.6 -> 125
+    expect(result.fat).toBe(83); // 2492 * 0.3 / 9 = 83.06 -> 83
+    expect(result.carbs).toBe(312); // 2492 * 0.5 / 4 = 311.5 -> 312
   });
 
   it('applies lose goal modifier (-500)', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'sedentary', goal: 'lose' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(1636);
+    // 2492 - 500 = 1992
+    expect(result.calories).toBe(1992);
   });
 
   it('applies gain goal modifier (+300)', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'sedentary', goal: 'gain' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(2436);
+    // 2492 + 300 = 2792
+    expect(result.calories).toBe(2792);
   });
 
   it('uses very_high activity multiplier', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'very_high', goal: 'maintain' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(Math.round(1780 * 1.9));
+    // 1780 * 2.0 = 3560
+    expect(result.calories).toBe(Math.round(1780 * 2.0));
   });
 
   it('defaults to sedentary for unknown activity', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'unknown', goal: 'maintain' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(Math.round(1780 * 1.2));
+    expect(result.calories).toBe(Math.round(1780 * 1.4)); 
   });
 
   it('defaults to maintain for unknown goal', () => {
     const profile = { weight: 80, height: 180, age: 30, gender: 'male' as const, activity_level: 'sedentary', goal: 'unknown' };
     const result = calculateDailyGoal(profile);
-    expect(result.calories).toBe(2136);
+    // BMR=1780 * 1.4 = 2492
+    expect(result.calories).toBe(2492);
   });
 });
 
@@ -165,11 +170,11 @@ describe('calculateItemMacros', () => {
 
 describe('ActivityMultipliers', () => {
   it('has correct multiplier values', () => {
-    expect(ActivityMultipliers.sedentary).toBe(1.2);
-    expect(ActivityMultipliers.light).toBe(1.375);
-    expect(ActivityMultipliers.moderate).toBe(1.55);
-    expect(ActivityMultipliers.high).toBe(1.725);
-    expect(ActivityMultipliers.very_high).toBe(1.9);
+    expect(ActivityMultipliers.sedentary).toBe(1.4);
+    expect(ActivityMultipliers.light).toBe(1.55);
+    expect(ActivityMultipliers.moderate).toBe(1.70);
+    expect(ActivityMultipliers.high).toBe(1.85);
+    expect(ActivityMultipliers.very_high).toBe(2.0);
   });
 });
 

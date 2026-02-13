@@ -69,18 +69,18 @@ class MealPlanService:
         "dinner": 0.20,
     }
 
-    # Default macro ratios
-    DEFAULT_PROTEIN_RATIO = 0.30  # 30% calories from protein
-    DEFAULT_FAT_RATIO = 0.25      # 25% calories from fat
-    DEFAULT_CARBS_RATIO = 0.45   # 45% calories from carbs
+    # Default macro ratios (Jarosz 2020 – Normy żywienia dla populacji Polski)
+    DEFAULT_PROTEIN_RATIO = 0.20  # 20% calories from protein
+    DEFAULT_FAT_RATIO = 0.30      # 30% calories from fat
+    DEFAULT_CARBS_RATIO = 0.50   # 50% calories from carbs
 
     # Activity level multipliers (PAL - Physical Activity Level)
     ACTIVITY_MULTIPLIERS = {
-        "sedentary": 1.2,
-        "light": 1.375,
-        "moderate": 1.55,
-        "active": 1.725,
-        "very_active": 1.9,
+        "sedentary": 1.4,
+        "light": 1.55,
+        "moderate": 1.70,
+        "active": 1.85,
+        "very_active": 2.0,
     }
 
     # Goal adjustments

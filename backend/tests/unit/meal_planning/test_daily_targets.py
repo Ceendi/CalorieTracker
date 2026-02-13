@@ -73,19 +73,19 @@ class TestActivityMultiplier:
     """Tests for _get_activity_multiplier."""
 
     def test_sedentary(self, service):
-        assert service._get_activity_multiplier("sedentary") == 1.2
+        assert service._get_activity_multiplier("sedentary") == 1.4
 
     def test_light(self, service):
-        assert service._get_activity_multiplier("light") == 1.375
+        assert service._get_activity_multiplier("light") == 1.55
 
     def test_moderate(self, service):
-        assert service._get_activity_multiplier("moderate") == 1.55
+        assert service._get_activity_multiplier("moderate") == 1.70
 
     def test_active(self, service):
-        assert service._get_activity_multiplier("active") == 1.725
+        assert service._get_activity_multiplier("active") == 1.85
 
     def test_very_active(self, service):
-        assert service._get_activity_multiplier("very_active") == 1.9
+        assert service._get_activity_multiplier("very_active") == 2.0
 
     def test_unknown_defaults_to_moderate(self, service):
         assert service._get_activity_multiplier("unknown") == 1.55
@@ -103,48 +103,48 @@ class TestCalculateDailyTargets:
 
     def test_maintain_goal_no_adjustment(self, service, prefs):
         # Male 80kg 180cm 30yo moderate maintain
-        # BMR=1780, CPM=1780*1.55=2759, goal=1.0 -> 2759
+        # BMR=1780, CPM=1780*1.70=3026, goal=1.0 -> 3026
         user = make_user_data(goal="maintain")
         result = service.calculate_daily_targets(user, prefs)
-        assert result["kcal"] == 2759
+        assert result["kcal"] == 3026
 
     def test_lose_goal_applies_20_percent_deficit(self, service, prefs):
         user = make_user_data(goal="lose")
         result = service.calculate_daily_targets(user, prefs)
-        # 2759 * 0.8 = 2207.2 -> int = 2207
-        assert result["kcal"] == 2207
+        # 3026 * 0.8 = 2420.8 -> int = 2420
+        assert result["kcal"] == 2420
 
     def test_gain_goal_applies_15_percent_surplus(self, service, prefs):
         user = make_user_data(goal="gain")
         result = service.calculate_daily_targets(user, prefs)
-        # 2759 * 1.15 = 3172.85 -> int = 3172
-        assert result["kcal"] == 3172
+        # 3026 * 1.15 = 3479.9 -> int = 3479
+        assert result["kcal"] == 3479
 
     def test_unknown_goal_defaults_to_maintain(self, service, prefs):
         user = make_user_data(goal="bulk")
         result = service.calculate_daily_targets(user, prefs)
-        # Same as maintain: 2759
-        assert result["kcal"] == 2759
+        # Same as maintain: 3026
+        assert result["kcal"] == 3026
 
     def test_protein_grams_calculation(self, service, prefs):
-        # protein = round(kcal * 0.30 / 4, 1)
+        # protein = round(kcal * 0.20 / 4, 1)
         user = make_user_data(goal="maintain")
         result = service.calculate_daily_targets(user, prefs)
-        expected = round(2759 * 0.30 / 4, 1)
+        expected = round(3026 * 0.20 / 4, 1)
         assert result["protein"] == expected
 
     def test_fat_grams_calculation(self, service, prefs):
-        # fat = round(kcal * 0.25 / 9, 1)
+        # fat = round(kcal * 0.30 / 9, 1)
         user = make_user_data(goal="maintain")
         result = service.calculate_daily_targets(user, prefs)
-        expected = round(2759 * 0.25 / 9, 1)
+        expected = round(3026 * 0.30 / 9, 1)
         assert result["fat"] == expected
 
     def test_carbs_grams_calculation(self, service, prefs):
-        # carbs = round(kcal * 0.45 / 4, 1)
+        # carbs = round(kcal * 0.50 / 4, 1)
         user = make_user_data(goal="maintain")
         result = service.calculate_daily_targets(user, prefs)
-        expected = round(2759 * 0.45 / 4, 1)
+        expected = round(3026 * 0.50 / 4, 1)
         assert result["carbs"] == expected
 
     def test_macro_ratios_sum_approximately_to_total_kcal(self, service, prefs):
@@ -167,14 +167,14 @@ class TestCalculateDailyTargets:
     def test_sedentary_female_lose_full_pipeline(self, service, prefs):
         # Female, 55kg, 160cm, 40yo, sedentary, lose
         # BMR = 10*55 + 6.25*160 - 5*40 - 161 = 550 + 1000 - 200 - 161 = 1189
-        # CPM = 1189 * 1.2 = 1426.8
-        # Adjusted = 1426.8 * 0.8 = 1141.44 -> 1141
+        # CPM = 1189 * 1.4 = 1664.6
+        # Adjusted = 1664.6 * 0.8 = 1331.68 -> 1331
         user = make_user_data(
             weight=55, height=160, age=40, gender="female",
             activity_level="sedentary", goal="lose"
         )
         result = service.calculate_daily_targets(user, prefs)
-        assert result["kcal"] == 1141
+        assert result["kcal"] == 1331
         assert result["protein"] > 0
         assert result["fat"] > 0
         assert result["carbs"] > 0
