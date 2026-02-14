@@ -16,7 +16,8 @@ from src.ai.config import (
     FRESH_CATEGORIES,
     DEFAULT_UNIT_GRAMS,
     DEFAULT_PORTION_GRAMS,
-    MEAL_RECOGNITION_CONFIG as CONFIG
+    MEAL_RECOGNITION_CONFIG as CONFIG,
+    PREFERRED_MATCHES
 )
 
 
@@ -231,12 +232,17 @@ class MealRecognitionService:
         unmatched_chunks: List[str] = []
 
         for chunk in chunks:
-            candidates = await self._search(chunk.text_for_search, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
+            search_query = chunk.text_for_search
+            if search_query.lower() in PREFERRED_MATCHES:
+                search_query = PREFERRED_MATCHES[search_query.lower()]
+                logger.info(f"Query rewritten: '{chunk.text_for_search}' -> '{search_query}'")
+
+            candidates = await self._search(search_query, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
 
             best_match: Optional[SearchCandidate] = None
 
             candidate_scores = []
-            q_norm = chunk.text_for_search.lower()
+            q_norm = search_query.lower()
             q_tokens = set(q_norm.split())
 
             for candidate in candidates:

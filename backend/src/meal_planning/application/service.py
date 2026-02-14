@@ -11,6 +11,7 @@ from uuid import UUID
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
+import json
 
 from src.meal_planning.application.ports import MealPlanRepositoryPort, FoodSearchPort
 from src.meal_planning.domain.entities import (
@@ -508,6 +509,15 @@ class MealPlanService:
             f"{len(validation['calorie_deviation_days'])} days with calorie deviation, "
             f"{len(validation['allergen_violations'])} allergen violations"
         )
+
+        try:
+            plan_dict = asdict(generated_plan)
+            logger.info(
+                f"Generated Plan JSON:\n"
+                f"{json.dumps(plan_dict, indent=2, default=str, ensure_ascii=False)}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to log plan JSON: {e}")
 
         if progress_callback:
             await progress_callback({

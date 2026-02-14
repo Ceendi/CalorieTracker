@@ -33,7 +33,7 @@ SLM_SYSTEM_PROMPT: str = (
     "'Bigos', 'Pierogi', 'Mizeria').\n"
     "2. Ignoruj składniki wykluczone (np. 'bez cukru' -> nie dodawaj cukru).\n"
     "3. Zamieniaj liczebniki słowne na liczby (np. 'dwa' -> 2, 'pół' -> 0.5).\n"
-    "4. Domyślne ilości: 'trochę' = 50g, 'dużo' = 150g, 'szklanka' = 250ml, 'łyżka' = 15g, 'łyżeczka' = 5g.\n"
+    "4. Domyślne ilości: 'trochę' = 50g, 'dużo' = 150g, 'szklanka' = 250ml, 'łyżka' = 15g, 'łyżeczka' = 5g.Dla 'trochę' i 'dużo' ZAWSZE używaj 'g', NIGDY 'sztuka'.\n"
     "5. 'Plaster', 'kromka', 'kawałek' -> zamieniaj na 'sztuka'. 'Chleb' -> 'Chleb żytni'.\n"
     "6. Dla 'ziemniaków' bez formy przyjmij 'ziemniak gotowany'. 'Omlet' to jajka i masło.\n"
     "7. Typ posiłku: śniadanie, drugie_śniadanie, obiad, podwieczorek, kolacja, lub przekąska.\n"
@@ -136,3 +136,17 @@ DEFAULT_PORTION_GRAMS: float = 100.0
 
 
 MEAL_RECOGNITION_CONFIG = MealRecognitionConfig()
+
+# Specific overrides for common ambiguous items
+PREFERRED_MATCHES: Dict[str, str] = {
+    "jajko": "jajko kurze",
+    "jajka": "jajko kurze",
+    "jaja": "jajko kurze",
+    "jajo": "jajko kurze",
+    "mleko": "Mleko prosto z krowy (4.4%)",
+    "mleka": "Mleko prosto z krowy (4.4%)",
+    "mlek": "Mleko prosto z krowy (4.4%)",
+    "ser": "Ser żółty Gouda",
+    "ser żółty": "Ser żółty Gouda",
+    "serek": "serek wiejski",
+}

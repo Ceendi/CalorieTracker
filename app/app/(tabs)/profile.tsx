@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,12 +13,13 @@ import { GOAL_OPTIONS, ACTIVITY_OPTIONS, GENDER_OPTIONS } from '@/constants/opti
 import { useLanguage } from '@/hooks/useLanguage';
 import { Colors } from '@/constants/theme';
 import { calculateDailyGoal } from '@/utils/calculations';
-import { useDailyTargets } from '@/hooks/useMealPlan';
+import { useDailyTargets, mealPlanKeys } from '@/hooks/useMealPlan';
 import { User } from '@/utils/validators';
 import { userService } from '@/services/user.service';
 import { UserProfileSchema } from '@/schemas/user';
 
 export default function ProfileScreen() {
+  const queryClient = useQueryClient();
   const { user, signOut, refreshUser } = useAuth();
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const { t } = useLanguage();
@@ -100,6 +102,9 @@ export default function ProfileScreen() {
       setIsLoading(true);
       await userService.updateProfile(validationResult.data);
       await refreshUser();
+      
+      await queryClient.invalidateQueries({ queryKey: mealPlanKeys.dailyTargets() });
+      
       setIsEditing(false);
       Alert.alert(t('profile.success'), t('profile.profileUpdated'));
     } catch (error) {
