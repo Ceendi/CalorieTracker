@@ -155,9 +155,9 @@ class SqlAlchemyFoodSearchAdapter:
                 case((FoodModel.name.ilike(query), 0), else_=1),
                 # Prefix match second
                 case((FoodModel.name.op("~*")(f"^{fuzzy_pattern}"), 0), else_=1),
-                # Prefer base_db and fineli sources
+                # Prefer verified sources
                 case(
-                    (FoodModel.source == 'fineli', 0),
+                    (FoodModel.source.in_(['fineli', 'kunachowicz']), 0),
                     (FoodModel.source == 'base_db', 1),
                     else_=2
                 ),

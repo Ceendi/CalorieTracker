@@ -70,7 +70,7 @@ async def test_vector_search_banana():
         result = await conn.execute(text("""
             SELECT name, (1 - (embedding <=> CAST(:vec AS vector))) as score
             FROM foods 
-            WHERE embedding IS NOT NULL AND source = 'fineli'
+            WHERE embedding IS NOT NULL AND source IN ('fineli', 'kunachowicz')
             ORDER BY embedding <=> CAST(:vec AS vector)
             LIMIT 5
         """), {"vec": vec_str})
@@ -105,7 +105,7 @@ async def test_vector_search_potatoes():
         result = await conn.execute(text("""
             SELECT name, (1 - (embedding <=> CAST(:vec AS vector))) as score
             FROM foods 
-            WHERE embedding IS NOT NULL AND source = 'fineli'
+            WHERE embedding IS NOT NULL AND source IN ('fineli', 'kunachowicz')
             ORDER BY embedding <=> CAST(:vec AS vector)
             LIMIT 5
         """), {"vec": vec_str})
@@ -133,7 +133,7 @@ async def test_vector_search_honey():
         result = await conn.execute(text("""
             SELECT name
             FROM foods 
-            WHERE embedding IS NOT NULL AND source = 'fineli'
+            WHERE embedding IS NOT NULL AND source IN ('fineli', 'kunachowicz')
             ORDER BY embedding <=> CAST(:vec AS vector)
             LIMIT 5
         """), {"vec": vec_str})

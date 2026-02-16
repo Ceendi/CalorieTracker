@@ -77,7 +77,7 @@ class SqlAlchemyFoodRepository:
         ).order_by(
             case((FoodModel.name.ilike(query), 0), else_=1),
             case((FoodModel.name.op("~*")(f"^{fuzzy_pattern}"), 0), else_=1),
-            case((FoodModel.source == 'fineli', 0), else_=1),
+            case((FoodModel.source.in_(['fineli', 'kunachowicz']), 0), else_=1),
             func.length(FoodModel.name),
             FoodModel.popularity_score.desc()
         ).limit(limit)

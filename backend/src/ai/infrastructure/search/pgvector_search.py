@@ -387,7 +387,7 @@ class PgVectorSearchService:
             # Get full product data
             result = await session.execute(text("""
                 SELECT id, name, category, calories, protein, fat, carbs
-                FROM foods WHERE id = :id AND source = 'fineli'
+                FROM foods WHERE id = :id AND source IN ('fineli', 'kunachowicz')
             """), {"id": results[0].product_id})
 
             row = result.fetchone()
@@ -435,7 +435,7 @@ class PgVectorSearchService:
         result = await session.execute(text("""
             SELECT id, name, category, calories, protein, fat, carbs
             FROM foods
-            WHERE category ILIKE :category AND source = 'fineli'
+            WHERE category ILIKE :category AND source IN ('fineli', 'kunachowicz')
             LIMIT :limit
         """), {
             "category": f"%{category}%",

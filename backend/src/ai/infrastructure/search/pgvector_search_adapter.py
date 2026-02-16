@@ -108,7 +108,7 @@ class PgVectorSearchAdapter:
                 SELECT
                     id, name, category, calories, protein, fat, carbs,
                     source
-                FROM foods WHERE id = :id AND source = 'fineli'
+                FROM foods WHERE id = :id AND source IN ('fineli', 'kunachowicz')
             """), {"id": product_id})
 
             row = result.fetchone()
