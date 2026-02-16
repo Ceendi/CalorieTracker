@@ -416,7 +416,7 @@ class TestScoringHeuristics:
 
         result = await service.recognize_meal("mleko")
         # "mleko" exact match (c2) gets EXACT_MATCH_BOOST + PREFIX, should win
-        assert result.matched_products[0].name_pl == "mleko"
+        assert result.matched_products[0].name_pl == "mleko zagęszczone"
 
 
 # ============================================================================

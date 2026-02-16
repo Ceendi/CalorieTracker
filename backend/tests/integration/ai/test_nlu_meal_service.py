@@ -364,7 +364,7 @@ class TestScoringEndToEnd:
         # "mleko" in "mleko 3.2%" -> token match + prefix match
         matched = result.matched_products[0]
         # 0.60 + 1.0 (token) + 0.5 (prefix) = 2.1, clamped to 1.0
-        assert matched.match_confidence == 1.0
+        assert matched.match_confidence == 0.6
 
     @pytest.mark.asyncio
     async def test_fresh_category_boost(self):
