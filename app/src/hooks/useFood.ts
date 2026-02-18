@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { foodService } from '@/services/food.service';
 import { trackingService } from '@/services/tracking.service';
 import { CreateEntryDto, CreateFoodDto, CreateBulkEntryDto } from '@/types/food';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -22,13 +22,41 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export function useFoodSearch(query: string) {
   const debouncedQuery = useDebounce(query, 300);
+  const enabled = debouncedQuery.length > 2;
 
-  return useQuery({
-    queryKey: ['foods', 'search', debouncedQuery],
-    queryFn: () => foodService.searchFoods(debouncedQuery),
-    enabled: debouncedQuery.length > 2, 
-    staleTime: 1000 * 60 * 5, 
+  // Stage 1: local DB only — fast, returns immediately
+  const localQuery = useQuery({
+    queryKey: ['foods', 'search', debouncedQuery, 'local'],
+    queryFn: () => foodService.searchFoods(debouncedQuery, false),
+    enabled,
+    staleTime: 1000 * 60 * 5,
   });
+
+  const localResults = localQuery.data ?? [];
+  const fewLocalResults = !localQuery.isLoading && localResults.length < 5;
+
+  // Stage 2: local + OFF — triggered only when local results are scarce
+  const externalQuery = useQuery({
+    queryKey: ['foods', 'search', debouncedQuery, 'external'],
+    queryFn: () => foodService.searchFoods(debouncedQuery, true),
+    enabled: enabled && fewLocalResults,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // When external query finishes it already contains local+OFF merged by backend
+  const data = useMemo(
+    () => externalQuery.data ?? localResults,
+    [externalQuery.data, localResults],
+  );
+
+  return {
+    data,
+    isLoading: localQuery.isLoading,
+    isLoadingExternal: fewLocalResults && externalQuery.isLoading,
+    isError: localQuery.isError,
+    refetch: localQuery.refetch,
+    isRefetching: localQuery.isRefetching,
+  };
 }
 
 export function useFoodBarcode(barcode: string | null) {

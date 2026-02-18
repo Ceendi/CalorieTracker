@@ -54,9 +54,9 @@ export async function ensureFoodProduct(food: CreateFoodDto): Promise<string> {
 }
 
 export const foodService = {
-  async searchFoods(query: string): Promise<FoodProduct[]> {
+  async searchFoods(query: string, external: boolean = false): Promise<FoodProduct[]> {
     const response = await apiClient.get(`/api/v1/foods/search`, {
-      params: { q: query },
+      params: { q: query, external },
     });
     const validated = FoodSearchResponseSchema.parse(response.data);
     return validated.map(mapFoodProduct);

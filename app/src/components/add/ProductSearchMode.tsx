@@ -29,7 +29,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
   const iconColor = Colors[theme].icon;
   const placeholderColor = Colors[theme].placeholder;
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: searchResults, isLoading, refetch, isRefetching } = useFoodSearch(searchQuery);
+  const { data: searchResults, isLoading, isLoadingExternal, refetch, isRefetching } = useFoodSearch(searchQuery);
 
   const dismissKeyboard = () => Keyboard.dismiss();
 
@@ -113,14 +113,28 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
           renderItem={renderItem}
           onRefresh={refetch}
           refreshing={Boolean(isRefetching)}
-          ListEmptyComponent={
-            <TouchableWithoutFeedback onPress={dismissKeyboard}>
-              <View className="flex-1 items-center justify-center pt-16 h-full">
-                <Text className="text-muted-foreground text-base">{t('addFood.noResults')}</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          }
+          ListFooterComponent={isLoadingExternal ? (
+            <View className="flex-row items-center justify-center py-4 gap-2">
+              <ActivityIndicator size="small" color={tintColor} />
+              <Text className="text-muted-foreground text-sm">{t('addFood.searchingExternal')}</Text>
+            </View>
+          ) : null}
         />
+      )}
+
+      {!isLoading && (!searchResults || searchResults.length === 0) && searchQuery.length >= 3 && (
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <View className="mt-12 items-center flex-1 gap-2">
+            {isLoadingExternal ? (
+              <>
+                <ActivityIndicator size="large" color={tintColor} />
+                <Text className="text-muted-foreground text-sm mt-2">{t('addFood.searchingExternal')}</Text>
+              </>
+            ) : (
+              <Text className="text-muted-foreground text-base">{t('addFood.noResults')}</Text>
+            )}
+          </View>
+        </TouchableWithoutFeedback>
       )}
 
       {!isLoading && (!searchResults || searchResults.length === 0) && searchQuery.length < 3 && (

@@ -54,10 +54,11 @@ async def get_categories():
 @router.get("/search", response_model=List[FoodOutSchema])
 async def search(
         q: str = Query(..., min_length=1),
+        external: bool = Query(False, description="Include results from Open Food Facts"),
         user=Depends(current_active_user),
         svc: FoodService = Depends(get_food_service),
 ):
-    results = await svc.search_food(q, user_id=user.id)
+    results = await svc.search_food(q, user_id=user.id, include_external=external)
     return results
 
 

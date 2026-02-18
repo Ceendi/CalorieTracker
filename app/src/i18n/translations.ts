@@ -170,6 +170,7 @@ export const translations = {
         title: "Add Meal",
         searchPlaceholder: "Search for food...",
         noResults: "No results found.",
+        searchingExternal: "Searching Open Food Facts...",
         emptyState: "Search for products or enter manually",
         startScanning: "Start Scanning",
         modes: {
@@ -543,6 +544,7 @@ export const translations = {
         title: "Dodaj Posiłek",
         searchPlaceholder: "Szukaj jedzenia...",
         noResults: "Nie znaleziono wyników.",
+        searchingExternal: "Szukam w Open Food Facts...",
         emptyState: "Szukaj produktów lub wprowadź ręcznie",
         startScanning: "Rozpocznij skanowanie",
         modes: {

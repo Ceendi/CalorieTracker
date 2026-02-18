@@ -124,10 +124,9 @@ class OpenFoodFactsAdapter(ExternalFoodProviderPort):
 
         # force ipv4
         transport = httpx.AsyncHTTPTransport(local_address="0.0.0.0")
-        search_timeout = max(self.timeout, 10.0)
 
         async with httpx.AsyncClient(
-                timeout=search_timeout,
+                timeout=self.timeout,
                 headers=self._get_headers(),
                 transport=transport
         ) as client:

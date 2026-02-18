@@ -12,11 +12,11 @@ class FoodService:
         self.repo = repo
         self.external = external
 
-    async def search_food(self, query: str, user_id: Optional[uuid.UUID] = None, limit: int = 20) -> List[Food]:
+    async def search_food(self, query: str, user_id: Optional[uuid.UUID] = None, limit: int = 20, include_external: bool = True) -> List[Food]:
         # 1. Search local DB first
         results = await self.repo.search_by_name(query, limit=limit, owner_id=user_id)
 
-        if len(results) >= limit:
+        if not include_external or len(results) >= limit:
             return results
 
         # 2. If not enough results, search external provider
