@@ -52,7 +52,8 @@ describe('useFoodSearch', () => {
 
     // Initial value fires immediately (useState initializes with value)
     await waitFor(() => {
-      expect(foodService.searchFoods).toHaveBeenCalledWith('app');
+      expect(foodService.searchFoods).toHaveBeenCalledWith('app', false);
+      expect(foodService.searchFoods).toHaveBeenCalledWith('app', true);
     });
 
     (foodService.searchFoods as jest.Mock).mockClear();
@@ -69,7 +70,7 @@ describe('useFoodSearch', () => {
     });
 
     await waitFor(() => {
-      expect(foodService.searchFoods).toHaveBeenCalledWith('apple');
+      expect(foodService.searchFoods).toHaveBeenCalledWith('apple', false);
     });
   });
 });

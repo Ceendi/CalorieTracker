@@ -27,7 +27,7 @@
     --ring: #4f46e5;
   }
 
-  .dark {
+  .dark:root {
     --background: #0f172a;
     --foreground: #f8fafc;
     --card: #1e293b;

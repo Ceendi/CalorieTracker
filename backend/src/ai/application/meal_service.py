@@ -73,14 +73,19 @@ class MealRecognitionService:
 
         for item in extracted_items:
             normalized_name = self.nlu.normalize_text(item.name)
-            
+
+            search_query = normalized_name
+            if search_query.lower() in PREFERRED_MATCHES:
+                search_query = PREFERRED_MATCHES[search_query.lower()]
+                logger.info(f"Vision query rewritten: '{normalized_name}' -> '{search_query}'")
+
             # 1. Search in DB
-            candidates = await self._search(normalized_name, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
-            
+            candidates = await self._search(search_query, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
+
             best_match: Optional[SearchCandidate] = None
             if candidates:
                 candidate_scores = []
-                q_norm = normalized_name.lower()
+                q_norm = search_query.lower()
                 q_tokens = set(q_norm.split())
 
                 for candidate in candidates:

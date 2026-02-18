@@ -49,6 +49,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Image,
+  Archive,
 } from 'lucide-react-native';
 
 // Map SF Symbol names to Lucide Components
@@ -108,6 +109,7 @@ const MAPPING: Record<string, LucideIcon> = {
   'exclamationmark.triangle': AlertTriangle,
   'chrome': Globe,
   'google': Globe,
+  'archivebox': Archive,
 };
 
 export type IconSymbolName = keyof typeof MAPPING;

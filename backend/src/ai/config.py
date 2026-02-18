@@ -72,7 +72,7 @@ class MealRecognitionConfig:
 
 
 DERIVATIVE_KEYWORDS: FrozenSet[str] = frozenset({
-    "mąka", "skrobia", "płatki", "chleb", "bułka", "puree", "placki", "chipsy", "frytki",
+    "mąka", "skrobia", "płatki", "chleb", "bułka", "puree", "purée", "placki", "chipsy", "frytki",
     "halloumi", "białko", "białka", "żółtko", "żółtka", "proszek", "pasta", "mix",
     "czekolada", "czekoladowe", "wanilia", "waniliowe", "truskawka", "truskawkowe", "kakao", "kakaowe",
     "topiony", "wędzony",
@@ -155,4 +155,8 @@ PREFERRED_MATCHES: Dict[str, str] = {
     "ser": "Ser żółty Gouda",
     "ser żółty": "Ser żółty Gouda",
     "serek": "serek wiejski",
+    "ziemniaki": "ziemniaki gotowane",
+    "ziemniak": "ziemniaki gotowane",
+    "kartofel": "ziemniaki gotowane",
+    "kartofle": "ziemniaki gotowane",
 }

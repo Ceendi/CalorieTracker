@@ -9,8 +9,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "e2e": "C:\\Users\\ceend\\.maestro\\maestro\\bin\\maestro.bat test .maestro/flows/",
-    "e2e:single": "C:\\Users\\ceend\\.maestro\\maestro\\bin\\maestro.bat test"
+    "e2e": "maestro test .maestro/flows/",
+    "e2e:single": "maestro test"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

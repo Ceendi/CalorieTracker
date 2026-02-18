@@ -165,12 +165,12 @@ export default function PlanScreen() {
             <View className={`px-2 py-1 rounded-full ${
               plan.status === 'active' ? 'bg-green-100 dark:bg-green-900' :
               plan.status === 'draft' ? 'bg-yellow-100 dark:bg-yellow-900' :
-              'bg-muted'
+              'bg-slate-100 dark:bg-slate-700'
             }`}>
               <Text className={`text-xs font-medium ${
                 plan.status === 'active' ? 'text-green-700 dark:text-green-300' :
                 plan.status === 'draft' ? 'text-yellow-700 dark:text-yellow-300' :
-                'text-muted-foreground'
+                'text-slate-600 dark:text-slate-300'
               }`}>
                 {t(`mealPlan.status.${plan.status}`)}
               </Text>

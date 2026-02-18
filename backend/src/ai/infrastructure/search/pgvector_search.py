@@ -187,9 +187,11 @@ class PgVectorSearchService:
             # Focused embedding: description + Polish meal type word only.
             meal_type_word = base_query.split()[0]
             embedding_query = f"{meal_description} {meal_type_word}"
-            # Higher vector weight when description available — semantic similarity
-            # captures dish intent better than keyword matching alone.
-            vector_weight = 0.7
+            # Single-word ingredient keywords (e.g. "pomidor", "śmietana") need
+            # stronger text-search weight so exact ingredient names rank above
+            # compound dishes that merely contain the word.
+            # Multi-word descriptions ("grillowany kurczak") keep higher vector weight.
+            vector_weight = 0.4 if len(meal_description.split()) == 1 else 0.7
         else:
             query = base_query
             embedding_query = base_query
@@ -252,7 +254,32 @@ class PgVectorSearchService:
         if preferences:
             products = self._filter_by_preferences(products, preferences)
 
+        # Re-rank: boost plain ingredient matches when searching by keyword.
+        # With alpha=0.7 the vector component dominates, causing compound products
+        # ("Przecier pomidorowy") to outrank the plain ingredient ("pomidor").
+        # A small score boost for name==keyword or name starts with keyword fixes this.
+        if meal_description:
+            q = self._strip_diacritics(meal_description.lower().strip())
+            for p in products:
+                tokens = p["name"].lower().split()
+                if not tokens:
+                    continue
+                first = self._strip_diacritics(tokens[0])
+                full = self._strip_diacritics(p["name"].lower())
+                if full == q:
+                    p["score"] += 2.0        # exact product name match
+                elif first == q:
+                    p["score"] += 1.0        # leading token match ("pomidor gotowany")
+            products.sort(key=lambda p: p["score"], reverse=True)
+
         return products[:limit]
+
+    @staticmethod
+    def _strip_diacritics(text: str) -> str:
+        return (text
+                .replace('ą', 'a').replace('ć', 'c').replace('ę', 'e')
+                .replace('ł', 'l').replace('ń', 'n').replace('ó', 'o')
+                .replace('ś', 's').replace('ź', 'z').replace('ż', 'z'))
 
     @staticmethod
     def _matches_allergen(name_lower: str, category: str, allergies: List[str]) -> bool:

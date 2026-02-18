@@ -42,19 +42,7 @@ export default function ProfileScreen() {
   // Fetch daily targets from backend
   const { data: backendTargets, isLoading: isLoadingTargets } = useDailyTargets();
 
-  // Use backend targets if available, otherwise fall back to local calculation
   const currentCalories = React.useMemo(() => {
-    // If we have backend targets, use them (convert kcal to calories for consistency)
-    if (backendTargets) {
-      return {
-        calories: backendTargets.kcal,
-        protein: Math.round(backendTargets.protein),
-        fat: Math.round(backendTargets.fat),
-        carbs: Math.round(backendTargets.carbs),
-      };
-    }
-
-    // Fallback to local calculation
     const profile: Partial<User> = {
         weight: parseFloat(formData.weight) || 0,
         height: parseFloat(formData.height) || 0,
@@ -64,7 +52,7 @@ export default function ProfileScreen() {
         goal: formData.goal
     };
     return calculateDailyGoal(profile);
-  }, [backendTargets, formData]);
+  }, [formData]);
 
 
 

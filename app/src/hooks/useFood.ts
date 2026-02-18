@@ -32,8 +32,8 @@ export function useFoodSearch(query: string) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const localResults = localQuery.data ?? [];
-  const fewLocalResults = !localQuery.isLoading && localResults.length < 5;
+  const localResults = localQuery.data;
+  const fewLocalResults = !localQuery.isLoading && (localResults?.length ?? 0) < 5;
 
   // Stage 2: local + OFF — triggered only when local results are scarce
   const externalQuery = useQuery({

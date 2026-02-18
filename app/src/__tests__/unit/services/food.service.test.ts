@@ -31,7 +31,7 @@ describe('foodService', () => {
     it('maps kcal_per_100g to calories_per_100g', async () => {
       mockGet.mockResolvedValue({ data: [apiFood] });
       const results = await foodService.searchFoods('apple');
-      expect(mockGet).toHaveBeenCalledWith('/api/v1/foods/search', { params: { q: 'apple' } });
+      expect(mockGet).toHaveBeenCalledWith('/api/v1/foods/search', { params: { q: 'apple', external: false } });
       expect(results[0].nutrition.calories_per_100g).toBe(52);
       expect(results[0].name).toBe('Apple');
     });
