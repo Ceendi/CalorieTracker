@@ -43,7 +43,6 @@ class VisionProcessingService:
 
         start_time = time.time()
         
-        # 1. Vision Extraction (Gemini)
         logger.info("Step 1: Analyzing image with Gemini Vision...")
         extraction, confidence = await self.vision_extractor.extract_from_image(image_bytes)
         logger.info(f"Gemini Analysis complete. Found {len(extraction.items)} items. Meal Type: {extraction.meal_type}")
@@ -51,7 +50,6 @@ class VisionProcessingService:
         if not extraction.items:
             logger.warning("No items found in image.")
         
-        # 2. Meal Recognition (Vector Search + Refinement)
         logger.info("Step 2: Refining with DB Search...")
         meal_service = self._get_meal_service(session)
         recognition_result = await meal_service.recognize_from_vision_items(extraction.items)

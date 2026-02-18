@@ -13,20 +13,17 @@ class FoodService:
         self.external = external
 
     async def search_food(self, query: str, user_id: Optional[uuid.UUID] = None, limit: int = 20, include_external: bool = True) -> List[Food]:
-        # 1. Search local DB first
         results = await self.repo.search_by_name(query, limit=limit, owner_id=user_id)
 
         if not include_external or len(results) >= limit:
             return results
 
-        # 2. If not enough results, search external provider
         try:
             external_results = await self.external.search(query, limit=limit)
         except Exception as e:
             logger.error(f"External search failed for query '{query}': {e}")
             return results
 
-        # 3. Persist new external products to ensure they have valid UUIDs in our system
         ready_external_products = []
         for food in external_results:
             if food.id and isinstance(food.id, uuid.UUID):

@@ -61,7 +61,6 @@ class MealPlanService:
     and coordinates between repository and meal planner.
     """
 
-    # Default meal distribution percentages
     MEAL_DISTRIBUTION = {
         "breakfast": 0.25,
         "second_breakfast": 0.10,
@@ -84,7 +83,6 @@ class MealPlanService:
         "very_active": 2.0,
     }
 
-    # Goal adjustments
     GOAL_ADJUSTMENTS = {
         "lose": 0.8,      # 20% calorie deficit
         "maintain": 1.0,   # No adjustment
@@ -134,7 +132,6 @@ class MealPlanService:
         bmr = self._calculate_bmr(user)
         cpm = bmr * self._get_activity_multiplier(user.activity_level)
 
-        # Apply goal adjustment
         goal_factor = self.GOAL_ADJUSTMENTS.get(user.goal, 1.0)
         daily_kcal = int(cpm * goal_factor)
 
@@ -354,7 +351,6 @@ class MealPlanService:
         if not self._planner:
             raise RuntimeError("Meal planner not configured")
 
-        # 1. Build profile with calculated targets
         profile = self.build_user_profile(user, preferences)
         logger.info(
             f"Generating {days}-day plan for user {user.id}, "
@@ -368,7 +364,6 @@ class MealPlanService:
                 "message": "Obliczono cele dzienne"
             })
 
-        # 2. Generate meal templates (structure for each day)
         logger.debug("Generating meal templates...")
         templates = await self._planner.generate_meal_templates(profile, days)
         logger.debug(f"Generated templates for {len(templates)} days")
@@ -380,7 +375,6 @@ class MealPlanService:
                 "message": "Wygenerowano struktury posilkow"
             })
 
-        # 3. Generate each meal with ingredients
         generated_days: List[GeneratedDay] = []
         used_ingredients: List[str] = []
 
@@ -394,7 +388,6 @@ class MealPlanService:
                 # Search for relevant products (RAG)
                 products = await self._search_products_for_meal(template, preferences)
 
-                # Generate meal with ingredients
                 logger.debug(
                     f"  Generating meal with {len(products)} available products..."
                 )
@@ -405,7 +398,6 @@ class MealPlanService:
                     available_products=products
                 )
                 
-                # Log what LLM selected
                 logger.info(
                     f"✅ Generated '{meal.name}' with {len(meal.ingredients)} ingredients: "
                     f"{', '.join([ing.name for ing in meal.ingredients])}"
@@ -428,7 +420,6 @@ class MealPlanService:
 
                 meals_done += 1
 
-                # Report progress during meal generation
                 if progress_callback:
                     progress = 15 + int((meals_done / total_meals) * 70)
                     await progress_callback({
@@ -462,7 +453,6 @@ class MealPlanService:
                 f"{generated_days[-1].total_kcal:.0f} kcal"
             )
 
-        # 4. Optimize the plan (adjust portions)
         if progress_callback:
             await progress_callback({
                 "stage": "optimizing",
@@ -472,7 +462,6 @@ class MealPlanService:
 
         optimized = await self._planner.optimize_plan(generated_days, profile)
 
-        # Build preferences dict for storage
         preferences_dict = {
             "diet": preferences.diet,
             "allergies": preferences.allergies,
@@ -481,7 +470,6 @@ class MealPlanService:
             "max_preparation_time": preferences.max_preparation_time,
         }
 
-        # Build the plan
         generated_plan = GeneratedPlan(
             days=optimized,
             preferences_applied=preferences_dict,
@@ -497,7 +485,6 @@ class MealPlanService:
             }
         )
 
-        # Validate plan quality
         validation = self.validate_plan_quality(
             generated_plan, profile.daily_kcal, preferences=preferences_dict
         )
@@ -556,14 +543,12 @@ class MealPlanService:
             logger.warning("Database session not provided, returning empty products")
             return []
 
-        # Build preferences dict for pgvector search filtering
         preferences_dict = {
             "allergies": preferences.allergies,
             "diet": preferences.diet,
             "excluded_ingredients": preferences.excluded_ingredients,
         }
 
-        # Check if template has ingredient keywords
         keywords = getattr(template, 'ingredient_keywords', [])
         if keywords:
             # Use keyword-based search for better ingredient matching
@@ -591,7 +576,6 @@ class MealPlanService:
                 f"Found {len(products)} products"
             )
 
-        # Log detailed product list for debugging
         if products:
             product_names = [p.get('name', 'Unknown') for p in products[:10]]
             logger.debug(
@@ -648,7 +632,6 @@ class MealPlanService:
                     all_products[product_id] = product
                     logger.debug(f"    Found: {product.get('name', 'Unknown')}")
 
-        # Sort by score (if available) and return top results
         sorted_products = sorted(
             all_products.values(),
             key=lambda p: p.get("score", 0),
@@ -683,11 +666,9 @@ class MealPlanService:
 
         for ing in meal.ingredients:
             if ing.food_id is not None:
-                # Already matched
                 enriched_ingredients.append(ing)
                 continue
 
-            # Search for this specific ingredient
             product = await self._food_search.find_product_by_name(
                 session=self._session,
                 name=ing.name,
@@ -720,7 +701,6 @@ class MealPlanService:
         if not recalc_needed:
             return meal
 
-        # Recalculate meal totals
         total_kcal = sum(i.kcal for i in enriched_ingredients)
         total_protein = sum(i.protein for i in enriched_ingredients)
         total_fat = sum(i.fat for i in enriched_ingredients)
@@ -797,14 +777,12 @@ class MealPlanService:
                     )
 
             for meal in day.meals:
-                # Check for empty meals
                 if not meal.ingredients:
                     empty_meals.append((day.day_number, meal.meal_type))
                     issues.append(
                         f"Dzien {day.day_number}, {meal.meal_type}: brak skladnikow"
                     )
 
-                # Count ingredients with/without food_id
                 for ing in meal.ingredients:
                     total_ingredients += 1
                     if ing.food_id is not None:
@@ -815,7 +793,6 @@ class MealPlanService:
                             f"'{ing.name}' bez food_id"
                         )
 
-                    # Check allergen violations
                     if allergies:
                         name_lower = ing.name.lower()
                         for allergen in allergies:
@@ -834,12 +811,10 @@ class MealPlanService:
                                     f"'{ing.name}' zawiera alergen '{allergen}'"
                                 )
 
-        # Calculate food_id percentage
         food_id_percentage = 0.0
         if total_ingredients > 0:
             food_id_percentage = (ingredients_with_food_id / total_ingredients) * 100
 
-        # Determine if plan is valid (no critical issues)
         is_valid = (
             food_id_percentage >= 90.0  # At least 90% matched
             and len(empty_meals) == 0  # No empty meals

@@ -79,7 +79,6 @@ class MealRecognitionService:
                 search_query = PREFERRED_MATCHES[search_query.lower()]
                 logger.info(f"Vision query rewritten: '{normalized_name}' -> '{search_query}'")
 
-            # 1. Search in DB
             candidates = await self._search(search_query, top_k=20, alpha=CONFIG.HYBRID_SEARCH_ALPHA)
 
             best_match: Optional[SearchCandidate] = None
@@ -123,7 +122,6 @@ class MealRecognitionService:
                     best_match = candidate_scores[0][1]
                     best_match.score = max(0.0, min(1.0, candidate_scores[0][0]))
 
-            # 2. Decide: Use DB or Fallback
             use_db_match = False
             if best_match and best_match.score > 0.5:
                 use_db_match = True

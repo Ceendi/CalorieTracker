@@ -35,13 +35,7 @@ class FoodModel(UUIDModel):
 
     popularity_score: Mapped[int] = mapped_column(Integer, default=0, index=True)
 
-    # Vector embedding for semantic search (384 dimensions for E5-small)
-    # Note: Actual column type is vector(384) in PostgreSQL via pgvector extension
-    # We use pgvector.sqlalchemy.Vector to handle this correctly
     embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(384), nullable=True)
-
-    # Note: search_text tsvector column is managed by PostgreSQL as a generated column
-    # It is not mapped here as it's automatically derived from the 'name' column
 
 
 class FoodUnitModel(UUIDModel):

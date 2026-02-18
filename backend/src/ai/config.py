@@ -2,10 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, FrozenSet
 
 
-# ============================================================================
-# WHISPER STT CONFIGURATION
-# ============================================================================
-
 WHISPER_INITIAL_PROMPT: str = (
     "Opis posiłku po polsku. Zjadłem na śniadanie kanapkę z szynką i serem, "
     "obiad, kolację. Produkty spożywcze: jajka, mleko, chleb, masło, ser żółty, "
@@ -20,10 +16,6 @@ WHISPER_CONFIG: Dict[str, Any] = {
     "temperature": 0.0,
 }
 
-
-# ============================================================================
-# SLM (BIELIK) NLU CONFIGURATION
-# ============================================================================
 
 SLM_SYSTEM_PROMPT: str = (
     "Jesteś precyzyjnym asystentem dietetycznym. Twoim zadaniem jest ekstrakcja składników posiłków z tekstu "
@@ -50,10 +42,6 @@ SLM_SYSTEM_PROMPT: str = (
 SLM_MAX_TOKENS: int = 512
 SLM_TEMPERATURE: float = 0.1
 
-
-# ============================================================================
-# MEAL RECOGNITION SCORING CONFIGURATION
-# ============================================================================
 
 @dataclass(frozen=True)
 class MealRecognitionConfig:

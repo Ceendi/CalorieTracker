@@ -35,7 +35,6 @@ from src.meal_planning.config import (
     MEAL_JSON_SCHEMA,
 )
 from src.ai.infrastructure.embedding.embedding_service import EmbeddingService
-import numpy as np
 
 
 # Mapping of Polish dish name stems to their typical ingredients
@@ -184,12 +183,10 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
             full_prompt = self._build_prompt(MEAL_PLANNER_SYSTEM_PROMPT, user_prompt)
             
-            # --- LOGGING DEBUG INFO ---
             logger.info(f"Day {day_num} Generation Context:")
             logger.info(f"Diet: {profile.preferences.get('diet')}")
             logger.info(f"Allergies: {profile.preferences.get('allergies')}")
             logger.debug(f"Full Prompt to LLM:\n{full_prompt}")
-            # --------------------------
 
             # Try with grammar first, fallback without if it fails
             day_templates = await self._generate_single_day_templates(
@@ -202,10 +199,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             for t in day_templates:
                 previous_descriptions.append(t.description)
 
-        # Post-processing: detect and fix repeated meals
         all_templates = self._deduplicate_meal_templates(all_templates, profile)
-
-        # Filter out templates whose descriptions contain allergens
         return self._filter_templates_by_allergies(all_templates, profile)
 
     async def _generate_single_day_templates(
@@ -259,7 +253,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 if not response_text.strip():
                     raise ValueError("Empty response from LLM")
 
-                # Parse single day response
                 templates = self._parse_single_day_templates(response_text, profile, day_num)
 
                 if templates and len(templates) >= 3:  # At least 3 valid meals
@@ -322,10 +315,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         if not description:
             return "Posilek"
             
-        # Remove content in parentheses
         cleaned = re.sub(r'\(.*?\)', '', description)
         
-        # Remove comments after - or :
         if " - " in cleaned:
             cleaned = cleaned.split(" - ")[0]
         if ": " in cleaned:
@@ -387,7 +378,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         for meal_data in data.get("meals", []):
             meal_type = meal_data.get("type", "snack")
 
-            # Deduplicate
             if meal_type in seen_types:
                 continue
             seen_types.add(meal_type)
@@ -397,7 +387,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             raw_desc = meal_data.get("description", default_descriptions.get(meal_type, "Posilek"))
             description = self._clean_description(raw_desc)
 
-            # Extract keywords
             raw_keywords = meal_data.get("keywords", [])
             if isinstance(raw_keywords, list) and raw_keywords:
                 keywords = [k.strip().lower() for k in raw_keywords if isinstance(k, str) and k.strip()]
@@ -418,7 +407,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             )
             templates.append(template)
 
-        # Fill missing meal types
         for mt in EXPECTED_MEAL_TYPES:
             if mt not in seen_types:
                 ratio = self.MEAL_DISTRIBUTION.get(mt, 0.20)
@@ -461,7 +449,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         model = self._get_model()
         grammar = self._get_meal_grammar()
 
-        # Format products as indexed list (limit to context size)
         products_limited = available_products[:MAX_PRODUCTS_IN_PROMPT]
         products_text, index_map = self._format_products_indexed(products_limited)
 
@@ -469,7 +456,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             f"  📋 Providing {len(products_limited)} products to LLM for '{template.description}'"
         )
 
-        # Format used ingredients (limit for context)
         used_limited = used_ingredients[-MAX_USED_INGREDIENTS_IN_PROMPT:]
         used_text = ", ".join(used_limited) if used_limited else "brak"
 
@@ -542,8 +528,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             Optimized list of days with adjusted portions
         """
         for day in days:
-            # 1. Per-Meal Normalization
-            # Check if individual meals are too far off their expected share
             for meal in day.meals:
                 target_ratio = self.MEAL_DISTRIBUTION.get(meal.meal_type, 0.20)
                 meal_target = profile.daily_kcal * target_ratio
@@ -581,12 +565,9 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                     meal.total_fat *= scale_correction
                     meal.total_carbs *= scale_correction
 
-            # 2. Global Scaling
-            # Recalculate day total after corrections
             day_kcal = sum(m.total_kcal for m in day.meals)
 
             if day_kcal > 0:
-                # Calculate ratio to target
                 ratio = profile.daily_kcal / day_kcal
 
                 # Only adjust if significantly off (>5% - tighter tolerance)
@@ -847,7 +828,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         # Strategy 2: Extract remaining words (skip stop words)
         words = re.findall(r'[a-ząćęłńóśźż]+', description_lower)
         for word in words:
-            # Skip short words, stop words, and already-matched dish stems
             if len(word) < 3:
                 continue
             if word in POLISH_STOP_WORDS:
@@ -857,7 +837,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                               for dish_stem in DISH_TO_INGREDIENTS.keys())
             if is_dish_stem:
                 continue
-            # Add as potential ingredient if not already present
             if word not in keywords and not any(word in k or k in word for k in keywords):
                 keywords.append(word)
 
@@ -893,7 +872,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             data = json.loads(json_str)
         except (ValueError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to parse templates JSON: {e}")
-            # Return default templates as fallback
             return self._generate_default_templates(profile, expected_days)
 
         EXPECTED_MEAL_TYPES = ["breakfast", "second_breakfast", "lunch", "snack", "dinner"]
@@ -937,10 +915,8 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 ratio = self.MEAL_DISTRIBUTION.get(meal_type, 0.20)
                 description = meal_data.get("description", f"Posilek {meal_type}")
 
-                # Extract keywords from LLM response or fallback to extraction
                 raw_keywords = meal_data.get("keywords", [])
                 if isinstance(raw_keywords, list) and raw_keywords:
-                    # Normalize keywords: lowercase, strip whitespace
                     keywords = [k.strip().lower() for k in raw_keywords if isinstance(k, str) and k.strip()]
                 else:
                     # Fallback: extract keywords from description
@@ -1014,7 +990,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         Returns:
             List of default meal templates
         """
-        # Default descriptions with specific meal ideas
         default_descriptions = {
             "breakfast": "Owsianka z owocami",
             "second_breakfast": "Jogurt z orzechami",
@@ -1023,7 +998,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             "dinner": "Kanapki z serem i warzywami",
         }
 
-        # Default ingredient keywords for product search
         default_keywords = {
             "breakfast": ["platki owsiane", "mleko", "banan", "jagody"],
             "second_breakfast": ["jogurt", "orzechy", "miod"],
@@ -1105,7 +1079,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             ],
         }
 
-        # Track seen descriptions (normalized for comparison)
         seen_descriptions: Dict[str, int] = {}  # description -> count
 
         def normalize(desc: str) -> str:
@@ -1115,7 +1088,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         def is_similar(desc1: str, desc2: str) -> bool:
             """Check if two descriptions are similar."""
             n1, n2 = normalize(desc1), normalize(desc2)
-            # Exact match
             if n1 == n2:
                 return True
             # One contains the other
@@ -1128,16 +1100,13 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 return True
             return False
 
-        # Count occurrences first
         for day_templates in templates:
             for template in day_templates:
                 key = normalize(template.description)
                 seen_descriptions[key] = seen_descriptions.get(key, 0) + 1
 
-        # Track which alternatives have been used
         used_alternatives: Dict[str, int] = {}  # meal_type -> next index to use
 
-        # Replace duplicates
         seen_once: set = set()
         replacements_made = 0
 
@@ -1145,19 +1114,16 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             for i, template in enumerate(day_templates):
                 key = normalize(template.description)
 
-                # Check if this is a duplicate
                 is_duplicate = False
                 if key in seen_once:
                     is_duplicate = True
                 else:
-                    # Check for similar descriptions
                     for seen_key in seen_once:
                         if is_similar(key, seen_key):
                             is_duplicate = True
                             break
 
                 if is_duplicate:
-                    # Find an alternative
                     meal_type = template.meal_type
                     alt_list = alternatives.get(meal_type, [])
                     alt_idx = used_alternatives.get(meal_type, 0)
@@ -1292,11 +1258,9 @@ class BielikMealPlannerAdapter(MealPlannerPort):
 
         def _get_safe_meal(meal_type: str, blocked_allergens: List[str]) -> Tuple[str, List[str]]:
             options = SAFE_MEALS_POOL.get(meal_type, [])
-            # Try to find first option that doesn't have any blocked allergens
             for desc, keywords, dish_allergens in options:
                 is_safe = True
                 for dish_allergen in dish_allergens:
-                    # Check if this dish allergen is one of the user's blocked triggers
                     if dish_allergen in blocked_allergens:
                         is_safe = False
                         break
@@ -1394,7 +1358,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             data = json.loads(json_str)
         except (ValueError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to parse meal JSON: {e}")
-            # Convert index_map values to list for fallback
             available_products = list(index_map.values())
             return self._generate_fallback_meal(template, available_products)
 
@@ -1417,7 +1380,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 logger.warning(f"Invalid idx value: {idx}")
                 continue
 
-            # Look up product by index
             product = index_map.get(idx)
             if not product:
                 logger.warning(f"  ⚠️ Invalid product index {idx}, skipping")
@@ -1507,7 +1469,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
         Returns:
             Basic generated meal with real ingredients from database
         """
-        # If no products available, return minimal fallback
         if not available_products:
             logger.warning("No products available for fallback meal")
             return GeneratedMeal(
@@ -1529,7 +1490,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             reverse=True
         )
 
-        # Select top 3-4 products
         selected = sorted_products[:min(4, len(sorted_products))]
 
         # Calculate grams for each product to hit target kcal
@@ -1547,7 +1507,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             if kcal_per_100g <= 0:
                 kcal_per_100g = 100  # Fallback to avoid division by zero
 
-            # Calculate grams to hit target calories for this ingredient
             grams = (target_per_ingredient / kcal_per_100g) * 100
             # Clamp to reasonable range
             grams = max(30.0, min(grams, 300.0))
@@ -1558,7 +1517,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
             fat = product.get("fat_per_100g", 0) * factor
             carbs = product.get("carbs_per_100g", 0) * factor
 
-            # Get food_id
             food_id = product.get("id")
             if food_id and isinstance(food_id, str):
                 try:

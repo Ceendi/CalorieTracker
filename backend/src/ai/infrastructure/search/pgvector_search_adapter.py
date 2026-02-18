@@ -74,7 +74,6 @@ class PgVectorSearchAdapter:
         Returns:
             List of SearchCandidate objects sorted by relevance
         """
-        # alpha maps to vector_weight: higher = more vector weight
         vector_weight = alpha
 
         candidates = await self._search_service.search(
@@ -113,7 +112,6 @@ class PgVectorSearchAdapter:
 
             row = result.fetchone()
             if row:
-                # Load units from food_units table
                 units_result = await self._session.execute(text("""
                     SELECT label, grams FROM food_units
                     WHERE food_id = :food_id ORDER BY priority DESC

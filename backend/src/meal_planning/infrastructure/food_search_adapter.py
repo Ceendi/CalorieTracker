@@ -141,7 +141,6 @@ class SqlAlchemyFoodSearchAdapter:
         query = query.strip()
         fuzzy_pattern = self._create_fuzzy_regex(query)
 
-        # Search with fuzzy matching and smart ordering
         stmt = (
             select(FoodModel)
             .where(

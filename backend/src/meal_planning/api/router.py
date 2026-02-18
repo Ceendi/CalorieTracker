@@ -38,11 +38,6 @@ _generation_progress: Dict[str, dict] = {}
 
 
 def _validate_user_profile(user: User) -> None:
-    """
-    Validate that user has completed their profile.
-
-    Raises HTTPException 400 if required fields are missing.
-    """
     if not all([user.weight, user.height, user.age]):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,15 +46,6 @@ def _validate_user_profile(user: User) -> None:
 
 
 def _user_to_user_data(user: User) -> UserData:
-    """
-    Map User model to UserData DTO for service layer.
-
-    Args:
-        user: User model from authentication
-
-    Returns:
-        UserData DTO for meal plan calculations
-    """
     return UserData(
         id=user.id,
         weight=user.weight,
@@ -307,7 +293,6 @@ async def generate_meal_plan(
                 "message": "Blad podczas generowania planu"
             }
 
-    # Schedule the generation task
     background_tasks.add_task(generate)
 
     logger.info(f"Started plan generation: task={task_id}, user={user_id}")
@@ -347,10 +332,8 @@ async def get_generation_progress(
         while True:
             progress = _generation_progress.get(task_id, {"status": "unknown"})
 
-            # Send progress update
             yield f"data: {json.dumps(progress)}\n\n"
 
-            # Check if generation is complete
             if progress.get("status") in ["completed", "error", "unknown"]:
                 # Clean up after a short delay to allow client to receive final event
                 if progress.get("status") != "unknown":
@@ -358,7 +341,6 @@ async def get_generation_progress(
                     _generation_progress.pop(task_id, None)
                 break
 
-            # Wait before next update
             await asyncio.sleep(0.5)
 
     return StreamingResponse(

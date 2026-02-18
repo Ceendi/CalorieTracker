@@ -66,7 +66,6 @@ class VisionExtractor:
             return self._empty_result("Missing API Key"), 0.0
 
         try:
-            # Prepare the request
             # Since google-genai client calls are synchronous by default in this version or we wrap them
             # We will use asyncio.to_thread to avoid blocking the event loop
             
@@ -145,7 +144,7 @@ class VisionExtractor:
                 quantity_value=float(i["quantity_value"]),
                 quantity_unit=i.get("quantity_unit", "g"),
                 confidence=float(i.get("confidence", 0.9)),
-                extraction_method=ExtractionMethod.SLM, # Using SLM as generic AI extraction tag
+                extraction_method=ExtractionMethod.SLM,
                 kcal=float(i.get("kcal", 0)),
                 protein=float(i.get("protein", 0)),
                 fat=float(i.get("fat", 0)),

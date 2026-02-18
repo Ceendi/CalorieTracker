@@ -133,7 +133,7 @@ class EmbeddingService:
         """Check if the model is loaded and available."""
         return self._model is not None
 
-    # Aliases for backward compatibility with task requirements
+    # Convenience aliases
     def encode(self, text: str) -> np.ndarray:
         """Alias for encode_passage."""
         return self.encode_passage(text)
@@ -156,7 +156,6 @@ class EmbeddingService:
         Returns:
             Number of foods updated with embeddings
         """
-        # Get foods without embeddings
         result = await session.execute(text("""
             SELECT id, name FROM foods WHERE embedding IS NULL
         """))
@@ -168,17 +167,14 @@ class EmbeddingService:
 
         logger.info(f"Generating embeddings for {len(foods)} foods...")
 
-        # Process in batches
         total_updated = 0
         for i in range(0, len(foods), batch_size):
             batch = foods[i:i + batch_size]
             names = [f[1] for f in batch]  # name is at index 1
             ids = [f[0] for f in batch]    # id is at index 0
 
-            # Generate embeddings
             embeddings = self.encode_passages_batch(names, batch_size=32, show_progress=True)
 
-            # Update database
             try:
                 for food_id, embedding in zip(ids, embeddings):
                     embedding_list = embedding.tolist()
@@ -225,7 +221,6 @@ class EmbeddingService:
         logger.debug(f"Generated embedding for food: {name}")
 
 
-# Singleton accessor function
 _embedding_service: Optional[EmbeddingService] = None
 
 

@@ -112,12 +112,10 @@ class PgVectorSearchService:
         Returns:
             List of SearchCandidate sorted by relevance
         """
-        # 1. Encode query to embedding
         query_embedding = self._embedding_service.encode_query(query)
         # Format with 8 decimal places to match pgvector storage precision
         embedding_str = f"[{','.join(f'{x:.8f}' for x in query_embedding.tolist())}]"
 
-        # 2. Call hybrid search function
         result = await session.execute(text("""
             SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, :weight)
         """), {
@@ -129,7 +127,6 @@ class PgVectorSearchService:
 
         rows = result.fetchall()
 
-        # 3. Map to SearchCandidate
         candidates = []
         for row in rows:
             candidates.append(SearchCandidate(
@@ -216,7 +213,6 @@ class PgVectorSearchService:
                 query += " tofu soczewica ciecierzyca warzywa orzechy fasola mleko_roslinne hummus"
                 embedding_query += " tofu soczewica warzywa"
 
-        # Get more results for filtering
         query_embedding = self._embedding_service.encode_query(embedding_query)
         # Format with 8 decimal places to match pgvector storage precision
         embedding_str = f"[{','.join(f'{x:.8f}' for x in query_embedding.tolist())}]"
@@ -236,7 +232,6 @@ class PgVectorSearchService:
 
         rows = result.fetchall()
 
-        # Convert to dicts with nutrition
         products = []
         for row in rows:
             products.append({
@@ -250,7 +245,6 @@ class PgVectorSearchService:
                 "score": float(row.score)
             })
 
-        # Filter by preferences if provided
         if preferences:
             products = self._filter_by_preferences(products, preferences)
 
@@ -300,7 +294,6 @@ class PgVectorSearchService:
         Returns:
             True if the product should be blocked
         """
-        # 1. Identify active stems based on known allergens found in user's strings
         active_stems = []
         for known_allergen, stems in ALLERGEN_KEYWORD_STEMS.items():
             # Check if this known allergen is mentioned in any of user's allergy strings
@@ -369,15 +362,12 @@ class PgVectorSearchService:
             name_lower = p["name"].lower()
             category = p.get("category", "")
 
-            # Skip products containing allergens (stem-based)
             if allergies and self._matches_allergen(name_lower, category, allergies):
                 continue
 
-            # Skip excluded ingredients
             if any(e in name_lower for e in excluded):
                 continue
 
-            # Apply diet restrictions
             if diet == "vegetarian" and category in meat_categories:
                 continue
             if diet == "vegan" and category in animal_categories:
@@ -411,7 +401,6 @@ class PgVectorSearchService:
 
         # RRF scores are low (max ~0.016), so use low threshold
         if results and results[0].score > 0.005:
-            # Get full product data
             result = await session.execute(text("""
                 SELECT id, name, category, calories, protein, fat, carbs
                 FROM foods WHERE id = :id AND source IN ('fineli', 'kunachowicz')
@@ -429,7 +418,6 @@ class PgVectorSearchService:
                     "carbs_per_100g": row.carbs
                 }
 
-                # Filter by allergens if preferences provided
                 if preferences:
                     allergies = [a.lower() for a in preferences.get("allergies", [])]
                     if allergies and self._matches_allergen(

@@ -5,10 +5,6 @@ Contains system prompts, generation prompts, and model parameters
 for the Bielik-based meal planner.
 """
 
-# =============================================================================
-# SYSTEM PROMPT
-# =============================================================================
-
 MEAL_PLANNER_SYSTEM_PROMPT: str = """Jestes ekspert dietetykiem. Twoim priorytetem jest ZDROWIE i BEZPIECZENSTWO uzytkownika.
 BEZWZGLĘDNE ZASADY KRYTYCZNE:
 1. DIETA I ALERGIE SA NAJWAZNIEJSZE. Jesli uzytkownik ma diete wegetarianska, ZABRANIA SIE uzywania miesa, ryb i owocow morza.
@@ -20,10 +16,6 @@ Zasady ogolne:
 2. Dbaj o roznorodnosc w ciagu dnia.
 3. Odpowiadaj TYLKO w formacie JSON."""
 
-
-# =============================================================================
-# TEMPLATE GENERATION PROMPT (per-day, simpler for small models)
-# =============================================================================
 
 TEMPLATE_GENERATION_PROMPT_SINGLE_DAY: str = """Zaplanuj 5 ROZNYCH posilkow na 1 dzien ({kcal} kcal).
 
@@ -43,10 +35,6 @@ Odpowiedz TYLKO JSON:
 TEMPLATE_GENERATION_PROMPT: str = TEMPLATE_GENERATION_PROMPT_SINGLE_DAY
 
 
-# =============================================================================
-# MEAL GENERATION PROMPT
-# =============================================================================
-
 MEAL_GENERATION_PROMPT: str = """Stworz przepis: "{description}"
 
 Cel: ~{target_kcal} kcal (B:{target_protein}g, T:{target_fat}g, W:{target_carbs}g)
@@ -65,21 +53,12 @@ FORMAT ODPOWIEDZI (TYLKO JSON):
 {{"name": "Nazwa posilku", "description": "Krotki opis", "preparation_time": 15, "ingredients": [{{"idx": 1, "grams": 150}}, {{"idx": 3, "grams": 100}}]}}"""
 
 
-# =============================================================================
-# MODEL PARAMETERS
-# =============================================================================
-
 MAX_TOKENS_TEMPLATES: int = 1024  # Reduced - now generating 1 day at a time
 MAX_TOKENS_MEAL: int = 512
 TEMPERATURE_TEMPLATES: float = 0.5  # Lower for more consistent structure
 TEMPERATURE_MEAL: float = 0.7  # Higher for creative meal names
 
 
-# =============================================================================
-# JSON SCHEMAS FOR GRAMMAR-BASED GENERATION
-# =============================================================================
-
-# Schema for single-day template generation
 DAY_TEMPLATE_JSON_SCHEMA: str = """{
   "type": "object",
   "properties": {
@@ -101,7 +80,6 @@ DAY_TEMPLATE_JSON_SCHEMA: str = """{
   "required": ["meals"]
 }"""
 
-# Schema for meal generation
 MEAL_JSON_SCHEMA: str = """{
   "type": "object",
   "properties": {

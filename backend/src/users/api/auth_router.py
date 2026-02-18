@@ -78,13 +78,11 @@ async def google_login(
             detail="GOOGLE_ACCOUNT_NO_EMAIL"
         )
     
-    # 2. Check if user exists
     try:
         user = await user_manager.get_by_email(email)
     except Exception:
         user = None
 
-    # 3. If not, register new user
     if not user:
         # Generate random secure password that meets complexities: 8+ chars, 1 digit, 1 upper
         while True:
