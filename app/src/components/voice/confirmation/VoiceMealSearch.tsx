@@ -68,7 +68,7 @@ export const VoiceMealSearch = ({
                                 <Text className="text-base font-semibold text-foreground flex-shrink" numberOfLines={1}>
                                     {item.name}
                                 </Text>
-                                {item.source === 'fineli' && (
+                                {(item.source === 'fineli' || item.source === 'kunachowicz') && (
                                      <IconSymbol name="checkmark.seal.fill" size={14} color={Colors[theme].tint} />
                                 )}
                             </View>

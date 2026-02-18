@@ -145,3 +145,7 @@ models/
 local_wheels/
 
 uv.toml
+
+# Copyrighted nutritional data (Kunachowicz)
+seeds/polish_products.json
+scripts/generate_polish_json.py

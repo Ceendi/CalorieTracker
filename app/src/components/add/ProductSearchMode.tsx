@@ -43,7 +43,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
         <View className="flex-1 mr-2">
           <Text className="text-base font-semibold text-foreground pt-1" numberOfLines={2} style={{ lineHeight: 22 }}>
             {item.name}
-            {item.source === 'fineli' && (
+            {(item.source === 'fineli' || item.source === 'kunachowicz') && (
               <Text style={{ lineHeight: 22 }}>
                 {' '}<IconSymbol name="checkmark.seal.fill" size={16} color={tintColor} />
               </Text>

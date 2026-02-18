@@ -75,7 +75,9 @@ DERIVATIVE_KEYWORDS: FrozenSet[str] = frozenset({
     "mąka", "skrobia", "płatki", "chleb", "bułka", "puree", "placki", "chipsy", "frytki",
     "halloumi", "białko", "białka", "żółtko", "żółtka", "proszek", "pasta", "mix",
     "czekolada", "czekoladowe", "wanilia", "waniliowe", "truskawka", "truskawkowe", "kakao", "kakaowe",
-    "topiony", "wędzony"
+    "topiony", "wędzony",
+    "kotlet", "kotlety", "zupa", "gulasz", "potrawka", "sałatka", "surówka", "pierogi",
+    "naleśniki", "budyń", "deser", "ciasto", "ciastko",
 })
 
 FRESH_CATEGORIES: FrozenSet[str] = frozenset({
@@ -108,6 +110,10 @@ DEFAULT_UNIT_GRAMS: Dict[str, float] = {
     "sztuki": 100.0,
     "sztuk": 100.0,
     "szt": 100.0,
+
+    # Packaging
+    "opakowanie": 200.0,
+    "tabliczka": 100.0,
 
     # Approximate amounts
     "garść": 30.0,

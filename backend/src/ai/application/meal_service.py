@@ -99,6 +99,12 @@ class MealRecognitionService:
                     if len(q_tokens) == 1 and len(c_tokens) > 2:
                         current_score -= CONFIG.MULTI_TOKEN_PENALTY
 
+                    # Penalize processed/dish forms when query is a raw ingredient
+                    derivative_in_product = DERIVATIVE_KEYWORDS.intersection(c_tokens)
+                    derivative_in_query = DERIVATIVE_KEYWORDS.intersection(q_tokens)
+                    if derivative_in_product and not derivative_in_query:
+                        current_score *= CONFIG.DERIVATIVE_PENALTY_MULTIPLIER
+
                     if not self.nlu.verify_keyword_consistency(normalized_name, candidate.name):
                         current_score *= CONFIG.GUARD_FAIL_MULTIPLIER
                         candidate.passed_guard = False
@@ -106,7 +112,7 @@ class MealRecognitionService:
                         candidate.passed_guard = True
 
                     candidate_scores.append((current_score, candidate))
-                
+
                 candidate_scores.sort(key=lambda x: x[0], reverse=True)
                 if candidate_scores:
                     best_match = candidate_scores[0][1]

@@ -36,7 +36,9 @@ class FoodService:
                 if persisted:
                     ready_external_products.append(persisted)
 
-        return results + ready_external_products
+        local_ids = {f.id for f in results}
+        unique_external = [f for f in ready_external_products if f.id not in local_ids]
+        return results + unique_external
 
     async def _persist_external_product(self, food: Food) -> Optional[Food]:
         """

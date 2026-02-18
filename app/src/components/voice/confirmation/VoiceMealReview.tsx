@@ -39,7 +39,7 @@ const FoodItemReview = React.memo(
               <Text className="text-base font-black text-foreground leading-tight">
                 {item.name}
               </Text>
-              {item.source === 'fineli' && (
+              {(item.source === 'fineli' || item.source === 'kunachowicz') && (
                 <IconSymbol name="checkmark.seal.fill" size={14} color={Colors[theme].tint} />
               )}
               <IconSymbol name="pencil" size={11} color={Colors[theme].tint} />

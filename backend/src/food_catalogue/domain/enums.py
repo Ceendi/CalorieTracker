@@ -29,3 +29,8 @@ class UnitLabel(StrEnum):
     PORCJA_MALA = "Porcja (mała)"
     PORCJA_SREDNIA = "Porcja (średnia)"
     PORCJA_DUZA = "Porcja (duża)"
+    KROMKA = "kromka"
+    PLASTER = "plaster"
+    PLASTERKI = "plasterki"
+    OPAKOWANIE = "opakowanie"
+    TABLICZKA = "tabliczka"
