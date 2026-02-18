@@ -1,10 +1,17 @@
-import React, { useRef, useMemo, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Dimensions, StyleSheet } from 'react-native';
-import { format, addDays, isSameDay, startOfDay } from 'date-fns';
-import { pl, enUS } from 'date-fns/locale';
-import { useLanguage } from '@/hooks/useLanguage';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/theme';
+import React, { useRef, useMemo, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  StyleSheet,
+} from "react-native";
+import { format, addDays, isSameDay, startOfDay } from "date-fns";
+import { pl, enUS } from "date-fns/locale";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/theme";
 
 interface DateStripProps {
   selectedDate: Date;
@@ -15,55 +22,63 @@ interface DateItemProps {
   item: Date;
   isSelected: boolean;
   isToday: boolean;
-  colorScheme: 'light' | 'dark' | null | undefined;
+  colorScheme: "light" | "dark" | null | undefined;
   locale: typeof pl | typeof enUS;
   onPress: () => void;
 }
 
-const ITEM_WIDTH = Dimensions.get('window').width / 7;
+const ITEM_WIDTH = Dimensions.get("window").width / 7;
 
 // Using StyleSheet instead of className to avoid NativeWind's react-native-css-interop
 // trying to access navigation context inside FlatList (which causes the error)
-const DateItem = React.memo(function DateItem({ 
-  item, 
-  isSelected, 
-  isToday, 
-  colorScheme, 
-  locale, 
-  onPress 
+const DateItem = React.memo(function DateItem({
+  item,
+  isSelected,
+  isToday,
+  colorScheme,
+  locale,
+  onPress,
 }: DateItemProps) {
-  const tintColor = Colors[colorScheme ?? 'light'].tint;
-  
+  const tintColor = Colors[colorScheme ?? "light"].tint;
+
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
       style={[
         styles.itemContainer,
-        { width: ITEM_WIDTH, zIndex: isSelected ? 10 : 0 }
+        { width: ITEM_WIDTH, zIndex: isSelected ? 10 : 0 },
       ]}
     >
-      <View 
+      <View
         style={[
           styles.itemInner,
-          { 
+          {
             width: ITEM_WIDTH - 6,
-            backgroundColor: isSelected ? tintColor : 'transparent',
+            backgroundColor: isSelected ? tintColor : "transparent",
           },
-          isSelected && styles.itemSelected
+          isSelected && styles.itemSelected,
         ]}
       >
-        <Text style={[
-          styles.dayText,
-          { color: isSelected ? '#E0E7FF' : '#9CA3AF' }
-        ]}>
-          {format(item, 'EEE', { locale })}
+        <Text
+          style={[
+            styles.dayText,
+            { color: isSelected ? "#E0E7FF" : "#9CA3AF" },
+          ]}
+        >
+          {format(item, "EEE", { locale })}
         </Text>
-        <Text style={[
-          styles.dateText,
-          { color: isSelected ? '#FFFFFF' : Colors[colorScheme ?? 'light'].text }
-        ]}>
-          {format(item, 'd')}
+        <Text
+          style={[
+            styles.dateText,
+            {
+              color: isSelected
+                ? "#FFFFFF"
+                : Colors[colorScheme ?? "light"].text,
+            },
+          ]}
+        >
+          {format(item, "d")}
         </Text>
         {isToday && !isSelected && (
           <View style={[styles.todayDot, { backgroundColor: tintColor }]} />
@@ -76,17 +91,17 @@ const DateItem = React.memo(function DateItem({
 const styles = StyleSheet.create({
   itemContainer: {
     height: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   itemInner: {
     height: 70,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   itemSelected: {
-    shadowColor: '#312E81',
+    shadowColor: "#312E81",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -94,13 +109,13 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   dateText: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   todayDot: {
     width: 4,
@@ -111,77 +126,85 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 8,
     marginHorizontal: -20,
-    overflow: 'visible',
+    overflow: "visible",
   },
 });
 
 export function DateStrip({ selectedDate, onSelectDate }: DateStripProps) {
   const { language } = useLanguage();
   const { colorScheme } = useColorScheme();
-  const locale = language === 'pl' ? pl : enUS;
+  const locale = language === "pl" ? pl : enUS;
   const flatListRef = useRef<FlatList>(null);
 
   const dates = useMemo(() => {
     const today = startOfDay(new Date());
     const range = [];
     for (let i = 30; i >= -30; i--) {
-        range.push(addDays(today, i));
+      range.push(addDays(today, i));
     }
     return range;
   }, []);
 
-  const selectedIndex = dates.findIndex(d => isSameDay(d, selectedDate));
-  const todayIndex = dates.findIndex(d => isSameDay(d, new Date()));
+  const todayIndex = dates.findIndex((d) => isSameDay(d, new Date()));
 
   // Note: Removed automatic scrollToIndex on selectedDate change
   // as it caused visual "jump" when user clicks on a date.
-  // The user is clicking on a visible date anyway, so no scroll needed. 
+  // The user is clicking on a visible date anyway, so no scroll needed.
 
-  const renderItem = useCallback(({ item }: { item: Date }) => {
-    const isSelected = isSameDay(item, selectedDate);
-    const isToday = isSameDay(item, new Date());
+  const renderItem = useCallback(
+    ({ item }: { item: Date }) => {
+      const isSelected = isSameDay(item, selectedDate);
+      const isToday = isSameDay(item, new Date());
 
-    return (
-      <DateItem
-        item={item}
-        isSelected={isSelected}
-        isToday={isToday}
-        colorScheme={colorScheme}
-        locale={locale}
-        onPress={() => onSelectDate(item)}
-      />
-    );
-  }, [selectedDate, colorScheme, locale, onSelectDate]);
+      return (
+        <DateItem
+          item={item}
+          isSelected={isSelected}
+          isToday={isToday}
+          colorScheme={colorScheme}
+          locale={locale}
+          onPress={() => onSelectDate(item)}
+        />
+      );
+    },
+    [selectedDate, colorScheme, locale, onSelectDate],
+  );
 
   return (
     <View style={styles.container}>
-       <FlatList
-          inverted 
-          ref={flatListRef}
-          data={dates}
-          renderItem={renderItem}
-          keyExtractor={item => item.toISOString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ overflow: 'visible' }}
-          contentContainerStyle={{ 
-              paddingHorizontal: 0,
-              paddingVertical: 10, 
-          }}
-          getItemLayout={(data, index) => (
-            { length: ITEM_WIDTH, offset: ITEM_WIDTH * index, index }
-          )}
-          initialScrollIndex={todayIndex} 
-          snapToInterval={ITEM_WIDTH}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          onScrollToIndexFailed={info => {
-              setTimeout(() => {
-                  flatListRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0 });
-              }, 100);
-          }}
-          extraData={selectedDate}
-       />
+      <FlatList
+        inverted
+        ref={flatListRef}
+        data={dates}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.toISOString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ overflow: "visible" }}
+        contentContainerStyle={{
+          paddingHorizontal: 0,
+          paddingVertical: 10,
+        }}
+        getItemLayout={(data, index) => ({
+          length: ITEM_WIDTH,
+          offset: ITEM_WIDTH * index,
+          index,
+        })}
+        initialScrollIndex={todayIndex}
+        snapToInterval={ITEM_WIDTH}
+        snapToAlignment="start"
+        decelerationRate="fast"
+        onScrollToIndexFailed={(info) => {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+              viewPosition: 0,
+            });
+          }, 100);
+        }}
+        extraData={selectedDate}
+      />
     </View>
   );
 }

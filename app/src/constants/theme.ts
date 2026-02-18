@@ -1,8 +1,3 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
 const tintColorLight = '#4F46E5'; // Indigo-600
@@ -27,7 +22,6 @@ export const Colors = {
     muted: '#f1f5f9',
     mutedForeground: '#64748b',
     placeholder: '#94a3b8', // Tailwind slate-400 equivalent for good contrast
-    // Status colors
     error: '#ef4444', // red-500
     warning: '#f59e0b', // amber-500
     success: '#10b981', // emerald-500
@@ -54,7 +48,6 @@ export const Colors = {
     muted: '#1e293b',
     mutedForeground: '#94a3b8',
     placeholder: '#475569', // Tailwind slate-600 equivalent
-    // Status colors
     error: '#ef4444', // red-500
     warning: '#f59e0b', // amber-500
     success: '#10b981', // emerald-500

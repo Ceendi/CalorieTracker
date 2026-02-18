@@ -10,7 +10,6 @@ export { FoodDetailsRawParams, FoodDetailsIntent, FoodDetailsMode };
  * Parse raw expo-router params into a normalized FoodDetailsIntent
  */
 export function parseFoodDetailsParams(params: FoodDetailsRawParams): FoodDetailsIntent {
-  // Determine mode
   let mode: FoodDetailsMode = 'new';
   if (params.barcode) {
     mode = 'barcode';
@@ -18,7 +17,6 @@ export function parseFoodDetailsParams(params: FoodDetailsRawParams): FoodDetail
     mode = 'edit';
   }
 
-  // Parse food from JSON if provided
   let food: FoodProduct | undefined;
   if (params.item) {
     try {
@@ -28,7 +26,6 @@ export function parseFoodDetailsParams(params: FoodDetailsRawParams): FoodDetail
     }
   }
 
-  // Parse initial unit
   let unit: UnitInfo | null = null;
   if (params.initialUnitLabel && params.initialUnitGrams) {
     unit = {
@@ -38,7 +35,6 @@ export function parseFoodDetailsParams(params: FoodDetailsRawParams): FoodDetail
     };
   }
 
-  // Parse meal type
   let mealType: MealType | undefined;
   if (params.initialMealType && Object.values(MealType).includes(params.initialMealType as MealType)) {
     mealType = params.initialMealType as MealType;

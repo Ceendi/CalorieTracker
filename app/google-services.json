@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "480830911363",
+    "project_id": "calorietracker-app",
+    "storage_bucket": "calorietracker-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480830911363:android:placeholder",
+        "android_client_info": {
+          "package_name": "com.ceendi.calorietracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480830911363-n0i4n8a3c7738brdup5mo1rvo7peh79k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "placeholder"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480830911363-n0i4n8a3c7738brdup5mo1rvo7peh79k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

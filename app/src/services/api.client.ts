@@ -1,10 +1,9 @@
-import axios from 'axios';
-import { CONFIG } from '@/constants/config';
-import { storageService } from './storage.service';
+import axios from "axios";
+import { CONFIG } from "@/constants/config";
+import { storageService } from "./storage.service";
 
 const baseURL = CONFIG.API_URL;
 
-let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 let onUnauthorizedCallback: (() => void) | null = null;
 
@@ -12,7 +11,7 @@ export const apiClient = axios.create({
   baseURL,
   timeout: 10000, // 10 seconds timeout
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -28,14 +27,14 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -46,15 +45,19 @@ apiClient.interceptors.response.use(
               const refreshToken = await storageService.getRefreshToken();
               if (!refreshToken) return null;
 
-              const response = await axios.post(`${CONFIG.API_URL}/auth/refresh`, {
-                  refresh_token: refreshToken
-              });
-              
-              const { access_token, refresh_token: new_refresh_token } = response.data;
-              
+              const response = await axios.post(
+                `${CONFIG.API_URL}/auth/refresh`,
+                {
+                  refresh_token: refreshToken,
+                },
+              );
+
+              const { access_token, refresh_token: new_refresh_token } =
+                response.data;
+
               await storageService.setAccessToken(access_token);
               if (new_refresh_token) {
-                  await storageService.setRefreshToken(new_refresh_token);
+                await storageService.setRefreshToken(new_refresh_token);
               }
               return access_token;
             } catch (err) {
@@ -70,7 +73,7 @@ apiClient.interceptors.response.use(
         }
 
         const newToken = await refreshPromise;
-        
+
         if (newToken) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return apiClient(originalRequest);
@@ -80,5 +83,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

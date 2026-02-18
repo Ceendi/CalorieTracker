@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useLanguage } from '@/hooks/useLanguage';
-import { useLogEntry, useUpdateEntry } from '@/hooks/useFood';
-import { ensureFoodProduct } from '@/services/food.service';
-import { FoodProduct, UnitInfo, MealType, CreateFoodDto, CreateEntryDto } from '@/types/food';
-import { formatDateForApi } from '@/utils/date';
+import { useState, useMemo, useEffect } from "react";
+import { Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useLogEntry, useUpdateEntry } from "@/hooks/useFood";
+import { ensureFoodProduct } from "@/services/food.service";
+import { FoodProduct, UnitInfo, MealType, CreateEntryDto } from "@/types/food";
+import { formatDateForApi } from "@/utils/date";
 
 interface FoodEntryParams {
   entryId?: string;
@@ -17,33 +17,38 @@ interface FoodEntryParams {
   date?: string;
 }
 
-export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) {
+export function useFoodEntry(
+  food: FoodProduct | null,
+  params: FoodEntryParams,
+) {
   const router = useRouter();
   const { t } = useLanguage();
-  
-  const { 
-    entryId, 
-    initialAmount, 
-    initialMealType, 
-    initialUnitLabel, 
-    initialUnitGrams, 
-    initialUnitQuantity 
+
+  const {
+    entryId,
+    initialAmount,
+    initialMealType,
+    initialUnitLabel,
+    initialUnitGrams,
+    initialUnitQuantity,
   } = params;
 
-  // --- Initial State Logic ---
   const getInitialUnit = (): UnitInfo | null => {
     if (initialUnitLabel && initialUnitGrams) {
       return {
         label: initialUnitLabel,
         grams: parseFloat(initialUnitGrams),
-        unit: initialUnitLabel
+        unit: initialUnitLabel,
       };
     }
     return null;
   };
 
   const getInitialMealType = (): MealType => {
-    if (initialMealType && Object.values(MealType).includes(initialMealType as MealType)) {
+    if (
+      initialMealType &&
+      Object.values(MealType).includes(initialMealType as MealType)
+    ) {
       return initialMealType as MealType;
     }
     const hour = new Date().getHours();
@@ -54,22 +59,26 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
     return MealType.SNACK;
   };
 
-  // --- State ---
-  const [selectedUnit, setSelectedUnit] = useState<UnitInfo | null>(getInitialUnit());
-  const [quantity, setQuantity] = useState(
-    initialUnitQuantity ? String(initialUnitQuantity) : (initialAmount ? String(initialAmount) : '100')
+  const [selectedUnit, setSelectedUnit] = useState<UnitInfo | null>(
+    getInitialUnit(),
   );
-  const [selectedMeal, setSelectedMeal] = useState<MealType>(getInitialMealType());
+  const [quantity, setQuantity] = useState(
+    initialUnitQuantity
+      ? String(initialUnitQuantity)
+      : initialAmount
+        ? String(initialAmount)
+        : "100",
+  );
+  const [selectedMeal, setSelectedMeal] =
+    useState<MealType>(getInitialMealType());
 
-  // Reset state when food changes (but not when editing or when initialAmount provided)
   useEffect(() => {
     if (food && !entryId && !initialAmount) {
       setSelectedUnit(null);
-      setQuantity('100');
+      setQuantity("100");
     }
   }, [food, entryId, initialAmount]);
 
-  // --- Derived Values ---
   const currentWeight = useMemo(() => {
     const qty = parseFloat(quantity) || 0;
     if (selectedUnit) {
@@ -79,7 +88,7 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
   }, [quantity, selectedUnit]);
 
   const ratio = currentWeight / 100;
-  
+
   const macros = useMemo(() => {
     if (!food?.nutrition) {
       return { calories: 0, protein: 0, fat: 0, carbs: 0 };
@@ -92,7 +101,6 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
     };
   }, [food, ratio]);
 
-  // --- Mutations ---
   const { mutate: logEntry, isPending: isLogging } = useLogEntry();
   const { mutate: updateEntry, isPending: isUpdating } = useUpdateEntry();
   const [isCreating, setIsCreating] = useState(false);
@@ -104,15 +112,22 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
 
     try {
       if (entryId) {
-        updateEntry({
-          id: entryId,
-          amount_grams: currentWeight,
-          meal_type: selectedMeal,
-          date: params.date as string
-        }, {
-          onSuccess: () => router.dismissAll(),
-          onError: () => Alert.alert(t('foodDetails.errorTitle'), "Failed to update entry.")
-        });
+        updateEntry(
+          {
+            id: entryId,
+            amount_grams: currentWeight,
+            meal_type: selectedMeal,
+            date: params.date as string,
+          },
+          {
+            onSuccess: () => router.dismissAll(),
+            onError: () =>
+              Alert.alert(
+                t("foodDetails.errorTitle"),
+                "Failed to update entry.",
+              ),
+          },
+        );
         return;
       }
 
@@ -124,7 +139,7 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
           productId = await ensureFoodProduct({
             name: food.name,
             barcode: food.barcode,
-            nutrition: food.nutrition
+            nutrition: food.nutrition,
           });
         } finally {
           setIsCreating(false);
@@ -132,7 +147,10 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
       }
 
       if (!productId) {
-        Alert.alert(t('foodDetails.errorTitle'), "Failed to resolve product ID");
+        Alert.alert(
+          t("foodDetails.errorTitle"),
+          "Failed to resolve product ID",
+        );
         return;
       }
 
@@ -143,22 +161,24 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
         amount_grams: currentWeight,
         unit_label: selectedUnit?.label,
         unit_grams: selectedUnit?.grams,
-        unit_quantity: selectedUnit ? parseFloat(quantity) : undefined
+        unit_quantity: selectedUnit ? parseFloat(quantity) : undefined,
       };
 
       logEntry(entry, {
         onSuccess: () => {
           router.dismissAll();
-          router.replace('/(tabs)');
+          router.replace("/(tabs)");
         },
         onError: (err) => {
-          Alert.alert(t('foodDetails.errorTitle'), "Failed to add entry. Please try again.");
+          Alert.alert(
+            t("foodDetails.errorTitle"),
+            "Failed to add entry. Please try again.",
+          );
           console.error(err);
-        }
+        },
       });
-
     } catch (e) {
-      Alert.alert(t('foodDetails.errorTitle'), t('foodDetails.creationFailed'));
+      Alert.alert(t("foodDetails.errorTitle"), t("foodDetails.creationFailed"));
       console.error(e);
     }
   };
@@ -172,6 +192,6 @@ export function useFoodEntry(food: FoodProduct | null, params: FoodEntryParams) 
     setSelectedMeal,
     macros,
     saveEntry,
-    isBusy
+    isBusy,
   };
 }

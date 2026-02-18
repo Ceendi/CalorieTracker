@@ -119,7 +119,6 @@ export const calculateItemMacros = (
     newQuantity: number,
     gramsPerUnit: number = 1
 ) => {
-    // Guard against invalid inputs
     if (newQuantity < 0 || isNaN(newQuantity)) {
         return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
     }

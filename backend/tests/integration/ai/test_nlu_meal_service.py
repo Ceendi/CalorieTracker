@@ -111,11 +111,6 @@ def _service(engine) -> MealRecognitionService:
     )
 
 
-# ===========================================================================
-# Composite Dish Expansion
-# ===========================================================================
-
-
 class TestCompositeDishExpansion:
     """Test that composite dishes are expanded to sub-ingredients by NLU."""
 
@@ -213,11 +208,6 @@ class TestCompositeDishExpansion:
         assert has_oats, f"Should find oats in {matched_names}"
 
 
-# ===========================================================================
-# Keyword Consistency Guard
-# ===========================================================================
-
-
 class TestKeywordConsistencyGuard:
     """Test that the real NLU keyword guard rejects cross-category mismatches."""
 
@@ -306,11 +296,6 @@ class TestKeywordConsistencyGuard:
         matched_name = result.matched_products[0].name_pl.lower()
         # The scoring should prefer the exact "mleko 3.2%" over "mleko sojowe"
         assert "3.2" in matched_name or "sojow" not in matched_name
-
-
-# ===========================================================================
-# Scoring Heuristics End-to-End
-# ===========================================================================
 
 
 class TestScoringEndToEnd:

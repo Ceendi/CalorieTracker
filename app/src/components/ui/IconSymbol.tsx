@@ -130,7 +130,7 @@ export function IconSymbol({
   color: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>; // Lucide uses ViewStyle mostly, but we can accept TextStyle to match interface
   weight?: string; // Ignored for now, Lucide uses strokeWidth
-  fill?: string; // Optional fill color
+  fill?: string;
   strokeWidth?: number;
 }) {
   const IconComponent = MAPPING[name];
@@ -141,13 +141,9 @@ export function IconSymbol({
   }
 
   // Handle "filled" state for SF Symbol emulation.
-  // SF Symbols often have specific .fill variants. 
+  // SF Symbols often have specific .fill variants.
   // Lucide icons are strokes by default. To emulate fill, we fill the icon with the color.
-  // const isFilled = name.includes('.fill');
-  
-  // If fill prop is provided, use it.
   // Otherwise, strictly default to 'none' to avoid SVG defaults (often black).
-  // User requested to remove automatic fill for all icons, so we default to 'none'.
   const resolvedFill = fill ?? 'none';
 
   return (

@@ -1,9 +1,14 @@
-import { create } from 'zustand';
-import { apiClient } from '@/services/api.client';
+import { create } from "zustand";
+import { apiClient } from "@/services/api.client";
 
-export type Gender = 'Male' | 'Female' | 'Other';
-export type Goal = 'lose' | 'maintain' | 'gain';
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'high' | 'very_high';
+export type Gender = "Male" | "Female" | "Other";
+export type Goal = "lose" | "maintain" | "gain";
+export type ActivityLevel =
+  | "sedentary"
+  | "light"
+  | "moderate"
+  | "high"
+  | "very_high";
 
 export interface OnboardingData {
   age?: number;
@@ -34,13 +39,12 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
 
       const { activityLevel, ...otherData } = data;
 
-      await apiClient.patch('/users/me', {
+      await apiClient.patch("/users/me", {
         ...otherData,
         activity_level: activityLevel,
-        is_onboarded: true
+        is_onboarded: true,
       });
 
-      // Call the success callback (typically checkSession from useAuth)
       if (onSuccess) {
         await onSuccess();
       }
@@ -50,5 +54,5 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       set({ isLoading: false });
       throw error;
     }
-  }
+  },
 }));

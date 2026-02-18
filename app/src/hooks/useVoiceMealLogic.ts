@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Keyboard } from 'react-native';
-import { ProcessedMeal, ProcessedFoodItem } from '@/types/ai';
-import { FoodProduct } from '@/types/food';
-import { summarizeMealMacros } from '@/utils/calculations';
+import { useState, useEffect, useMemo } from "react";
+import { Keyboard } from "react-native";
+import { ProcessedMeal, ProcessedFoodItem } from "@/types/ai";
+import { FoodProduct } from "@/types/food";
+import { summarizeMealMacros } from "@/utils/calculations";
 
 interface UseVoiceMealLogicProps {
   initialMeal: ProcessedMeal | null;
@@ -21,7 +21,11 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
     return summarizeMealMacros(localMeal.items);
   }, [localMeal]);
 
-  const updateQuantity = (index: number, newValue: number, newUnit?: { grams: number; label: string } | null) => {
+  const updateQuantity = (
+    index: number,
+    newValue: number,
+    newUnit?: { grams: number; label: string } | null,
+  ) => {
     if (!localMeal) return;
     const updatedItems = [...localMeal.items];
     const item = { ...updatedItems[index] };
@@ -33,9 +37,11 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
     const fatPerGram = item.fat / currentGrams;
     const carbsPerGram = item.carbs / currentGrams;
 
-    const newGramsPerUnit = (newUnit === null || newUnit === undefined) ? 1 : newUnit.grams;
-    item.unit_matched = (newUnit === null || newUnit === undefined) ? 'g' : newUnit.label;
-    
+    const newGramsPerUnit =
+      newUnit === null || newUnit === undefined ? 1 : newUnit.grams;
+    item.unit_matched =
+      newUnit === null || newUnit === undefined ? "g" : newUnit.label;
+
     item.quantity_unit_value = newValue;
     item.quantity_grams = newValue * newGramsPerUnit;
 
@@ -43,7 +49,7 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
     item.protein = item.quantity_grams * proteinPerGram;
     item.fat = item.quantity_grams * fatPerGram;
     item.carbs = item.quantity_grams * carbsPerGram;
-    
+
     updatedItems[index] = item;
     setLocalMeal({ ...localMeal, items: updatedItems });
   };
@@ -56,7 +62,14 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
 
   const cycleMealType = () => {
     if (!localMeal) return;
-    const types = ['breakfast', 'second_breakfast', 'lunch', 'tea', 'dinner', 'snack'];
+    const types = [
+      "breakfast",
+      "second_breakfast",
+      "lunch",
+      "tea",
+      "dinner",
+      "snack",
+    ];
     const currentIdx = types.indexOf(localMeal.meal_type);
     const nextIdx = currentIdx === -1 ? 0 : (currentIdx + 1) % types.length;
     setLocalMeal({ ...localMeal, meal_type: types[nextIdx] });
@@ -64,18 +77,18 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
 
   const getMealTypeLabel = (type: string): string => {
     const labels: Record<string, string> = {
-      'breakfast': t('meals.breakfast'),
-      'second_breakfast': t('meals.second_breakfast'),
-      'lunch': t('meals.lunch'),
-      'tea': t('meals.tea'),
-      'dinner': t('meals.dinner'),
-      'snack': t('meals.snack'),
-      'śniadanie': t('meals.breakfast'),
-      'drugie_śniadanie': t('meals.second_breakfast'),
-      'obiad': t('meals.lunch'),
-      'podwieczorek': t('meals.tea'),
-      'kolacja': t('meals.dinner'),
-      'przekąska': t('meals.snack'),
+      breakfast: t("meals.breakfast"),
+      second_breakfast: t("meals.second_breakfast"),
+      lunch: t("meals.lunch"),
+      tea: t("meals.tea"),
+      dinner: t("meals.dinner"),
+      snack: t("meals.snack"),
+      śniadanie: t("meals.breakfast"),
+      drugie_śniadanie: t("meals.second_breakfast"),
+      obiad: t("meals.lunch"),
+      podwieczorek: t("meals.tea"),
+      kolacja: t("meals.dinner"),
+      przekąska: t("meals.snack"),
     };
     return labels[type] || type;
   };
@@ -83,24 +96,24 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
   const addManualItem = (product: FoodProduct) => {
     if (!localMeal) return;
     const newItem: ProcessedFoodItem = {
-      product_id: product.id || null,
+      product_id: product.id ? Number(product.id) : null,
       name: product.name,
       quantity_grams: 100,
       quantity_unit_value: 100,
-      unit_matched: 'g',
+      unit_matched: "g",
       kcal: product.nutrition.calories_per_100g,
       protein: product.nutrition.protein_per_100g,
       fat: product.nutrition.fat_per_100g,
       carbs: product.nutrition.carbs_per_100g,
       confidence: 1.0,
-      status: 'matched',
+      status: "matched",
       brand: product.brand,
       units: product.units,
     };
 
     setLocalMeal({
       ...localMeal,
-      items: [...localMeal.items, newItem]
+      items: [...localMeal.items, newItem],
     });
     Keyboard.dismiss();
   };
@@ -112,6 +125,6 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
     removeItem,
     cycleMealType,
     getMealTypeLabel,
-    addManualItem
+    addManualItem,
   };
 }

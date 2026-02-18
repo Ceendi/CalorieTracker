@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { trackingService } from '@/services/tracking.service';
-import { DailyLog } from '@/types/food';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { trackingService } from "@/services/tracking.service";
+import { DailyLog } from "@/types/food";
 
 // Query keys factory for type safety and consistency
 export const diaryKeys = {
-  all: ['diary'] as const,
-  byDate: (date: string) => ['diary', date] as const,
+  all: ["diary"] as const,
+  byDate: (date: string) => ["diary", date] as const,
 };
 
 const DIARY_STALE_TIME = 1000 * 60 * 2; // 2 minutes
@@ -25,10 +25,12 @@ export function useDiary(date: string) {
     mutationFn: (entryId: string) => trackingService.deleteEntry(entryId),
     onMutate: async (entryId) => {
       await queryClient.cancelQueries({ queryKey: diaryKeys.byDate(date) });
-      const previousLog = queryClient.getQueryData<DailyLog>(diaryKeys.byDate(date));
+      const previousLog = queryClient.getQueryData<DailyLog>(
+        diaryKeys.byDate(date),
+      );
 
       if (previousLog) {
-        const deletedEntry = previousLog.entries.find(e => e.id === entryId);
+        const deletedEntry = previousLog.entries.find((e) => e.id === entryId);
         const deletedCalories = deletedEntry?.calories ?? 0;
         const deletedProtein = deletedEntry?.protein ?? 0;
         const deletedFat = deletedEntry?.fat ?? 0;
@@ -36,8 +38,9 @@ export function useDiary(date: string) {
 
         queryClient.setQueryData<DailyLog>(diaryKeys.byDate(date), {
           ...previousLog,
-          entries: previousLog.entries.filter((e: { id: string }) => e.id !== entryId),
-          // Update totals for optimistic UI (use ?? to handle undefined)
+          entries: previousLog.entries.filter(
+            (e: { id: string }) => e.id !== entryId,
+          ),
           total_kcal: (previousLog.total_kcal ?? 0) - deletedCalories,
           total_protein: (previousLog.total_protein ?? 0) - deletedProtein,
           total_fat: (previousLog.total_fat ?? 0) - deletedFat,
@@ -58,8 +61,14 @@ export function useDiary(date: string) {
   });
 
   const updateEntryMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: string, amount_grams?: number, meal_type?: string }) =>
-      trackingService.updateEntry(id, data),
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string;
+      amount_grams?: number;
+      meal_type?: string;
+    }) => trackingService.updateEntry(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: diaryKeys.byDate(date) });
     },

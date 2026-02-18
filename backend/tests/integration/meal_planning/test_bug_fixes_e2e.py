@@ -23,11 +23,6 @@ from tests.unit.meal_planning.conftest import (
 )
 
 
-# -------------------------------------------------------------------------
-# Bug 1: Allergen Filtering
-# -------------------------------------------------------------------------
-
-
 class TestAllergenFilteringE2E:
     """E2E tests verifying allergens are blocked at every layer."""
 
@@ -162,11 +157,6 @@ class TestAllergenFilteringE2E:
             f"Allergen violations found: {validation['allergen_violations']}"
 
 
-# -------------------------------------------------------------------------
-# Bug 2: Meal Type Deduplication
-# -------------------------------------------------------------------------
-
-
 class TestMealTypeDeduplicationE2E:
     """E2E tests verifying no duplicate meal types per day."""
 
@@ -290,11 +280,6 @@ class TestMealTypeDeduplicationE2E:
             meal_types = [m.meal_type for m in day.meals]
             assert len(meal_types) == len(set(meal_types)), \
                 f"Day {day.day_number} has duplicate meal types: {meal_types}"
-
-
-# -------------------------------------------------------------------------
-# Bug 3: Search Query Focus
-# -------------------------------------------------------------------------
 
 
 class TestSearchQueryFocusE2E:

@@ -18,27 +18,22 @@ export class AppError extends Error {
  * Error codes for categorizing errors
  */
 export enum ErrorCode {
-  // Network errors
   NETWORK_ERROR = 'NETWORK_ERROR',
   TIMEOUT = 'TIMEOUT',
 
-  // Auth errors
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   SESSION_EXPIRED = 'SESSION_EXPIRED',
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   AUTH_GOOGLE_PLAY_SERVICES = 'AUTH_GOOGLE_PLAY_SERVICES',
 
-  // Validation errors
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
 
-  // Server errors
   SERVER_ERROR = 'SERVER_ERROR',
   NOT_FOUND = 'NOT_FOUND',
   CONFLICT = 'CONFLICT',
 
-  // Client errors
   UNKNOWN = 'UNKNOWN',
 }
 
@@ -51,7 +46,6 @@ export function getErrorMessage(error: unknown): string {
   }
 
   if (axios.isAxiosError(error)) {
-    // Server responded with error
     if (error.response?.data?.detail) {
       return String(error.response.data.detail);
     }
@@ -59,12 +53,10 @@ export function getErrorMessage(error: unknown): string {
       return String(error.response.data.message);
     }
 
-    // Network error (no response)
     if (!error.response) {
       return 'Błąd połączenia z serwerem. Sprawdź internet.';
     }
 
-    // HTTP status based messages
     switch (error.response.status) {
       case 400: return 'Nieprawidłowe dane żądania.';
       case 401: return 'Sesja wygasła. Zaloguj się ponownie.';

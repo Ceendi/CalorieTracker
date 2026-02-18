@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
-  Keyboard,
 } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { VoiceMealSummary } from "./VoiceMealSummary";
@@ -26,8 +25,8 @@ const FoodItemReview = React.memo(
     t: (key: string) => string;
   }) => {
     const { colorScheme } = useColorScheme();
-    const theme = colorScheme ?? 'light';
-    
+    const theme = colorScheme ?? "light";
+
     return (
       <Pressable
         onPress={onPress}
@@ -39,8 +38,12 @@ const FoodItemReview = React.memo(
               <Text className="text-base font-black text-foreground leading-tight">
                 {item.name}
               </Text>
-              {(item.source === 'fineli' || item.source === 'kunachowicz') && (
-                <IconSymbol name="checkmark.seal.fill" size={14} color={Colors[theme].tint} />
+              {(item.source === "fineli" || item.source === "kunachowicz") && (
+                <IconSymbol
+                  name="checkmark.seal.fill"
+                  size={14}
+                  color={Colors[theme].tint}
+                />
               )}
               <IconSymbol name="pencil" size={11} color={Colors[theme].tint} />
             </View>
@@ -54,7 +57,11 @@ const FoodItemReview = React.memo(
             onPress={onRemove}
             className="p-2 -mr-2 -mt-2 opacity-50"
           >
-            <IconSymbol name="xmark" size={16} color={Colors[theme].tabIconDefault} />
+            <IconSymbol
+              name="xmark"
+              size={16}
+              color={Colors[theme].tabIconDefault}
+            />
           </TouchableOpacity>
         </View>
 
@@ -117,10 +124,11 @@ export const VoiceMealReview = ({
   isLoading,
   t,
 }: VoiceMealReviewProps) => {
+  const { colorScheme } = useColorScheme();
+
   if (!localMeal) return null;
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme ?? 'light';
+  const theme = colorScheme ?? "light";
 
   return (
     <View className="flex-1 bg-background">
@@ -134,7 +142,7 @@ export const VoiceMealReview = ({
           </TouchableOpacity>
           <View className="items-end">
             <Text className="text-xs font-semibold text-muted-foreground mb-1">
-              {t('addFood.confirmProducts')}
+              {t("addFood.confirmProducts")}
             </Text>
             <TouchableOpacity
               className="flex-row items-center gap-1.5 bg-card px-3 py-1.5 rounded-full border border-border"
@@ -143,7 +151,11 @@ export const VoiceMealReview = ({
               <Text className="text-base font-black text-foreground capitalize">
                 {getMealTypeLabel(localMeal.meal_type)}
               </Text>
-              <IconSymbol name="chevron.down" size={12} color={Colors[theme].tint} />
+              <IconSymbol
+                name="chevron.down"
+                size={12}
+                color={Colors[theme].tint}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -185,7 +197,11 @@ export const VoiceMealReview = ({
             onPress={() => setIsSearching(true)}
             className="mt-2 mb-8 flex-row items-center justify-center p-4 border-2 border-dashed border-border rounded-2xl"
           >
-            <IconSymbol name="plus" size={20} color={Colors[theme].tabIconDefault} />
+            <IconSymbol
+              name="plus"
+              size={20}
+              color={Colors[theme].tabIconDefault}
+            />
             <Text className="text-muted-foreground font-semibold ml-2">
               {t("addFood.searchToConfirm")}
             </Text>

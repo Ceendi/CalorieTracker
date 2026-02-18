@@ -19,10 +19,6 @@ def adapter():
     return a
 
 
-# ---------------------------------------------------------------------------
-# _format_preferences
-# ---------------------------------------------------------------------------
-
 class TestFormatPreferences:
     """Tests for _format_preferences."""
 
@@ -84,10 +80,6 @@ class TestFormatPreferences:
         assert "BRAK SZCZEGOLNYCH WYMAGAN" in result
 
 
-# ---------------------------------------------------------------------------
-# _extract_json
-# ---------------------------------------------------------------------------
-
 class TestExtractJson:
     """Tests for _extract_json."""
 
@@ -127,10 +119,6 @@ class TestExtractJson:
         result = adapter._extract_json(text)
         assert json.loads(result) == {"key": "value"}
 
-
-# ---------------------------------------------------------------------------
-# _clean_json
-# ---------------------------------------------------------------------------
 
 class TestCleanJson:
     """Tests for _clean_json."""

@@ -1,21 +1,19 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Zod schemas for API response validation
  * Ensures type safety at runtime when receiving data from backend
  */
 
-// ============ AUTH SCHEMAS ============
-
 export const TokenResponseSchema = z.object({
   access_token: z.string(),
   refresh_token: z.string(),
-  token_type: z.string().default('bearer'),
+  token_type: z.string().default("bearer"),
 });
 
 export const UserResponseSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
+  id: z.uuid(),
+  email: z.email(),
   is_active: z.boolean().optional().default(true),
   is_verified: z.boolean().optional().default(false),
   is_onboarded: z.boolean().optional().default(false),
@@ -26,8 +24,6 @@ export const UserResponseSchema = z.object({
   activity_level: z.string().nullable().optional(),
   goal: z.string().nullable().optional(),
 });
-
-// ============ FOOD SCHEMAS ============
 
 export const NutritionSchema = z.object({
   kcal_per_100g: z.number().default(0),
@@ -43,13 +39,13 @@ export const UnitInfoSchema = z.object({
 });
 
 export const FoodProductResponseSchema = z.object({
-  id: z.string().uuid().nullable(),
+  id: z.uuid().nullable(),
   name: z.string(),
   barcode: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   default_unit: z.string().nullable().optional(),
   nutrition: NutritionSchema,
-  owner_id: z.string().uuid().nullable().optional(),
+  owner_id: z.uuid().nullable().optional(),
   source: z.string().nullable().optional(),
   brand: z.string().nullable().optional(),
   units: z.array(UnitInfoSchema).optional().default([]),
@@ -57,13 +53,11 @@ export const FoodProductResponseSchema = z.object({
 
 export const FoodSearchResponseSchema = z.array(FoodProductResponseSchema);
 
-// ============ TRACKING SCHEMAS ============
-
 export const MealEntryResponseSchema = z.object({
-  id: z.string().uuid(),
-  daily_log_id: z.string().uuid(),
-  product_id: z.string().uuid(),
-  product_name: z.string().default('Unknown'),
+  id: z.uuid(),
+  daily_log_id: z.uuid(),
+  product_id: z.uuid(),
+  product_name: z.string().default("Unknown"),
   amount_grams: z.number(),
   meal_type: z.string(),
   kcal_per_100g: z.number().default(0),
@@ -80,9 +74,9 @@ export const MealEntryResponseSchema = z.object({
 });
 
 export const DailyLogResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   date: z.string(),
-  user_id: z.string().uuid().optional(),
+  user_id: z.uuid().optional(),
   entries: z.array(MealEntryResponseSchema).default([]),
   total_kcal: z.number().default(0),
   total_protein: z.number().default(0),
@@ -92,10 +86,8 @@ export const DailyLogResponseSchema = z.object({
 
 export const DailyLogHistoryResponseSchema = z.array(DailyLogResponseSchema);
 
-// ============ VOICE SCHEMAS ============
-
 export const ProcessedFoodItemSchema = z.object({
-  product_id: z.string().uuid().nullable(),
+  product_id: z.uuid().nullable(),
   name: z.string(),
   brand: z.string().nullable().optional(),
   quantity_grams: z.number(),
@@ -110,7 +102,7 @@ export const ProcessedFoodItemSchema = z.object({
   fat_per_100g: z.number(),
   carbs_per_100g: z.number(),
   confidence: z.number().optional(),
-  status: z.enum(['matched', 'not_found', 'needs_confirmation']).optional(),
+  status: z.enum(["matched", "not_found", "needs_confirmation"]).optional(),
   units: z.array(UnitInfoSchema).optional(),
 });
 
@@ -120,8 +112,6 @@ export const VoiceProcessResponseSchema = z.object({
   items: z.array(ProcessedFoodItemSchema),
   processing_time_ms: z.number().optional(),
 });
-
-// ============ TYPE EXPORTS ============
 
 export type TokenResponse = z.infer<typeof TokenResponseSchema>;
 export type UserResponse = z.infer<typeof UserResponseSchema>;

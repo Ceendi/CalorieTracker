@@ -68,7 +68,6 @@ async def seed():
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
     async with session_factory() as session:
-        # 1. Delete registration target so the registration test can create it fresh
         registration_email = "e2e-register@calorietracker.dev"
         result = await session.execute(
             select(User).where(User.email == registration_email)
@@ -80,7 +79,6 @@ async def seed():
         else:
             print(f"  Clean (no existing): {registration_email}")
 
-        # 2. Upsert the seeded users
         for user_data in USERS:
             email = user_data["email"]
             result = await session.execute(

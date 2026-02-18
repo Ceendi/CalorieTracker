@@ -15,9 +15,9 @@ export interface Nutrition {
  * Maps to backend FoodUnitModel / UnitInfoSchema
  */
 export interface UnitInfo {
-  unit: string;    // UnitType enum value
-  grams: number;   // How many grams equals 1 unit
-  label: string;   // Display label (UnitLabel enum)
+  unit: string; // UnitType enum value
+  grams: number; // How many grams equals 1 unit
+  label: string; // Display label (UnitLabel enum)
 }
 
 /**
@@ -46,7 +46,7 @@ export enum MealType {
   BREAKFAST = "breakfast",
   LUNCH = "lunch",
   DINNER = "dinner",
-  SNACK = "snack"
+  SNACK = "snack",
 }
 
 /**
@@ -109,12 +109,10 @@ export interface MealEntry {
   date: string;
   meal_type: MealType;
   amount_grams: number;
-  // Computed values from backend
-  calories: number;  // Backend: computed_kcal
-  protein: number;   // Backend: computed_protein
-  fat: number;       // Backend: computed_fat
-  carbs: number;     // Backend: computed_carbs
-  // Unit info
+  calories: number; // Backend: computed_kcal
+  protein: number; // Backend: computed_protein
+  fat: number; // Backend: computed_fat
+  carbs: number; // Backend: computed_carbs
   unit_label?: string;
   unit_grams?: number;
   unit_quantity?: number;
@@ -133,4 +131,3 @@ export interface DailyLog {
   total_fat: number;
   total_carbs: number;
 }
-

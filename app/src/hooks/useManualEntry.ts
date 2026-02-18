@@ -50,7 +50,6 @@ export function useManualEntry() {
 
   const onSubmit: SubmitHandler<ManualFoodFormValues> = async (data) => {
       try {
-          // Ensure numeric values are valid numbers
           const newFoodPayload: CreateFoodDto = {
               name: data.name.trim(),
               nutrition: {
