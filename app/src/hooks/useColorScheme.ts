@@ -20,7 +20,8 @@ export function useColorScheme() {
       }
     };
     loadTheme();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentional: load once on mount — setColorScheme from nativewind is not a stable reference
 
   const toggleColorScheme = async () => {
     const newScheme = colorScheme === 'dark' ? 'light' : 'dark';

@@ -191,7 +191,6 @@ jest.mock('react-native-svg', () => ({
 
 // --- react-native-gesture-handler/ReanimatedSwipeable (FoodEntryItem) ---
 jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
-  const React = require('react');
   return {
     __esModule: true,
     default: ({ children }: any) => children,

@@ -35,7 +35,7 @@ export function AuthProtection() {
     } else if (user && inOnboardingGroup && user.is_onboarded) {
       router.replace('/(tabs)');
     }
-  }, [user, segments, isLoading, navigationState?.key]);
+  }, [user, segments, isLoading, navigationState?.key, router]);
 
   return null;
 }

@@ -2,7 +2,6 @@ import { renderHook, act } from '@testing-library/react-native';
 import { createQueryWrapper } from '../helpers';
 
 import { useFoodEntry } from '@/hooks/useFoodEntry';
-import { useLogEntry, useUpdateEntry } from '@/hooks/useFood';
 import { FoodProduct, MealType } from '@/types/food';
 
 // --- Service mocks ---

@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 
 import { SettingsModal } from '@/components/profile/SettingsModal';
 

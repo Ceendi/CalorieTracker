@@ -45,7 +45,7 @@ describe('useFoodSearch', () => {
   it('debounces search on value change', async () => {
     (foodService.searchFoods as jest.Mock).mockResolvedValue(mockFoods);
     const { wrapper } = createQueryWrapper();
-    const { result, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ q }: { q: string }) => useFoodSearch(q),
       { wrapper, initialProps: { q: 'app' } }
     );

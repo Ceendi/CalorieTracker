@@ -1,4 +1,4 @@
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 
 import { VoiceInputButton } from '@/components/voice/VoiceInputButton';
 

@@ -1,4 +1,4 @@
-import axios, { isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 
 /**
  * Custom application error with error code and original error context

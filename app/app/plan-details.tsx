@@ -131,7 +131,8 @@ export default function PlanDetailsScreen() {
     if (plan && plan.days.length > 0 && expandedDays.size === 0) {
       setExpandedDays(new Set([plan.days[0].id]));
     }
-  }, [plan]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan]); // expandedDays.size intentionally excluded — including it would re-expand days whenever user collapses them
 
   const renderIngredient = (ingredient: Ingredient, mealType: string) => (
     <TouchableOpacity

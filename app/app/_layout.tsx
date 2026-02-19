@@ -48,7 +48,7 @@ function InitialLayout() {
 
   useEffect(() => {
     checkSession();
-  }, []);
+  }, [checkSession]);
 
   return (
     <View

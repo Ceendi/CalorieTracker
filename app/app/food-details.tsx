@@ -85,7 +85,7 @@ export default function FoodDetailsScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     }
-  }, [barcodeError]);
+  }, [barcodeError, router, t]);
 
   const {
     quantity,

@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react-native';
+import { renderHook, act } from '@testing-library/react-native';
 
 import { usePhotoInput } from '@/hooks/usePhotoInput';
 import * as ImagePicker from 'expo-image-picker';

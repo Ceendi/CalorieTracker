@@ -45,13 +45,13 @@ export function usePhotoInput(): UsePhotoInputResult {
     return false;
   }, []);
 
-  const processImageUri = async (uri: string) => {
+  const processImageUri = useCallback(async (uri: string) => {
     try {
       setState('processing');
       setError(null);
-      
+
       const result = await aiService.processImage(uri);
-      
+
       setProcessedMeal(result);
       setState('success');
     } catch (err) {
@@ -59,7 +59,7 @@ export function usePhotoInput(): UsePhotoInputResult {
       setError(errorMessage);
       setState('error');
     }
-  };
+  }, [t]);
 
   const pickImage = useCallback(async () => {
     try {
@@ -82,7 +82,7 @@ export function usePhotoInput(): UsePhotoInputResult {
       setError(t('common.errors.unknown'));
       setState('error');
     }
-  }, [t]);
+  }, [t, processImageUri]);
 
   const takePhoto = useCallback(async () => {
     try {
@@ -105,7 +105,7 @@ export function usePhotoInput(): UsePhotoInputResult {
         setError(t('common.errors.unknown'));
         setState('error');
     }
-  }, [t]);
+  }, [t, processImageUri]);
 
   const reset = useCallback(() => {
     setState('idle');
