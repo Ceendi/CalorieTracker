@@ -16,7 +16,7 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.480830911363-spj1gi9ruv8rvf3tb7cnmn4ojjtgh5a6"
+              "com.googleusercontent.apps.212489687032-dc774lms280aet89luurqi4l22r6vv5j"
             ]
           }
         ]
@@ -64,7 +64,12 @@
       ],
       "expo-secure-store",
       "expo-localization",
-      "@react-native-google-signin/google-signin"
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.212489687032-dc774lms280aet89luurqi4l22r6vv5j"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
