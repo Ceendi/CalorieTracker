@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
-from src.ai.domain.models import MealType, MealExtraction, ExtractedFoodItem
+from src.ai.domain.models import MealType, MealExtraction
 
 
 # ============================================================================

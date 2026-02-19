@@ -1,7 +1,6 @@
 import pytest
 import uuid
-from datetime import date
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from src.main import app
 from src.food_catalogue.api.dependencies import get_food_service

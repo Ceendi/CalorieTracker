@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from fastapi import status
-from uuid import uuid4
 from src.main import app
 from src.users.application.manager import get_user_manager
 from src.users.api.routes import current_active_user

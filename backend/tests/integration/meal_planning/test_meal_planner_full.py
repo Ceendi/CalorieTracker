@@ -3,13 +3,12 @@ import pytest
 import sys
 import os
 import asyncio
-from unittest.mock import MagicMock
 
 # Add backend to path
 sys.path.append(os.path.join(os.getcwd(), "backend"))
 
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
-from src.meal_planning.domain.entities import MealTemplate, UserProfile, GeneratedDay, GeneratedMeal, GeneratedIngredient
+from src.meal_planning.domain.entities import UserProfile, GeneratedDay, GeneratedMeal, GeneratedIngredient
 
 @pytest.mark.asyncio
 async def test_full_plan_optimization():

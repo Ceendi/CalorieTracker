@@ -1,6 +1,6 @@
 import pytest
 import base64
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from fastapi_users.exceptions import InvalidVerifyToken, UserAlreadyVerified
 
 from src.users.application.manager import UserManager
@@ -93,7 +93,7 @@ async def test_request_verify_success(manager, user, mock_user_db):
     manager.on_after_request_verify = AsyncMock()
 
     # Act
-    with patch('random.randint', return_value=999999):
+    with patch('secrets.randbelow', return_value=899999):
         await manager.request_verify(user)
 
     # Assert

@@ -49,7 +49,7 @@ def get_db_url():
                             host, port = host_port.split(":")
                         else:
                             host = host_port
-                    except:
+                    except Exception:
                         pass
                     break
     return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/calorie_tracker_db"

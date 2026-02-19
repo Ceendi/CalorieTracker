@@ -15,9 +15,6 @@ from src.meal_planning.api.schemas import (
     GeneratePlanRequest,
     PlanPreferencesSchema,
     IngredientSchema,
-    MealSchema,
-    MealPlanSchema,
-    DaySchema,
     DailyTargetsResponse,
 )
 

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.ai.application.dto import ProcessedMealDTO, ProcessedFoodItemDTO
+from src.ai.application.dto import ProcessedMealDTO
 from src.ai.domain.models import (
     MealRecognitionResult,
     MatchedProduct,

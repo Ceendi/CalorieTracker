@@ -6,7 +6,6 @@ Tests _deduplicate_meal_templates to ensure repeated meals are detected and repl
 import pytest
 
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
-from src.meal_planning.domain.entities import MealTemplate
 from tests.unit.meal_planning.conftest import make_profile, make_template
 
 

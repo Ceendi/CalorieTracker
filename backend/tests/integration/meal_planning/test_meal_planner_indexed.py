@@ -7,7 +7,7 @@ ensuring 100% of ingredients are matched to database products.
 
 import pytest
 from uuid import UUID, uuid4
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
 from src.meal_planning.application.service import MealPlanService
@@ -18,9 +18,7 @@ from src.meal_planning.domain.entities import (
     GeneratedDay,
     GeneratedMeal,
     GeneratedIngredient,
-    PlanPreferences,
 )
-from src.meal_planning.application.service import UserData
 
 
 @pytest.fixture

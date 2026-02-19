@@ -3,12 +3,9 @@ Unit tests for meal planning domain entities.
 
 Tests GeneratedDay computed properties and PlanPreferences defaults.
 """
-import pytest
 
 from src.meal_planning.domain.entities import (
     GeneratedDay,
-    GeneratedMeal,
-    GeneratedIngredient,
     PlanPreferences,
 )
 from tests.unit.meal_planning.conftest import make_meal, make_ingredient

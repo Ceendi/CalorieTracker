@@ -18,7 +18,6 @@ from tests.unit.meal_planning.conftest import (
     make_meal,
     make_template,
     make_profile,
-    make_product,
     make_user_data,
 )
 

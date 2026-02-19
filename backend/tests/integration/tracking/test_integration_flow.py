@@ -9,7 +9,7 @@ from src.tracking.api.dependencies import get_tracking_service
 from src.users.api.routes import current_active_user
 from src.users.domain.models import User
 from src.tracking.application.services import TrackingService
-from src.tracking.domain.entities import DailyLog, MealEntry, MealType
+from src.tracking.domain.entities import DailyLog, MealType
 
 # --- Fixtures ---
 

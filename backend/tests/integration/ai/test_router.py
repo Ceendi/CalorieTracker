@@ -35,9 +35,6 @@ from src.ai.domain.models import (
 )
 from src.ai.domain.exceptions import (
     TranscriptionFailedException,
-    AudioProcessingException,
-    AudioFormatError,
-    AudioTooLongError,
 )
 from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
 from src.core.database import get_db_session

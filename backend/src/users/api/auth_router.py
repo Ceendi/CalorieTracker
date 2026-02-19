@@ -12,7 +12,6 @@ from src.users.application.services import AuthService
 from src.users.infrastructure.security import auth_backend
 from src.users.api.dependencies import get_auth_service
 from src.users.api import schemas
-from src.users.api.schemas import GoogleLogin
 
 router = APIRouter()
 
@@ -102,7 +101,7 @@ async def google_login(
                 is_onboarded=False
             )
             user = await user_manager.create(user_create)
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="REGISTER_FAILED"

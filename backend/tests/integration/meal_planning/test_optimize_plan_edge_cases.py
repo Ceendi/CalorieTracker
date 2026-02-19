@@ -12,9 +12,8 @@ from src.meal_planning.domain.entities import (
     GeneratedDay,
     GeneratedMeal,
     GeneratedIngredient,
-    UserProfile,
 )
-from tests.unit.meal_planning.conftest import make_ingredient, make_meal, make_profile
+from tests.unit.meal_planning.conftest import make_profile
 
 
 @pytest.fixture

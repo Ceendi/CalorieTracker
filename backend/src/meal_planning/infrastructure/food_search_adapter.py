@@ -30,8 +30,7 @@ Migration guide:
         )
 """
 import warnings
-from typing import List, Optional
-from uuid import UUID
+from typing import List
 
 from sqlalchemy import select, or_, func, case
 from sqlalchemy.ext.asyncio import AsyncSession

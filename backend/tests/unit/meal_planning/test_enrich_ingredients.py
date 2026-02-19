@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 from unittest.mock import MagicMock, AsyncMock
 
 from src.meal_planning.application.service import MealPlanService
-from tests.unit.meal_planning.conftest import make_ingredient, make_meal, make_product
+from tests.unit.meal_planning.conftest import make_ingredient, make_meal
 
 
 def _make_service(food_search=None, session=None):

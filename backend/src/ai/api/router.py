@@ -103,7 +103,7 @@ async def process_audio_meal(
 
         if len(audio_bytes) > MAX_FILE_SIZE:
             raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 detail=f"File too large. Maximum size: {MAX_FILE_SIZE // 1024 // 1024}MB"
             )
 
@@ -125,7 +125,7 @@ async def process_audio_meal(
     except TranscriptionFailedException as e:
         logger.error(f"Transcription failed: {e}")
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(e)
         )
     except AudioFormatError as e:
@@ -180,7 +180,7 @@ async def transcribe_audio(
         raise
     except TranscriptionFailedException as e:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(e)
         )
     except Exception as e:

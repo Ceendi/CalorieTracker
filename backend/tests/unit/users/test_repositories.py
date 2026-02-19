@@ -2,14 +2,15 @@ import pytest
 from uuid import uuid4
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, MagicMock
-from sqlalchemy import select, func
 
 from src.users.infrastructure.repositories import RefreshTokenRepository
 from src.users.infrastructure.models import RefreshToken
 
 @pytest.fixture
 def mock_session():
-    return AsyncMock()
+    session = AsyncMock()
+    session.add = MagicMock()
+    return session
 
 @pytest.fixture
 def repo(mock_session):

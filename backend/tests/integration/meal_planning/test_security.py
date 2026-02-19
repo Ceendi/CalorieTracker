@@ -1,10 +1,8 @@
 import pytest
 import uuid
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 from src.main import app
-from src.users.api.routes import current_active_user
-from src.meal_planning.api.dependencies import get_current_user
 from src.users.domain.models import User
 
 @pytest.fixture

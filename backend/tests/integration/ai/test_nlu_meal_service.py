@@ -25,11 +25,6 @@ from src.ai.domain.models import (
     ExtractedFoodItem,
 )
 from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
-from src.ai.config import (
-    DEFAULT_UNIT_GRAMS,
-    DEFAULT_PORTION_GRAMS,
-    MEAL_RECOGNITION_CONFIG as CONFIG,
-)
 
 
 # ---------------------------------------------------------------------------

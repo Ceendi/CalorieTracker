@@ -1267,7 +1267,6 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 
                 # Also check against user's raw allergy strings just in case
                 # e.g. if user has "uczulenie na pomidory" and dish is "Omlet z pomidorami"
-                start_safe_check = is_safe
                 if is_safe:
                     desc_lower = desc.lower()
                     for user_allergy in active_raw_allergies: # active_raw_allergies from outer scope

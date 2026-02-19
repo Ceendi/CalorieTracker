@@ -7,11 +7,11 @@ from pydantic import EmailStr, field_validator
 
 def validate_strong_password(v: str) -> str:
     if len(v) < 8:
-        raise ValueError(f"Password must be at least 8 characters long")
+        raise ValueError("Password must be at least 8 characters long")
     if not any(char.isdigit() for char in v):
-        raise ValueError(f"Password must contain at least one digit")
+        raise ValueError("Password must contain at least one digit")
     if not any(char.isupper() for char in v):
-        raise ValueError(f"Password must contain at least one uppercase letter")
+        raise ValueError("Password must contain at least one uppercase letter")
     return v
 
 

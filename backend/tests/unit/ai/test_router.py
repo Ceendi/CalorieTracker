@@ -7,7 +7,7 @@ Mocks: Override get_audio_service/get_vision_service/get_db_session FastAPI deps
 
 import io
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import FastAPI

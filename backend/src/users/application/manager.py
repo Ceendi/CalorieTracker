@@ -1,5 +1,5 @@
 import base64
-import random
+import secrets
 from typing import Optional, cast
 
 from fastapi import Depends, Request
@@ -34,7 +34,7 @@ class UserManager(UUIDIDMixin, BaseUserManager):
         if user.is_verified:
             raise UserAlreadyVerified()
 
-        code = str(random.randint(100000, 999999))
+        code = str(secrets.randbelow(900000) + 100000)
 
         await self.user_db.update(user, {"verification_code": code})
         
@@ -55,8 +55,8 @@ class UserManager(UUIDIDMixin, BaseUserManager):
 
         user = cast(User, user)
 
-        if (settings.ENVIRONMENT != "production" and 
-            code == "123456" and 
+        if (settings.ENVIRONMENT == "testing" and
+            code == "123456" and
             user.email.endswith("@calorietracker.dev")):
             return user
 
@@ -76,10 +76,10 @@ class UserManager(UUIDIDMixin, BaseUserManager):
     async def on_after_request_verify(self, user: User, token: str, request: Optional[Request] = None):
         logger.info(f"Verification requested for user {user.id}.")
         # TODO: add email code send
-        logger.info(f"--- [EMAIL SIMULATION: VERIFICATION] ---")
+        logger.info("--- [EMAIL SIMULATION: VERIFICATION] ---")
         logger.info(f"To: {user.email}")
         logger.info(f"Code: {token}")
-        logger.info(f"----------------------------------------")
+        logger.info("----------------------------------------")
 
     async def on_after_verify(self, user: User, request: Optional[Request] = None):
         await self.user_db.update(user, {"verification_code": None})
@@ -88,10 +88,10 @@ class UserManager(UUIDIDMixin, BaseUserManager):
     async def on_after_forgot_password(self, user: User, token: str, request: Optional = None):
         logger.warning(f"User {user.id} has forgotten their password. Reset token generated.")
 
-        logger.info(f"--- [EMAIL SIMULATION: PASSWORD RESET] ---")
+        logger.info("--- [EMAIL SIMULATION: PASSWORD RESET] ---")
         logger.info(f"To: {user.email}")
         logger.info(f"Token: {token}")
-        logger.info(f"----------------------------------------")
+        logger.info("----------------------------------------")
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):

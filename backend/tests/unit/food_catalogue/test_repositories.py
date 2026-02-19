@@ -1,10 +1,10 @@
 import pytest
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.food_catalogue.infrastructure.repositories import SqlAlchemyFoodRepository
 from src.food_catalogue.infrastructure.orm_models import FoodModel, FoodUnitModel
-from src.food_catalogue.domain.entities import Food, Nutrition, UnitInfo
+from src.food_catalogue.domain.entities import Food, Nutrition
 
 @pytest.fixture
 def mock_session():

@@ -12,8 +12,7 @@ from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdap
 from src.ai.infrastructure.search import PgVectorSearchService
 from src.ai.infrastructure.embedding import get_embedding_service
 
-# Re-export current_active_user from users module for convenience
-from src.users.api.routes import current_active_user as get_current_user
+from src.users.api.routes import current_active_user as get_current_user  # noqa: F401
 
 # Singleton instance of the Bielik planner (lazy loaded)
 _bielik_planner: Optional[BielikMealPlannerAdapter] = None

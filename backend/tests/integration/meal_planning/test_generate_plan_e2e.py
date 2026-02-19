@@ -6,7 +6,6 @@ flow from user profile to validated plan.
 """
 import pytest
 from datetime import date
-from uuid import uuid4
 from unittest.mock import MagicMock, AsyncMock
 
 from src.meal_planning.application.service import MealPlanService

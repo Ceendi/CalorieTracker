@@ -4,9 +4,9 @@ Service layer for meal planning module.
 Contains business logic for meal plan generation and management,
 including BMR/CPM calculations and macro targets.
 """
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from datetime import date
-from typing import Any, Callable, Awaitable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from loguru import logger

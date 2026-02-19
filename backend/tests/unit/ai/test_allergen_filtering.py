@@ -12,8 +12,6 @@ import pytest
 
 from src.ai.infrastructure.search.pgvector_search import (
     PgVectorSearchService,
-    ALLERGEN_KEYWORD_STEMS,
-    ALLERGEN_CATEGORY_MAP,
 )
 
 

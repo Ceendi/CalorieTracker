@@ -97,7 +97,7 @@ class WhisperLocalClient(BaseSTTClient):
     @classmethod
     def is_available(cls) -> bool:
         try:
-            import whisper
+            import whisper  # noqa: F401
             return True
         except ImportError:
             return False

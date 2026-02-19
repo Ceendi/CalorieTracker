@@ -1,6 +1,6 @@
 import pytest
 import uuid
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from src.food_catalogue.application.services import FoodService
 from src.food_catalogue.domain.entities import Food, Nutrition
 
@@ -124,6 +124,7 @@ class TestFoodService:
 
         # Act
         results = await service.get_basic_products(category="Owoce", limit=50)
+        assert results == [sample_food]
 
     @pytest.mark.asyncio
     async def test_search_food_external_error(self, service, mock_repo, mock_external, sample_food):

@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 
-from sqlalchemy import String, ForeignKey, Float, Integer, Enum as SAEnum, LargeBinary
+from sqlalchemy import String, ForeignKey, Float, Integer, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 

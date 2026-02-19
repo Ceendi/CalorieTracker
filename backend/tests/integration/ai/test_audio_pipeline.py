@@ -23,7 +23,6 @@ import pytest
 from src.ai.application.dto import ProcessedMealDTO
 from src.ai.domain.models import SearchCandidate
 from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
-from src.ai.config import DEFAULT_PORTION_GRAMS
 
 
 # ---------------------------------------------------------------------------
@@ -275,7 +274,6 @@ class TestAudioPipelineMultipleItems:
         result = await service.process_audio(b"audio", session=MagicMock())
 
         assert len(result.items) == 2
-        names = [item.name for item in result.items]
         # Both items should be matched
         assert all(item.status == "matched" for item in result.items)
 

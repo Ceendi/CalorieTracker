@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     logger.info("Preloading AI models...")
 
     if torch.cuda.is_available():
-        logger.info(f"CUDA Available: True")
+        logger.info("CUDA Available: True")
         logger.info(f"Device Name: {torch.cuda.get_device_name(0)}")
     else:
         logger.warning("CUDA Available: False - Running on CPU")
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     try:
         service = get_audio_service()
         await service.warmup()
-        vision_service = get_vision_service()
+        get_vision_service()
 
         logger.info("AI models preloaded successfully!")
     except Exception as e:

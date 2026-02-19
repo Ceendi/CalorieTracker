@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.tracking.domain.entities import MealType
 
@@ -52,8 +52,7 @@ class MealEntryRead(BaseModel):
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DailyLogRead(BaseModel):
@@ -64,6 +63,5 @@ class DailyLogRead(BaseModel):
     total_fat: float
     total_carbs: float
     entries: List[MealEntryRead]
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)

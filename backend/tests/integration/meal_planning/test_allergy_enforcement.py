@@ -6,13 +6,12 @@ allergy and receives a plan containing wheat, that is a critical bug.
 """
 import pytest
 from datetime import date
-from uuid import uuid4
 from unittest.mock import MagicMock, AsyncMock
 
 from src.meal_planning.application.service import MealPlanService
 from src.meal_planning.domain.entities import PlanPreferences
 from tests.unit.meal_planning.conftest import (
-    make_user_data, make_template, make_meal, make_ingredient,
+    make_user_data, make_template, make_meal,
 )
 
 

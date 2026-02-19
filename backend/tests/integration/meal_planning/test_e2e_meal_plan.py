@@ -3,15 +3,13 @@ import pytest
 import sys
 import os
 import asyncio
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock
 
 # Add backend to path
 sys.path.append(os.path.join(os.getcwd(), "backend"))
 
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
-from src.meal_planning.domain.entities import UserProfile, MealTemplate
-from src.ai.infrastructure.embedding.embedding_service import EmbeddingService
-from src.meal_planning.application.service import MealPlanService, UserData, PlanPreferences
+from src.meal_planning.domain.entities import UserProfile
 
 # Mocking the repository and food search ports for the service test
 # We want to test the ADAPTER logic mostly, but simulating the flow via Service is good too. 
@@ -75,7 +73,7 @@ async def test_e2e_meal_generation_logic():
     # Mock the LLM call to return templates first, then meals
     async def mock_llm_call(model, prompt, **kwargs):
         if "Zaplanuj strukture" in prompt:
-            return {"choices": [{"text": mock_template_json}]}
+            return {"choices": [{"text": mock_template_json_day1}]}
         elif "Jajecznica" in prompt:
             return {"choices": [{"text": mock_meal_json_1}]}
         else:
@@ -85,9 +83,7 @@ async def test_e2e_meal_generation_logic():
     adapter._get_model = MagicMock() # Mock the loader
     # We need to mock asyncio.to_thread to call our async mock logic or just a sync wrapper
     # Since the real code uses asyncio.to_thread(model, ...), we mock the model object itself to be callable
-    mock_model_obj = MagicMock(side_effect=mock_llm_call)
-    # But wait, asyncio.to_thread runs a sync function in a thread. 
-    # Our mock_llm_call is async? No, let's make it sync for the mock.
+    # asyncio.to_thread runs a sync function in a thread — use sync mock below.
     
     def mock_llm_sync(prompt, **kwargs):
         if "Zaplanuj 5 ROZNYCH posilkow" in prompt:

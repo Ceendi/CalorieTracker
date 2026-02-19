@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 from src.food_catalogue.domain.enums import UnitType, UnitLabel
@@ -31,8 +31,7 @@ class FoodOutSchema(BaseModel):
     owner_id: Optional[uuid.UUID] = None
     source: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CreateCustomFoodIn(BaseModel):

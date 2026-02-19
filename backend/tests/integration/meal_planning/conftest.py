@@ -5,28 +5,17 @@ import pytest
 from uuid import uuid4
 from unittest.mock import MagicMock, AsyncMock
 
-from src.meal_planning.application.service import MealPlanService, UserData
+from src.meal_planning.application.service import MealPlanService
 from src.meal_planning.domain.entities import (
     PlanPreferences,
-    GeneratedIngredient,
-    GeneratedMeal,
-    GeneratedDay,
-    GeneratedPlan,
-    MealTemplate,
-    UserProfile,
 )
 
 
 # Re-export factory functions from unit conftest
 from tests.unit.meal_planning.conftest import (
-    make_ingredient,
     make_meal,
-    make_day,
-    make_plan,
     make_user_data,
     make_template,
-    make_profile,
-    make_product,
 )
 
 

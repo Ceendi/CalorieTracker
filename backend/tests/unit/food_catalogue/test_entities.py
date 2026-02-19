@@ -1,4 +1,3 @@
-import pytest
 import uuid
 from src.food_catalogue.domain.entities import Food, Nutrition, UnitInfo
 

@@ -2,7 +2,6 @@ import pytest
 from uuid import uuid4
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
-from sqlalchemy.orm import selectinload
 
 from src.tracking.infrastructure.repositories import SqlAlchemyTrackingRepository
 from src.tracking.infrastructure.orm_models import TrackingDailyLog, TrackingMealEntry
@@ -10,7 +9,10 @@ from src.tracking.domain.entities import MealEntry, MealType
 
 @pytest.fixture
 def mock_session():
-    return AsyncMock()
+    session = AsyncMock()
+    session.add = MagicMock()
+    session.add_all = MagicMock()
+    return session
 
 @pytest.fixture
 def repo(mock_session):

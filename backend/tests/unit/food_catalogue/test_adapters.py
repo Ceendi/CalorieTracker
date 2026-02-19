@@ -2,7 +2,6 @@ import pytest
 import httpx
 from unittest.mock import AsyncMock, MagicMock, patch
 from src.food_catalogue.infrastructure.adapters.openfoodfacts_adapter import OpenFoodFactsAdapter
-from src.food_catalogue.domain.entities import Food, Nutrition
 
 @pytest.fixture
 def adapter():

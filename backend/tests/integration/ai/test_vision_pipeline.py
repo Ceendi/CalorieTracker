@@ -27,7 +27,6 @@ from src.ai.domain.models import (
     MealExtraction,
     MealType,
 )
-from src.ai.infrastructure.nlu.processor import NaturalLanguageProcessor
 
 
 # ---------------------------------------------------------------------------

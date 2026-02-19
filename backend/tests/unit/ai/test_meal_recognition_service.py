@@ -9,12 +9,10 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-import pytest_asyncio
 
 from src.ai.application.meal_service import MealRecognitionService
 from src.ai.domain.models import (
     SearchCandidate,
-    MatchedProduct,
     IngredientChunk,
     MealExtraction,
     ExtractedFoodItem,
@@ -23,7 +21,6 @@ from src.ai.domain.models import (
 from src.ai.config import (
     DEFAULT_UNIT_GRAMS,
     DEFAULT_PORTION_GRAMS,
-    MEAL_RECOGNITION_CONFIG as CONFIG,
 )
 
 
@@ -183,7 +180,7 @@ class TestRecognizeMeal:
         candidate = make_search_candidate(name="mleko", score=0.8)
         mock_search_engine.search.return_value = [candidate]
 
-        result = await service.recognize_meal("mleko")
+        await service.recognize_meal("mleko")
         mock_nlu_processor.process_text.assert_called_once()
 
     @pytest.mark.asyncio

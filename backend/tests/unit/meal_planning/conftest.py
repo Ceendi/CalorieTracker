@@ -3,7 +3,7 @@ Shared fixtures and factory functions for meal_planning unit tests.
 """
 import pytest
 from uuid import UUID, uuid4
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock
 
 from src.meal_planning.application.service import MealPlanService, UserData
 from src.meal_planning.adapters.bielik_meal_planner import BielikMealPlannerAdapter
