@@ -1,5 +1,8 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { MealSection } from '@/components/diary/MealSection';
+import { MealType, MealEntry } from '@/types/food';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -21,9 +24,6 @@ jest.mock('@/components/diary/FoodEntryItem', () => ({
     );
   },
 }));
-
-import { MealSection } from '@/components/diary/MealSection';
-import { MealType, MealEntry } from '@/types/food';
 
 const createEntry = (id: string, name: string, calories: number): MealEntry => ({
   id,

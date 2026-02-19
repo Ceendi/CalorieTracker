@@ -1,5 +1,8 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { VoiceMealReview } from '@/components/voice/confirmation/VoiceMealReview';
+import { ProcessedMeal } from '@/types/ai';
+
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: () => ({ colorScheme: 'light', toggleColorScheme: jest.fn(), setColorScheme: jest.fn(), isLoaded: true }),
 }));
@@ -25,9 +28,6 @@ jest.mock('@/components/voice/confirmation/VoiceMealSummary', () => ({
     );
   },
 }));
-
-import { VoiceMealReview } from '@/components/voice/confirmation/VoiceMealReview';
-import { ProcessedMeal } from '@/types/ai';
 
 const t = (k: string) => k;
 

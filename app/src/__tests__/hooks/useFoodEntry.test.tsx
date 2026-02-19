@@ -1,6 +1,10 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { createQueryWrapper } from '../helpers';
 
+import { useFoodEntry } from '@/hooks/useFoodEntry';
+import { FoodProduct, MealType } from '@/types/food';
+import { ensureFoodProduct } from '@/services/food.service';
+
 // --- Mocks (must be before hook import) ---
 const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismissAll: jest.fn() };
 jest.mock('expo-router', () => ({ useRouter: () => mockRouter }));
@@ -26,10 +30,6 @@ jest.mock('@/utils/date', () => ({
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
-
-import { useFoodEntry } from '@/hooks/useFoodEntry';
-import { FoodProduct, MealType } from '@/types/food';
-import { ensureFoodProduct } from '@/services/food.service';
 
 const mockFood: FoodProduct = {
   id: 'food-1',

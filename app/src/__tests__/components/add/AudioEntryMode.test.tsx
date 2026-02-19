@@ -1,5 +1,7 @@
 import { render } from "@testing-library/react-native";
 
+import { AudioEntryMode } from "@/components/add/AudioEntryMode";
+
 jest.mock("@/hooks/useLanguage", () => ({
   useLanguage: () => ({
     t: (k: string) => k,
@@ -18,8 +20,6 @@ jest.mock("@/components/voice/VoiceInputButton", () => ({
     );
   },
 }));
-
-import { AudioEntryMode } from "@/components/add/AudioEntryMode";
 
 describe("AudioEntryMode", () => {
   it("renders voice title", () => {

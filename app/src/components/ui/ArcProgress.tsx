@@ -30,6 +30,7 @@ export function ArcProgress({
 
   useEffect(() => {
     animatedProgress.value = withTiming(progress, { duration: 1000 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
 
   const animatedProps = useAnimatedProps(() => {

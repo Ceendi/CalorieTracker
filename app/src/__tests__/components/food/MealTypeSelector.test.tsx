@@ -1,11 +1,11 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { MealTypeSelector } from '@/components/food/MealTypeSelector';
+import { MealType } from '@/types/food';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
-
-import { MealTypeSelector } from '@/components/food/MealTypeSelector';
-import { MealType } from '@/types/food';
 
 describe('MealTypeSelector', () => {
   const onSelect = jest.fn();

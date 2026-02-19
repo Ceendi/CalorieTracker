@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react-native';
 
+import { NutrientRing } from '@/components/diary/NutrientRing';
+
 jest.mock('@/constants/theme', () => ({
   Colors: { light: { tint: '#6366f1' }, dark: { tint: '#818cf8' } },
 }));
-
-import { NutrientRing } from '@/components/diary/NutrientRing';
 
 describe('NutrientRing', () => {
   it('renders label and values', () => {

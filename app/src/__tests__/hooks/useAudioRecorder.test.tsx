@@ -1,12 +1,12 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useAudioRecorder as useExpoAudioRecorder, AudioModule } from 'expo-audio';
+
 // expo-audio is already mocked in setup.tsx. We import it to configure per-test behavior.
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
-
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useAudioRecorder as useExpoAudioRecorder, AudioModule } from 'expo-audio';
 
 describe('useAudioRecorder', () => {
   const mockRecorder = {

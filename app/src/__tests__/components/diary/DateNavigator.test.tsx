@@ -1,5 +1,8 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { DateNavigator } from '@/components/diary/DateNavigator';
+import { format } from 'date-fns';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -16,9 +19,6 @@ jest.mock('@/components/ui/IconSymbol', () => ({
     return React.createElement(Text, { testID: `icon-${name}` }, name);
   },
 }));
-
-import { DateNavigator } from '@/components/diary/DateNavigator';
-import { format } from 'date-fns';
 
 describe('DateNavigator', () => {
   const onDateChange = jest.fn();

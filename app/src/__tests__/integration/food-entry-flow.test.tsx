@@ -1,6 +1,10 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { createQueryWrapper } from '../helpers';
 
+import { useFoodEntry } from '@/hooks/useFoodEntry';
+import { useLogEntry, useUpdateEntry } from '@/hooks/useFood';
+import { FoodProduct, MealType } from '@/types/food';
+
 // --- Service mocks ---
 const mockSearchFoods = jest.fn();
 const mockLogEntry = jest.fn();
@@ -42,10 +46,6 @@ jest.mock('@/utils/date', () => ({
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
-
-import { useFoodEntry } from '@/hooks/useFoodEntry';
-import { useLogEntry, useUpdateEntry } from '@/hooks/useFood';
-import { FoodProduct, MealType } from '@/types/food';
 
 // Mock the useFood hooks to return mutate functions
 const mockLogEntryMutate = jest.fn();

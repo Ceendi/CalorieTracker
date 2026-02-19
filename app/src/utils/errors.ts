@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 /**
  * Custom application error with error code and original error context
@@ -45,7 +45,7 @@ export function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     if (error.response?.data?.detail) {
       return String(error.response.data.detail);
     }
@@ -85,14 +85,14 @@ export function getErrorMessage(error: unknown): string {
  * Check if error is a network error (no response from server)
  */
 export function isNetworkError(error: unknown): boolean {
-  return axios.isAxiosError(error) && !error.response;
+  return isAxiosError(error) && !error.response;
 }
 
 /**
  * Check if error is an authentication error
  */
 export function isAuthError(error: unknown): boolean {
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     return error.response?.status === 401 || error.response?.status === 403;
   }
   if (error instanceof AppError) {
@@ -105,7 +105,7 @@ export function isAuthError(error: unknown): boolean {
  * Check if error is a validation error (422)
  */
 export function isValidationError(error: unknown): boolean {
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     return error.response?.status === 422;
   }
   if (error instanceof AppError) {
@@ -122,7 +122,7 @@ export function toAppError(error: unknown): AppError {
     return error;
   }
 
-  if (axios.isAxiosError(error)) {
+  if (isAxiosError(error)) {
     if (!error.response) {
       return new AppError(
         'Błąd połączenia z serwerem.',
@@ -162,7 +162,7 @@ export function toAppError(error: unknown): AppError {
  * Extract validation errors from 422 response
  */
 export function getValidationErrors(error: unknown): Record<string, string> | null {
-  if (!axios.isAxiosError(error) || error.response?.status !== 422) {
+  if (!isAxiosError(error) || error.response?.status !== 422) {
     return null;
   }
 

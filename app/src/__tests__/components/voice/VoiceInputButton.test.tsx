@@ -1,5 +1,7 @@
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 
+import { VoiceInputButton } from '@/components/voice/VoiceInputButton';
+
 const mockStartRecording = jest.fn();
 const mockStopAndProcess = jest.fn();
 const mockCancelRecording = jest.fn();
@@ -43,8 +45,6 @@ jest.mock('@/components/ui/IconSymbol', () => ({
   IconSymbol: 'IconSymbol',
   IconSymbolName: {},
 }));
-
-import { VoiceInputButton } from '@/components/voice/VoiceInputButton';
 
 describe('VoiceInputButton', () => {
   beforeEach(() => {

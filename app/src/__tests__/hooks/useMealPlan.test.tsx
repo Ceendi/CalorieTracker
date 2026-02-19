@@ -2,6 +2,8 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useMealPlans, useMealPlan, useDailyTargets, useDeleteMealPlan, useUpdatePlanStatus, useMealPlanGeneration, mealPlanKeys } from '@/hooks/useMealPlan';
 import { createQueryWrapper } from '../helpers';
 
+import { mealPlanService } from '@/services/meal-plan.service';
+
 jest.mock('@/services/meal-plan.service', () => ({
   mealPlanService: {
     listPlans: jest.fn(),
@@ -13,8 +15,6 @@ jest.mock('@/services/meal-plan.service', () => ({
     getGenerationStatus: jest.fn(),
   },
 }));
-
-import { mealPlanService } from '@/services/meal-plan.service';
 
 beforeEach(() => {
   jest.clearAllMocks();

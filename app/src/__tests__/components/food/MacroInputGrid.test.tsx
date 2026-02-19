@@ -2,6 +2,8 @@ import { render } from '@testing-library/react-native';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
+import { MacroInputGrid } from '@/components/food/MacroInputGrid';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -11,8 +13,6 @@ jest.mock('@/hooks/useColorScheme', () => ({
 jest.mock('@/constants/theme', () => ({
   Colors: { light: { tint: '#6366f1', text: '#020617', placeholder: '#94a3b8' }, dark: {} },
 }));
-
-import { MacroInputGrid } from '@/components/food/MacroInputGrid';
 
 interface ManualFoodFormValues {
   name: string;

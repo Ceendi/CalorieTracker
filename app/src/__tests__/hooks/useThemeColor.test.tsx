@@ -1,5 +1,8 @@
 import { renderHook } from '@testing-library/react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { Colors } from '@/constants/theme';
+
 // theme.ts imports Platform from react-native — mock the constants module
 jest.mock('@/constants/theme', () => ({
   Colors: {
@@ -18,9 +21,6 @@ const mockUseColorScheme = jest.fn();
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: (...args: any[]) => mockUseColorScheme(...args),
 }));
-
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Colors } from '@/constants/theme';
 
 describe('useThemeColor', () => {
   beforeEach(() => {

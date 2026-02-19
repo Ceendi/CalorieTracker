@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { storageService } from '@/services/storage.service';
 
 export function useColorScheme() {
-  const { colorScheme, setColorScheme, toggleColorScheme: nativeToggle } = useNativeWindColorScheme();
+  const { colorScheme, setColorScheme } = useNativeWindColorScheme();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {

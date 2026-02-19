@@ -1,3 +1,7 @@
+import { aiService } from '../../../services/ai.service';
+import { apiClient } from '../../../services/api.client';
+import { storageService } from '../../../services/storage.service';
+
 jest.mock('../../../services/api.client', () => ({
   apiClient: {
     get: jest.fn(),
@@ -13,10 +17,6 @@ jest.mock('../../../services/storage.service', () => ({
 jest.mock('../../../constants/config', () => ({
   CONFIG: { API_URL: 'http://localhost:8000' },
 }));
-
-import { aiService } from '../../../services/ai.service';
-import { apiClient } from '../../../services/api.client';
-import { storageService } from '../../../services/storage.service';
 
 const mockGet = apiClient.get as jest.Mock;
 

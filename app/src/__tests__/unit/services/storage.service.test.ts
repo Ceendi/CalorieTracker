@@ -1,5 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
+import { storageService } from '../../../services/storage.service';
+
 // Mock expo-secure-store
 const store: Record<string, string> = {};
 jest.mock('expo-secure-store', () => ({
@@ -7,8 +9,6 @@ jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async (key: string) => store[key] ?? null),
   deleteItemAsync: jest.fn(async (key: string) => { delete store[key]; }),
 }));
-
-import { storageService } from '../../../services/storage.service';
 
 beforeEach(() => {
   Object.keys(store).forEach(k => delete store[k]);

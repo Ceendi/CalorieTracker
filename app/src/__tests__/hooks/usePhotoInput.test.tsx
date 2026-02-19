@@ -1,5 +1,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 
+import { usePhotoInput } from '@/hooks/usePhotoInput';
+import * as ImagePicker from 'expo-image-picker';
+import { aiService } from '@/services/ai.service';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -17,10 +21,6 @@ jest.mock('@/services/ai.service', () => ({
     processImage: jest.fn(),
   },
 }));
-
-import { usePhotoInput } from '@/hooks/usePhotoInput';
-import * as ImagePicker from 'expo-image-picker';
-import { aiService } from '@/services/ai.service';
 
 const mockMeal = {
   meal_type: 'lunch',

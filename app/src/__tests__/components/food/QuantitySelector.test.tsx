@@ -1,5 +1,8 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { QuantitySelector } from '@/components/food/QuantitySelector';
+import { UnitInfo } from '@/types/food';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -16,9 +19,6 @@ jest.mock('@/components/ui/IconSymbol', () => ({
     return React.createElement(Text, { testID: `icon-${name}` }, name);
   },
 }));
-
-import { QuantitySelector } from '@/components/food/QuantitySelector';
-import { UnitInfo } from '@/types/food';
 
 describe('QuantitySelector', () => {
   const onChangeQuantity = jest.fn();

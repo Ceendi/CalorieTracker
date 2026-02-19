@@ -1,5 +1,7 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { SettingsModal } from '@/components/profile/SettingsModal';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -18,8 +20,6 @@ jest.mock('@/components/ui/IconSymbol', () => ({
 jest.mock('@/components/profile/ChangePasswordModal', () => ({
   ChangePasswordModal: () => null,
 }));
-
-import { SettingsModal } from '@/components/profile/SettingsModal';
 
 describe('SettingsModal', () => {
   const onClose = jest.fn();

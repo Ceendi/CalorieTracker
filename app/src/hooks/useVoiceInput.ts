@@ -48,7 +48,7 @@ export function useVoiceInput(): UseVoiceInputResult {
       setProcessedMeal(null);
       await startAudioRecording();
       setState('recording');
-    } catch (err) {
+    } catch {
       setError(recorderError || t('common.errors.startRecording'));
       setState('error');
     }
@@ -82,7 +82,7 @@ export function useVoiceInput(): UseVoiceInputResult {
   const cancelRecording = useCallback(async () => {
     try {
       await stopAudioRecording();
-    } catch (err) {
+    } catch {
       // ignore errors during cancel
     }
     setState('idle');

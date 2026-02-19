@@ -1,5 +1,8 @@
 import { renderHook, act } from '@testing-library/react-native';
 
+import { useVoiceMealLogic } from '@/hooks/useVoiceMealLogic';
+import { ProcessedMeal, ProcessedFoodItem } from '@/types/ai';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -9,9 +12,6 @@ jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
   dismiss: jest.fn(),
   addListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
-
-import { useVoiceMealLogic } from '@/hooks/useVoiceMealLogic';
-import { ProcessedMeal, ProcessedFoodItem } from '@/types/ai';
 
 const mockT = (k: string) => k;
 

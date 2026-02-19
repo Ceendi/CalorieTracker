@@ -57,8 +57,6 @@ export default function HomeScreen() {
   const remaining = dailyGoal - consumed;
   const isOverGoal = consumed > dailyGoal;
   const progress = Math.min(consumed / dailyGoal, 1);
-  const percentage = Math.round((consumed / dailyGoal) * 100);
-
   const handleAddMeal = (type: MealType) => {
     router.push("/(tabs)/add");
   };

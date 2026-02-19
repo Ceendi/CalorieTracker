@@ -2,14 +2,14 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { useForm } from 'react-hook-form';
 import React from 'react';
 
+import { ControlledInput } from '@/components/ui/ControlledInput';
+
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: () => ({ colorScheme: 'light', toggleColorScheme: jest.fn(), setColorScheme: jest.fn(), isLoaded: true }),
 }));
 jest.mock('@/constants/theme', () => ({
   Colors: { light: { tint: '#6366f1', text: '#020617', placeholder: '#94a3b8' }, dark: {} },
 }));
-
-import { ControlledInput } from '@/components/ui/ControlledInput';
 
 interface TestForm {
   email: string;

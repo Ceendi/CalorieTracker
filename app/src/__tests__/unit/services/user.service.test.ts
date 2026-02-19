@@ -1,11 +1,11 @@
+import { userService } from '../../../services/user.service';
+import { apiClient } from '../../../services/api.client';
+
 jest.mock('../../../services/api.client', () => ({
   apiClient: {
     patch: jest.fn(),
   },
 }));
-
-import { userService } from '../../../services/user.service';
-import { apiClient } from '../../../services/api.client';
 
 const mockPatch = apiClient.patch as jest.Mock;
 

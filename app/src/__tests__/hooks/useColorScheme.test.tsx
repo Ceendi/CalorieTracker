@@ -1,5 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { storageService } from '@/services/storage.service';
+
 let mockScheme = 'light';
 const mockSetColorScheme = jest.fn((s: string) => { mockScheme = s; });
 
@@ -17,9 +20,6 @@ jest.mock('@/services/storage.service', () => ({
     setTheme: jest.fn(async () => {}),
   },
 }));
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { storageService } from '@/services/storage.service';
 
 describe('useColorScheme', () => {
   beforeEach(() => {

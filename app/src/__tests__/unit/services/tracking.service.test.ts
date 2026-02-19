@@ -1,3 +1,6 @@
+import { trackingService } from '../../../services/tracking.service';
+import { apiClient } from '../../../services/api.client';
+
 jest.mock('../../../services/api.client', () => ({
   apiClient: {
     get: jest.fn(),
@@ -6,9 +9,6 @@ jest.mock('../../../services/api.client', () => ({
     patch: jest.fn(),
   },
 }));
-
-import { trackingService } from '../../../services/tracking.service';
-import { apiClient } from '../../../services/api.client';
 
 const mockGet = apiClient.get as jest.Mock;
 const mockPost = apiClient.post as jest.Mock;

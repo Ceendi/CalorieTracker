@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react-native';
 
+import { NutrientSummary } from '@/components/food/NutrientSummary';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
-
-import { NutrientSummary } from '@/components/food/NutrientSummary';
 
 describe('NutrientSummary', () => {
   it('renders all four macro values', () => {

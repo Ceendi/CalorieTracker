@@ -44,7 +44,7 @@ export default function ResetPasswordScreen() {
       Alert.alert(t('profile.success'), t('auth.resetSuccess'), [
           { text: 'OK', onPress: () => router.replace('/(auth)/login') }
       ]);
-    } catch (error: any) {
+    } catch {
       setIsLoading(false);
       Alert.alert(t('profile.error'), t('auth.unexpectedError'));
     }

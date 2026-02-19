@@ -1,5 +1,8 @@
 import { renderHook, act } from '@testing-library/react-native';
 
+import { useVoiceInput } from '@/hooks/useVoiceInput';
+import { aiService } from '@/services/ai.service';
+
 const mockStartRecording = jest.fn();
 const mockStopRecording = jest.fn();
 const mockRequestPermission = jest.fn(async () => true);
@@ -25,9 +28,6 @@ jest.mock('@/services/ai.service', () => ({
     processAudio: jest.fn(),
   },
 }));
-
-import { useVoiceInput } from '@/hooks/useVoiceInput';
-import { aiService } from '@/services/ai.service';
 
 const mockMeal = {
   meal_type: 'breakfast',

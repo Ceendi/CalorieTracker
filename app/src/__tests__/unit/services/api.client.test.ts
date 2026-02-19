@@ -1,4 +1,7 @@
 // We need to mock storage and config before importing api.client
+import { apiClient, setOnUnauthorizedCallback } from '../../../services/api.client';
+import { storageService } from '../../../services/storage.service';
+
 jest.mock('../../../services/storage.service', () => {
   const store: Record<string, string | null> = {};
   return {
@@ -19,9 +22,6 @@ jest.mock('../../../services/storage.service', () => {
 jest.mock('../../../constants/config', () => ({
   CONFIG: { API_URL: 'http://localhost:8000' },
 }));
-
-import { apiClient, setOnUnauthorizedCallback } from '../../../services/api.client';
-import { storageService } from '../../../services/storage.service';
 
 const mockStore = (storageService as any)._store as Record<string, string | null>;
 

@@ -1,14 +1,14 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { FoodEntryItem } from '@/components/diary/FoodEntryItem';
+import { MealEntry, MealType } from '@/types/food';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
 jest.mock('@/components/ui/IconSymbol', () => ({
   IconSymbol: 'IconSymbol',
 }));
-
-import { FoodEntryItem } from '@/components/diary/FoodEntryItem';
-import { MealEntry, MealType } from '@/types/food';
 
 const createEntry = (overrides?: Partial<MealEntry>): MealEntry => ({
   id: 'entry-1',

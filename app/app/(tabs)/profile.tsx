@@ -30,8 +30,8 @@ import { UserProfileSchema } from "@/schemas/user";
 
 export default function ProfileScreen() {
   const queryClient = useQueryClient();
-  const { user, signOut, refreshUser } = useAuth();
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { user, refreshUser } = useAuth();
+  const { colorScheme } = useColorScheme();
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,8 +51,7 @@ export default function ProfileScreen() {
     "goal" | "activity_level" | "gender" | null
   >(null);
 
-  const { data: backendTargets, isLoading: isLoadingTargets } =
-    useDailyTargets();
+  const { isLoading: isLoadingTargets } = useDailyTargets();
 
   const currentCalories = React.useMemo(() => {
     const profile: Partial<User> = {

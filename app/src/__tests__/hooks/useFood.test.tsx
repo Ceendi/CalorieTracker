@@ -2,6 +2,9 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useFoodSearch, useFoodBarcode, useLogEntry, useLogEntriesBulk } from '@/hooks/useFood';
 import { createQueryWrapper } from '../helpers';
 
+import { foodService } from '@/services/food.service';
+import { trackingService } from '@/services/tracking.service';
+
 jest.mock('@/services/food.service', () => ({
   foodService: {
     searchFoods: jest.fn(),
@@ -17,9 +20,6 @@ jest.mock('@/services/tracking.service', () => ({
     updateEntry: jest.fn(),
   },
 }));
-
-import { foodService } from '@/services/food.service';
-import { trackingService } from '@/services/tracking.service';
 
 const mockFoods = [
   { id: 'food-1', name: 'Apple', nutrition: { calories_per_100g: 52, protein_per_100g: 0.3, fat_per_100g: 0.2, carbs_per_100g: 14 } },

@@ -78,7 +78,7 @@ export function usePhotoInput(): UsePhotoInputResult {
       } else {
         setState('idle');
       }
-    } catch (err) {
+    } catch {
       setError(t('common.errors.unknown'));
       setState('error');
     }
@@ -101,7 +101,7 @@ export function usePhotoInput(): UsePhotoInputResult {
       } else {
         setState('idle');
       }
-    } catch (err) {
+    } catch {
         setError(t('common.errors.unknown'));
         setState('error');
     }

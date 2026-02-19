@@ -1,12 +1,12 @@
+import { foodService, ensureFoodProduct } from '../../../services/food.service';
+import { apiClient } from '../../../services/api.client';
+
 jest.mock('../../../services/api.client', () => ({
   apiClient: {
     get: jest.fn(),
     post: jest.fn(),
   },
 }));
-
-import { foodService, ensureFoodProduct } from '../../../services/food.service';
-import { apiClient } from '../../../services/api.client';
 
 const mockGet = apiClient.get as jest.Mock;
 const mockPost = apiClient.post as jest.Mock;

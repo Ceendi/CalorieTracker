@@ -1,5 +1,8 @@
 import { renderHook, act } from '@testing-library/react-native';
 
+import { useAuth } from '@/hooks/useAuth';
+import { storageService } from '@/services/storage.service';
+
 // --- Service mocks ---
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
@@ -44,9 +47,6 @@ jest.mock('expo-router', () => ({
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
-
-import { useAuth } from '@/hooks/useAuth';
-import { storageService } from '@/services/storage.service';
 
 describe('Auth Flow Integration', () => {
   beforeEach(() => {

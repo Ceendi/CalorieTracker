@@ -1,3 +1,7 @@
+import { authService } from '../../../services/auth.service';
+import { apiClient } from '../../../services/api.client';
+import { storageService } from '../../../services/storage.service';
+
 jest.mock('../../../services/api.client', () => ({
   apiClient: {
     post: jest.fn(),
@@ -10,10 +14,6 @@ jest.mock('../../../services/storage.service', () => ({
     getRefreshToken: jest.fn(),
   },
 }));
-
-import { authService } from '../../../services/auth.service';
-import { apiClient } from '../../../services/api.client';
-import { storageService } from '../../../services/storage.service';
 
 const mockPost = apiClient.post as jest.Mock;
 const mockGet = apiClient.get as jest.Mock;

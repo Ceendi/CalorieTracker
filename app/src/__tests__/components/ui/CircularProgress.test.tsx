@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react-native';
 
-jest.mock('@/constants/theme', () => ({
-  Colors: { light: { tint: '#6366f1' }, dark: { tint: '#818cf8' } },
-}));
-
 import { CircularProgress } from '@/components/ui/CircularProgress';
 import React from 'react';
 import { Text } from 'react-native';
+
+jest.mock('@/constants/theme', () => ({
+  Colors: { light: { tint: '#6366f1' }, dark: { tint: '#818cf8' } },
+}));
 
 describe('CircularProgress', () => {
   it('renders without crashing', () => {

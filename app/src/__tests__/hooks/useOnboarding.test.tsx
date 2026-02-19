@@ -1,13 +1,13 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useOnboarding } from '@/hooks/useOnboarding';
 
+import { apiClient } from '@/services/api.client';
+
 jest.mock('@/services/api.client', () => ({
   apiClient: {
     patch: jest.fn(),
   },
 }));
-
-import { apiClient } from '@/services/api.client';
 
 const mockPatch = apiClient.patch as jest.Mock;
 

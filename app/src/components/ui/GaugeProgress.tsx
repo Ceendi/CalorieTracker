@@ -32,6 +32,7 @@ export function GaugeProgress({
 
   useEffect(() => {
     animatedProgress.value = withTiming(progress, { duration: 1200 }); // slower, smoother animation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress]);
 
   const animatedProps = useAnimatedProps(() => {

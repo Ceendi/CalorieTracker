@@ -1,5 +1,7 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { InfoItem } from '@/components/profile/InfoItem';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -12,8 +14,6 @@ jest.mock('@/constants/theme', () => ({
 jest.mock('@/components/ui/IconSymbol', () => ({
   IconSymbol: 'IconSymbol',
 }));
-
-import { InfoItem } from '@/components/profile/InfoItem';
 
 describe('InfoItem', () => {
   it('renders label and value in display mode', () => {

@@ -1,5 +1,10 @@
 import { renderHook, act } from '@testing-library/react-native';
 
+import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth.service';
+import { storageService } from '@/services/storage.service';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+
 // Mock all dependencies before importing the hook
 jest.mock('@/services/storage.service', () => ({
   storageService: {
@@ -38,11 +43,6 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
     PLAY_SERVICES_NOT_AVAILABLE: 'PLAY_SERVICES_NOT_AVAILABLE',
   },
 }));
-
-import { useAuth } from '@/hooks/useAuth';
-import { authService } from '@/services/auth.service';
-import { storageService } from '@/services/storage.service';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 const mockUser = {
   id: 'user-1',

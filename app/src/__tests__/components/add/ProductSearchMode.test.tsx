@@ -1,5 +1,7 @@
 import { render, fireEvent } from '@testing-library/react-native';
 
+import { ProductSearchMode } from '@/components/add/ProductSearchMode';
+
 jest.mock('@/hooks/useLanguage', () => ({
   useLanguage: () => ({ t: (k: string) => k, language: 'en', setLanguage: jest.fn() }),
 }));
@@ -18,21 +20,19 @@ jest.mock('@/components/ui/IconSymbol', () => ({
 }));
 
 const mockUseFoodSearch = jest.fn(() => ({
-  data: undefined,
+  data: undefined as unknown[] | undefined,
   isLoading: false,
   refetch: jest.fn(),
   isRefetching: false,
 }));
 jest.mock('@/hooks/useFood', () => ({
-  useFoodSearch: (...args: any[]) => mockUseFoodSearch(...args),
+  useFoodSearch: (_q: string) => mockUseFoodSearch(),
 }));
 
 jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
   dismiss: jest.fn(),
   addListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
-
-import { ProductSearchMode } from '@/components/add/ProductSearchMode';
 
 describe('ProductSearchMode', () => {
   const onItemPress = jest.fn();

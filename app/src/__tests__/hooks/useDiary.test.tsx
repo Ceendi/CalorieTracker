@@ -2,6 +2,8 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useDiary, diaryKeys } from '@/hooks/useDiary';
 import { createQueryWrapper } from '../helpers';
 
+import { trackingService } from '@/services/tracking.service';
+
 jest.mock('@/services/tracking.service', () => ({
   trackingService: {
     getDailyLog: jest.fn(),
@@ -9,8 +11,6 @@ jest.mock('@/services/tracking.service', () => ({
     updateEntry: jest.fn(),
   },
 }));
-
-import { trackingService } from '@/services/tracking.service';
 
 const mockLog = {
   id: 'log-1',

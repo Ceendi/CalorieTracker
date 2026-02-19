@@ -60,7 +60,7 @@ apiClient.interceptors.response.use(
                 await storageService.setRefreshToken(new_refresh_token);
               }
               return access_token;
-            } catch (err) {
+            } catch {
               await storageService.clearAll();
               if (onUnauthorizedCallback) {
                 onUnauthorizedCallback();

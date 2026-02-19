@@ -1,5 +1,8 @@
 import { renderHook, act } from '@testing-library/react-native';
 
+import { useLanguage } from '@/hooks/useLanguage';
+import { storageService } from '@/services/storage.service';
+
 jest.mock('@/services/storage.service', () => ({
   storageService: {
     getLanguage: jest.fn(),
@@ -10,9 +13,6 @@ jest.mock('@/services/storage.service', () => ({
 jest.mock('expo-localization', () => ({
   getLocales: jest.fn(() => [{ languageCode: 'en' }]),
 }));
-
-import { useLanguage } from '@/hooks/useLanguage';
-import { storageService } from '@/services/storage.service';
 
 beforeEach(() => {
   jest.clearAllMocks();

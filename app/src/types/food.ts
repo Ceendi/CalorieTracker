@@ -37,7 +37,7 @@ export interface FoodProduct {
   units?: UnitInfo[];
 }
 
-export interface Food extends FoodProduct {}
+export type Food = FoodProduct;
 
 /**
  * Meal type enum - matches backend MealType
