@@ -10,6 +10,7 @@ import {
   AppError,
   ErrorCode,
 } from "../utils/errors";
+import { queryClient } from "../services/queryClient";
 import {
   GoogleSignin,
   statusCodes,
@@ -108,6 +109,7 @@ export const useAuth = create<AuthState>((set) => ({
   signOut: async () => {
     await authService.logout();
     await storageService.clearAll();
+    queryClient.clear();
     set({ user: null, isSignout: true });
   },
 
@@ -152,6 +154,7 @@ export const useAuth = create<AuthState>((set) => ({
 setOnUnauthorizedCallback(() => {
   const { user } = useAuth.getState();
   if (user) {
+    queryClient.clear();
     useAuth.setState({ user: null, isSignout: true });
   }
 });
