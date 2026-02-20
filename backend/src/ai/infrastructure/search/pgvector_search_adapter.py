@@ -106,7 +106,7 @@ class PgVectorSearchAdapter:
             result = await self._session.execute(text("""
                 SELECT
                     id, name, category, calories, protein, fat, carbs,
-                    source
+                    source, glycemic_index
                 FROM foods WHERE id = :id AND source IN ('fineli', 'kunachowicz')
             """), {"id": product_id})
 
@@ -131,6 +131,7 @@ class PgVectorSearchAdapter:
                     "fat_100g": row.fat or 0,
                     "carbs_100g": row.carbs or 0,
                     "source": row.source,
+                    "glycemic_index": row.glycemic_index,
                     "units": units
                 }
         except Exception as e:

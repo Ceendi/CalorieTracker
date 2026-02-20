@@ -62,6 +62,7 @@ class MatchedProduct(BaseModel):
     notes: str = ""
     units: List[dict] = Field(default_factory=list)
     alternatives: List[SearchCandidate] = Field(default_factory=list)
+    glycemic_index: Optional[float] = None
 
     @property
     def name(self) -> str:

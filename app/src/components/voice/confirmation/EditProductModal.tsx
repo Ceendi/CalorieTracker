@@ -14,6 +14,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import * as Haptics from 'expo-haptics';
 import { ProcessedFoodItem } from '@/types/ai';
 import { calculateItemMacros } from '@/utils/calculations';
+import { calculateGL } from '@/utils/glycemicLoad';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
 
@@ -173,6 +174,23 @@ export function EditProductModal({
                             {calculatedValues.carbs.toFixed(1)}g
                         </Text>
                     </View>
+                    {item.glycemic_index != null && (
+                        (() => {
+                            const gl = calculateGL(item.glycemic_index, calculatedValues.carbs);
+                            const color =
+                                gl.label === 'niski' ? 'text-green-500'
+                                : gl.label === 'średni' ? 'text-amber-500'
+                                : 'text-red-500';
+                            return (
+                                <View className="flex-1">
+                                    <Text className="text-[10px] font-bold text-indigo-500 uppercase mb-0.5">ŁG</Text>
+                                    <Text className={`text-sm font-black ${color}`}>
+                                        {gl.value}
+                                    </Text>
+                                </View>
+                            );
+                        })()
+                    )}
                 </View>
 
                 <View className="mb-6">

@@ -175,7 +175,8 @@ class AudioProcessingService:
                 quantity_unit_value=product.quantity_unit_value,
                 status="matched",
                 units=product.units,
-                notes=product.notes
+                notes=product.notes,
+                glycemic_index=product.glycemic_index,
             ))
 
         for chunk in result.unmatched_chunks:

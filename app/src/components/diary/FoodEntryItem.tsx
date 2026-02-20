@@ -4,6 +4,7 @@ import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { MealEntry } from '@/types/food';
 import { useLanguage } from '@/hooks/useLanguage';
+import { calculateGL } from '@/utils/glycemicLoad';
 
 interface FoodEntryItemProps {
   entry: MealEntry;
@@ -52,10 +53,24 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
                             {Math.round(entry.amount_grams)}g • {Math.round(entry.calories)} kcal
                         </Text>
                     </View>
-                    <View>
+                    <View className="items-end gap-1">
                         <Text className="text-muted-foreground text-xs">
                             {t('foodDetails.macroP')}: {Math.round(entry.protein)} {t('foodDetails.macroF')}: {Math.round(entry.fat)} {t('foodDetails.macroC')}: {Math.round(entry.carbs)}
                         </Text>
+                        {entry.gi_per_100g != null && (
+                            (() => {
+                                const gl = calculateGL(entry.gi_per_100g, entry.carbs);
+                                const color =
+                                    gl.label === 'niski' ? 'text-green-600 dark:text-green-400'
+                                    : gl.label === 'średni' ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-red-600 dark:text-red-400';
+                                return (
+                                    <Text className={`text-xs font-medium ${color}`}>
+                                        ŁG {gl.value}
+                                    </Text>
+                                );
+                            })()
+                        )}
                     </View>
                 </TouchableOpacity>
             </Swipeable>

@@ -30,6 +30,7 @@ class FoodOutSchema(BaseModel):
     nutrition: NutritionSchema
     owner_id: Optional[uuid.UUID] = None
     source: Optional[str] = None
+    glycemic_index: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,3 +39,4 @@ class CreateCustomFoodIn(BaseModel):
     name: str
     barcode: Optional[str] = None
     nutrition: NutritionSchema
+    glycemic_index: Optional[float] = None

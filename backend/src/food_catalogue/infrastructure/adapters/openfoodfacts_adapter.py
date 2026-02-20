@@ -4,6 +4,7 @@ from typing import Optional, Any, Dict, List
 
 import httpx
 
+from src.food_catalogue.application.gi_utils import match_gi
 from src.food_catalogue.application.ports import ExternalFoodProviderPort
 from src.food_catalogue.config import settings
 from src.food_catalogue.domain.entities import Food, Nutrition
@@ -94,7 +95,8 @@ class OpenFoodFactsAdapter(ExternalFoodProviderPort):
                     name=name,
                     barcode=barcode,
                     nutrition=nutrition,
-                    source="external"
+                    source="external",
+                    glycemic_index=match_gi(name, nutrition.carbs_per_100g),
                 )
             except httpx.HTTPError as e:
                 logger.error(f"OFF HTTP Error fetching barcode {barcode}: {str(e)}")
@@ -155,7 +157,8 @@ class OpenFoodFactsAdapter(ExternalFoodProviderPort):
                             name=name,
                             barcode=barcode,
                             nutrition=nutrition,
-                            source="external"
+                            source="external",
+                            glycemic_index=match_gi(name, nutrition.carbs_per_100g),
                         ))
                     except Exception as inner_e:
                         logger.debug(f"Skipping malformed product in search results: {inner_e}")

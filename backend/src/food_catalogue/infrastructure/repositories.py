@@ -37,6 +37,7 @@ class SqlAlchemyFoodRepository:
             units=units,
             owner_id=model.owner_id,
             source=model.source,
+            glycemic_index=model.glycemic_index,
         )
 
     async def get_by_id(self, id: uuid.UUID) -> Optional[Food]:
@@ -105,7 +106,8 @@ class SqlAlchemyFoodRepository:
             fat=food.nutrition.fat_per_100g,
             carbs=food.nutrition.carbs_per_100g,
             source=food.source or "user",
-            popularity_score=0
+            popularity_score=0,
+            glycemic_index=food.glycemic_index,
         )
         self.session.add(model)
         await self.session.commit()

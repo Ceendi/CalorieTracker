@@ -35,6 +35,7 @@ export interface FoodProduct {
   source?: string; // 'public' | 'fineli' | 'openfoodfacts' | 'user'
   brand?: string;
   units?: UnitInfo[];
+  glycemic_index?: number | null;
 }
 
 export type Food = FoodProduct;
@@ -116,6 +117,7 @@ export interface MealEntry {
   unit_label?: string;
   unit_grams?: number;
   unit_quantity?: number;
+  gi_per_100g?: number | null;
 }
 
 /**

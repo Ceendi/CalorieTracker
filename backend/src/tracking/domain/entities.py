@@ -30,6 +30,7 @@ class MealEntry:
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
+    gi_per_100g: Optional[float] = None
 
     def __post_init__(self):
         if self.amount_grams < 0:

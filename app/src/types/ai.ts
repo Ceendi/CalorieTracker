@@ -16,6 +16,7 @@ export interface ProcessedFoodItem {
   units?: UnitInfo[];
   notes?: string;
   source?: string; // 'public' | 'fineli' | 'openfoodfacts' | 'user'
+  glycemic_index?: number | null;
 }
 
 export interface ProcessedMeal {

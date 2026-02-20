@@ -37,6 +37,8 @@ class FoodModel(UUIDModel):
 
     embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(384), nullable=True)
 
+    glycemic_index: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
 
 class FoodUnitModel(UUIDModel):
     __tablename__ = "food_units"

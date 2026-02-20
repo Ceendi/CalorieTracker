@@ -37,7 +37,8 @@ class TrackingService:
             kcal_per_100g=int(product.nutrition.kcal_per_100g),
             protein_per_100g=product.nutrition.protein_per_100g,
             fat_per_100g=product.nutrition.fat_per_100g,
-            carbs_per_100g=product.nutrition.carbs_per_100g
+            carbs_per_100g=product.nutrition.carbs_per_100g,
+            gi_per_100g=product.glycemic_index
         )
 
     async def add_meal_entry(

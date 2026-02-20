@@ -165,6 +165,57 @@ class TestTrackingServiceRemove:
         with pytest.raises(MealEntryNotFoundError):
             await service.remove_entry(uuid4(), uuid4())
 
+class TestGIPropagation:
+    @pytest.mark.asyncio
+    async def test_add_meal_entry_propagates_gi(self, service, mock_tracking_repo, mock_food_repo, sample_daily_log):
+        food_with_gi = Food(
+            id=uuid4(),
+            name="Ryż biały",
+            nutrition=Nutrition(kcal_per_100g=130, protein_per_100g=2.7, fat_per_100g=0.3, carbs_per_100g=28.0),
+            barcode=None,
+            glycemic_index=73.0,
+        )
+        mock_food_repo.get_by_id.return_value = food_with_gi
+        mock_tracking_repo.get_or_create_daily_log.return_value = sample_daily_log
+        mock_tracking_repo.get_daily_log.return_value = sample_daily_log
+
+        await service.add_meal_entry(
+            user_id=uuid4(),
+            log_date=date.today(),
+            meal_type=MealType.LUNCH,
+            product_id=food_with_gi.id,
+            amount_grams=150,
+        )
+
+        call_args = mock_tracking_repo.add_entry.call_args
+        entry_arg = call_args[0][1]
+        assert entry_arg.gi_per_100g == 73.0
+
+    @pytest.mark.asyncio
+    async def test_add_meal_entry_gi_none_when_food_has_no_gi(self, service, mock_tracking_repo, mock_food_repo, sample_daily_log):
+        food_no_gi = Food(
+            id=uuid4(),
+            name="Kurczak pierś",
+            nutrition=Nutrition(kcal_per_100g=165, protein_per_100g=31.0, fat_per_100g=3.6, carbs_per_100g=0.0),
+            barcode=None,
+        )
+        mock_food_repo.get_by_id.return_value = food_no_gi
+        mock_tracking_repo.get_or_create_daily_log.return_value = sample_daily_log
+        mock_tracking_repo.get_daily_log.return_value = sample_daily_log
+
+        await service.add_meal_entry(
+            user_id=uuid4(),
+            log_date=date.today(),
+            meal_type=MealType.DINNER,
+            product_id=food_no_gi.id,
+            amount_grams=200,
+        )
+
+        call_args = mock_tracking_repo.add_entry.call_args
+        entry_arg = call_args[0][1]
+        assert entry_arg.gi_per_100g is None
+
+
 class TestTrackingServiceUpdate:
     @pytest.mark.asyncio
     async def test_update_entry_success(self, service, mock_tracking_repo):

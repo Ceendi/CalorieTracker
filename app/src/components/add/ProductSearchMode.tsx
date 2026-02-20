@@ -60,9 +60,14 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
         <Text className="text-base font-bold text-primary">
           {Math.round(item.nutrition?.calories_per_100g || 0)} {t('addFood.summary.kcal')} <Text className="text-xs font-normal text-muted-foreground">/ 100g</Text>
         </Text>
-        <Text className="text-sm text-muted-foreground ml-3">
+        <Text className="text-sm text-muted-foreground ml-3 flex-1">
           {t('foodDetails.macroP')}: {(item.nutrition?.protein_per_100g || 0).toFixed(1)}  {t('foodDetails.macroF')}: {(item.nutrition?.fat_per_100g || 0).toFixed(1)}  {t('foodDetails.macroC')}: {(item.nutrition?.carbs_per_100g || 0).toFixed(1)}
         </Text>
+        {item.glycemic_index != null && (
+          <Text className="text-xs font-semibold text-indigo-500 ml-2">
+            IG {item.glycemic_index}
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );

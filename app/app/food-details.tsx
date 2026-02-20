@@ -23,6 +23,7 @@ import { useFoodEntry } from "@/hooks/useFoodEntry";
 import { NutrientSummary } from "@/components/food/NutrientSummary";
 import { MealTypeSelector } from "@/components/food/MealTypeSelector";
 import { QuantitySelector } from "@/components/food/QuantitySelector";
+import { calculateGL } from "@/utils/glycemicLoad";
 
 export default function FoodDetailsScreen() {
   const params = useLocalSearchParams<{
@@ -198,6 +199,33 @@ export default function FoodDetailsScreen() {
               fat={macros.fat}
               carbs={macros.carbs}
             />
+
+            {food.glycemic_index != null && (
+              (() => {
+                const gl = calculateGL(food.glycemic_index, macros.carbs);
+                const badgeColor =
+                  gl.label === 'niski'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+                    : gl.label === 'średni'
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400';
+                return (
+                  <View className="flex-row items-center bg-card rounded-2xl px-5 py-3 mb-6 border border-border shadow-sm gap-3">
+                    <View className="flex-1">
+                      <Text className="text-xs text-muted-foreground mb-0.5">
+                        Ładunek glikemiczny porcji
+                      </Text>
+                      <Text className="text-base font-bold text-foreground">
+                        ŁG {gl.value} <Text className="text-xs font-normal text-muted-foreground">(IG {food.glycemic_index})</Text>
+                      </Text>
+                    </View>
+                    <View className={`px-3 py-1 rounded-full ${badgeColor}`}>
+                      <Text className="text-xs font-bold capitalize">{gl.label}</Text>
+                    </View>
+                  </View>
+                );
+              })()
+            )}
           </ScrollView>
 
           <View className="bg-card border-t border-border">

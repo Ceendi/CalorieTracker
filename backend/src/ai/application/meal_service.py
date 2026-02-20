@@ -156,12 +156,13 @@ class MealRecognitionService:
                             "label": u.get("name"),
                             "unit": u.get("name"),
                             "grams": u.get("weight_g")
-                        } 
-                        for u in raw_product.get("units", []) 
+                        }
+                        for u in raw_product.get("units", [])
                         if u.get("name") and u.get("weight_g")
                     ],
                     notes=f"Vision Match. Score: {best_match.score:.2f}, Guard: {best_match.passed_guard}",
-                    alternatives=candidates[1:]
+                    alternatives=candidates[1:],
+                    glycemic_index=raw_product.get("glycemic_index"),
                 )
                 matched_products.append(matched)
             else:
@@ -328,12 +329,13 @@ class MealRecognitionService:
                             "label": u.get("name"),
                             "unit": u.get("name"),
                             "grams": u.get("weight_g")
-                        } 
-                        for u in raw_product.get("units", []) 
+                        }
+                        for u in raw_product.get("units", [])
                         if u.get("name") and u.get("weight_g")
                     ],
                     notes=f"E5 Score: {best_match.score:.2f}, Guard: {best_match.passed_guard}",
-                    alternatives=candidates[1:]
+                    alternatives=candidates[1:],
+                    glycemic_index=raw_product.get("glycemic_index"),
                 )
                 matched_products.append(matched)
             else:

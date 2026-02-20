@@ -42,6 +42,7 @@ class Food:
     units: Optional[List[UnitInfo]] = field(default_factory=list)
     owner_id: Optional[uuid.UUID] = None
     source: Optional[str] = None  # 'public', 'base_db', 'openfoodfacts', 'user'
+    glycemic_index: Optional[float] = None
 
     def __post_init__(self):
         if not self.name or not self.name.strip():

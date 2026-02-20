@@ -49,6 +49,7 @@ export const FoodProductResponseSchema = z.object({
   source: z.string().nullable().optional(),
   brand: z.string().nullable().optional(),
   units: z.array(UnitInfoSchema).optional().default([]),
+  glycemic_index: z.number().nullable().optional(),
 });
 
 export const FoodSearchResponseSchema = z.array(FoodProductResponseSchema);
@@ -71,6 +72,7 @@ export const MealEntryResponseSchema = z.object({
   unit_label: z.string().nullable().optional(),
   unit_grams: z.number().nullable().optional(),
   unit_quantity: z.number().nullable().optional(),
+  gi_per_100g: z.number().nullable().optional(),
 });
 
 export const DailyLogResponseSchema = z.object({
@@ -104,6 +106,7 @@ export const ProcessedFoodItemSchema = z.object({
   confidence: z.number().optional(),
   status: z.enum(["matched", "not_found", "needs_confirmation"]).optional(),
   units: z.array(UnitInfoSchema).optional(),
+  glycemic_index: z.number().nullable().optional(),
 });
 
 export const VoiceProcessResponseSchema = z.object({

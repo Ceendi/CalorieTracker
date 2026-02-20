@@ -17,6 +17,7 @@ class ProcessedFoodItemDTO(BaseModel):
     status: Literal["matched", "not_found", "needs_confirmation"] = Field(description="Match status")
     units: List[dict] = Field(default_factory=list, description="Available product units")
     notes: Optional[str] = Field(None, description="Additional notes")
+    glycemic_index: Optional[float] = Field(None, description="Glycemic index per 100g")
 
 
 class ProcessedMealDTO(BaseModel):
