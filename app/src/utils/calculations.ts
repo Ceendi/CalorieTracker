@@ -1,4 +1,4 @@
-import { User } from './validators';
+import { User } from '../types/user';
 
 /**
  * Clamp a number between min and max values
@@ -37,7 +37,7 @@ export const calculateBMR = (
         bmr -= 161;
     }
 
-    return Math.round(bmr);
+    return bmr;
 };
 
 /**
@@ -59,9 +59,9 @@ export const ActivityMultipliers: Record<string, number> = {
  * Kept for fallback purposes when API is unavailable.
  */
 export const GoalModifiers: Record<string, number> = {
-    lose: -500,      // ~0.5kg per week
-    maintain: 0,
-    gain: 300        // moderate surplus for muscle gain
+    lose: 0.8,       // 20% calorie deficit
+    maintain: 1.0,   // No adjustment
+    gain: 1.15       // 15% calorie surplus
 };
 
 /**
@@ -86,17 +86,15 @@ export const calculateDailyGoal = (profile: Partial<User>) => {
     const activityMultiplier = ActivityMultipliers[profile.activity_level || 'sedentary'] || 1.4;
     const tdee = bmr * activityMultiplier;
 
-    const goalModifier = GoalModifiers[profile.goal || 'maintain'] || 0;
+    const goalModifier = GoalModifiers[profile.goal || 'maintain'] || 1.0;
 
-    const calories = Math.round(tdee + goalModifier);
+    const calories = Math.round(tdee * goalModifier);
 
     // standard macros split: protein 20%, fat 30%, carbs 50%
-    // protein: 4 kcal/g
-    // fat: 9 kcal/g
-    // carbs: 4 kcal/g
-    const protein = Math.round((calories * 0.2) / 4);
-    const fat = Math.round((calories * 0.3) / 9);
-    const carbs = Math.round((calories * 0.5) / 4);
+    // Protein: 4 kcal/g, Fat: 9 kcal/g, Carbs: 4 kcal/g
+    const protein = roundTo((calories * 0.2) / 4, 1);
+    const fat = roundTo((calories * 0.3) / 9, 1);
+    const carbs = roundTo((calories * 0.5) / 4, 1);
 
     return { calories, protein, fat, carbs };
 };

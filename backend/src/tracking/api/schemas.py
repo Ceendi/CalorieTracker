@@ -8,11 +8,16 @@ from src.tracking.domain.entities import MealType
 
 
 class MealEntryBase(BaseModel):
-    product_id: UUID
+    product_id: Optional[UUID] = None
+    product_name: Optional[str] = None
     amount_grams: float
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
+    kcal_per_100g: Optional[int] = None
+    protein_per_100g: Optional[float] = None
+    fat_per_100g: Optional[float] = None
+    carbs_per_100g: Optional[float] = None
     gi_per_100g: Optional[float] = None
 
 

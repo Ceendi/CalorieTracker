@@ -222,7 +222,9 @@ class PgVectorSearchService:
         fetch_limit = limit * 10
 
         result = await session.execute(text("""
-            SELECT * FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, :weight)
+            SELECT h.*, f.glycemic_index 
+            FROM hybrid_food_search(:query, CAST(:embedding AS vector), :limit, :weight) h
+            LEFT JOIN foods f ON h.id = f.id
         """), {
             "query": query,
             "embedding": embedding_str,
@@ -242,6 +244,7 @@ class PgVectorSearchService:
                 "protein_per_100g": row.protein,
                 "fat_per_100g": row.fat,
                 "carbs_per_100g": row.carbs,
+                "glycemic_index": getattr(row, 'glycemic_index', None),
                 "score": float(row.score)
             })
 
@@ -402,7 +405,7 @@ class PgVectorSearchService:
         # RRF scores are low (max ~0.016), so use low threshold
         if results and results[0].score > 0.005:
             result = await session.execute(text("""
-                SELECT id, name, category, calories, protein, fat, carbs
+                SELECT id, name, category, calories, protein, fat, carbs, glycemic_index
                 FROM foods WHERE id = :id AND source IN ('fineli', 'kunachowicz')
             """), {"id": results[0].product_id})
 
@@ -415,7 +418,8 @@ class PgVectorSearchService:
                     "kcal_per_100g": row.calories,
                     "protein_per_100g": row.protein,
                     "fat_per_100g": row.fat,
-                    "carbs_per_100g": row.carbs
+                    "carbs_per_100g": row.carbs,
+                    "glycemic_index": getattr(row, 'glycemic_index', None)
                 }
 
                 if preferences:
@@ -448,7 +452,7 @@ class PgVectorSearchService:
             List of product dicts from the specified category
         """
         result = await session.execute(text("""
-            SELECT id, name, category, calories, protein, fat, carbs
+            SELECT id, name, category, calories, protein, fat, carbs, glycemic_index
             FROM foods
             WHERE category ILIKE :category AND source IN ('fineli', 'kunachowicz')
             LIMIT :limit
@@ -467,7 +471,8 @@ class PgVectorSearchService:
                 "kcal_per_100g": row.calories,
                 "protein_per_100g": row.protein,
                 "fat_per_100g": row.fat,
-                "carbs_per_100g": row.carbs
+                "carbs_per_100g": row.carbs,
+                "glycemic_index": getattr(row, 'glycemic_index', None)
             })
 
         return products

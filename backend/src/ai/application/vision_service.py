@@ -101,7 +101,8 @@ class VisionProcessingService:
                 quantity_unit_value=product.quantity_unit_value,
                 status="matched" if product.match_strategy != "vision_ai_estimate" else "needs_confirmation",
                 units=product.units,
-                notes=product.notes
+                notes=product.notes,
+                glycemic_index=product.glycemic_index
             ))
 
         # Unmatched chunks should ideally be empty for vision flow as we force fallback,

@@ -1428,6 +1428,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 protein=round(protein, 1),
                 fat=round(fat, 1),
                 carbs=round(carbs, 1),
+                gi_per_100g=product.get("glycemic_index"),
             )
             ingredients.append(ingredient)
 
@@ -1532,6 +1533,7 @@ class BielikMealPlannerAdapter(MealPlannerPort):
                 protein=round(protein, 1),
                 fat=round(fat, 1),
                 carbs=round(carbs, 1),
+                gi_per_100g=product.get("glycemic_index"),
             )
             ingredients.append(ingredient)
 

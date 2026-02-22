@@ -24,7 +24,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Colors } from "@/constants/theme";
 import { calculateDailyGoal } from "@/utils/calculations";
 import { useDailyTargets, mealPlanKeys } from "@/hooks/useMealPlan";
-import { User } from "@/utils/validators";
+import { User } from "@/types/user";
 import { userService } from "@/services/user.service";
 import { UserProfileSchema } from "@/schemas/user";
 
@@ -314,7 +314,7 @@ export default function ProfileScreen() {
               />
             ) : (
               <Text className="text-2xl font-bold text-primary">
-                {currentCalories.calories} kcal
+                {Math.round(currentCalories.calories)} kcal
               </Text>
             )}
           </View>
@@ -328,7 +328,7 @@ export default function ProfileScreen() {
                 <Text className="text-sm font-bold text-foreground">...</Text>
               ) : (
                 <Text className="text-sm font-bold text-foreground">
-                  {currentCalories.protein}g
+                  {Math.round(currentCalories.protein)}g
                 </Text>
               )}
             </View>
@@ -341,7 +341,7 @@ export default function ProfileScreen() {
                 <Text className="text-sm font-bold text-foreground">...</Text>
               ) : (
                 <Text className="text-sm font-bold text-foreground">
-                  {currentCalories.fat}g
+                  {Math.round(currentCalories.fat)}g
                 </Text>
               )}
             </View>
@@ -354,7 +354,7 @@ export default function ProfileScreen() {
                 <Text className="text-sm font-bold text-foreground">...</Text>
               ) : (
                 <Text className="text-sm font-bold text-foreground">
-                  {currentCalories.carbs}g
+                  {Math.round(currentCalories.carbs)}g
                 </Text>
               )}
             </View>

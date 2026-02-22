@@ -55,7 +55,12 @@ const DateItem = React.memo(function DateItem({
           styles.itemInner,
           {
             width: ITEM_WIDTH - 6,
-            backgroundColor: isSelected ? tintColor : "transparent",
+            backgroundColor: isSelected
+              ? tintColor
+              : Colors[colorScheme ?? "light"].card,
+            borderColor: isSelected
+              ? tintColor
+              : Colors[colorScheme ?? "light"].border,
           },
           isSelected && styles.itemSelected,
         ]}
@@ -96,9 +101,11 @@ const styles = StyleSheet.create({
   },
   itemInner: {
     height: 70,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    overflow: "hidden",
   },
   itemSelected: {
     shadowColor: "#312E81",

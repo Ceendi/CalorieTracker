@@ -69,11 +69,16 @@ export interface CreateEntryDto {
  * Maps to backend MealEntryBase
  */
 export interface BulkMealItem {
-  product_id: string;
+  product_id?: string;
+  product_name?: string;
   amount_grams: number;
   unit_label?: string;
   unit_grams?: number;
   unit_quantity?: number;
+  kcal_per_100g?: number;
+  protein_per_100g?: number;
+  fat_per_100g?: number;
+  carbs_per_100g?: number;
   gi_per_100g?: number | null;
 }
 
@@ -108,7 +113,7 @@ export interface MealEntry {
   daily_log_id?: string;
   user_id?: string;
   product: FoodProduct; // Constructed on frontend
-  product_id: string;
+  product_id: string | null;
   date: string;
   meal_type: MealType;
   amount_grams: number;

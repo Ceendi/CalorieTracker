@@ -57,7 +57,7 @@ export const FoodSearchResponseSchema = z.array(FoodProductResponseSchema);
 export const MealEntryResponseSchema = z.object({
   id: z.uuid(),
   daily_log_id: z.uuid(),
-  product_id: z.uuid(),
+  product_id: z.uuid().nullable(),
   product_name: z.string().default("Unknown"),
   amount_grams: z.number(),
   meal_type: z.string(),

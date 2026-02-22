@@ -689,6 +689,7 @@ class MealPlanService:
                     protein=round(product.get("protein_per_100g", 0) * factor, 1),
                     fat=round(product.get("fat_per_100g", 0) * factor, 1),
                     carbs=round(product.get("carbs_per_100g", 0) * factor, 1),
+                    gi_per_100g=product.get("glycemic_index"),
                 )
                 enriched_ingredients.append(enriched_ing)
                 recalc_needed = True

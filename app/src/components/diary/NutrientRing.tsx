@@ -37,7 +37,7 @@ export function NutrientRing({ label, current, total, unit, color, bgColor }: Nu
       
       <Text className="text-foreground font-bold text-lg -mb-0.5">
           {Math.round(current)}
-          <Text className="text-xs font-normal text-muted-foreground">/{total}{unit}</Text>
+          <Text className="text-xs font-normal text-muted-foreground">/{Math.round(total)}{unit}</Text>
       </Text>
       <Text 
         className="text-xs font-medium text-muted-foreground uppercase tracking-wide"

@@ -386,18 +386,18 @@ _GI_SOURCE_2021: dict[str, GIEntry] = {
     "kasza bulgur":           GIEntry(46, 4, "Bulgur, boiled", "Atkinson2021"),
     "bulgur":                 GIEntry(46, 4, "Bulgur, boiled", "Atkinson2021"),
 
-    # "Semolina, cooked" (GI: 54 ± 4)
-    "kasza manna":            GIEntry(54, 4, "Semolina, cooked", "Atkinson2021"),
-    "semolina":               GIEntry(54, 4, "Semolina, cooked", "Atkinson2021"),
+    # "Semolina, steamed" (GI: 55 ± 9)
+    "kasza manna":            GIEntry(55, 9, "Semolina, steamed", "Atkinson2021"),
+    "semolina":               GIEntry(55, 9, "Semolina, steamed", "Atkinson2021"),
 
     # "Quinoa, cooked" (GI: 53 ± 5)
     "quinoa":                 GIEntry(53, 5, "Quinoa, cooked", "Atkinson2021"),
     "komosa ryzowa":          GIEntry(53, 5, "Quinoa, cooked", "Atkinson2021"),
 
     # ── Rye bread (cautious: wide GI variation 41–86 across studies) ─────────
-    # "Rye bread, wholegrain" (GI: 51 ± 4) | "Pumpernickel bread" (GI: 49 ± 4)
-    "chleb zytni":            GIEntry(51, 4, "Rye bread, wholegrain", "Atkinson2021"),
-    "chleb razowy zytni":     GIEntry(51, 4, "Rye bread, wholegrain", "Atkinson2021"),
+    # "Rye bread, wholegrain" (GI: 53 ± 3) | "Pumpernickel bread" (GI: 49 ± 4)
+    "chleb zytni":            GIEntry(53, 3, "Rye bread, Country Grain Organic", "Atkinson2021"),
+    "chleb razowy zytni":     GIEntry(53, 3, "Rye bread, Country Grain Organic", "Atkinson2021"),
     "pumpernikiel":           GIEntry(49, 4, "Pumpernickel bread",    "Atkinson2021"),
 
     # ── Fresh fruits ─────────────────────────────────────────────────────────
@@ -406,52 +406,52 @@ _GI_SOURCE_2021: dict[str, GIEntry] = {
     "gruszki":                GIEntry(33, 3, "Pear, raw", "Atkinson2021"),
 
     # "Cherries, raw" or "Sour cherries, raw" (GI: 22 ± 0) 
-    "wisnie":                 GIEntry(22, 0, "Cherries, raw", "Atkinson2021"),
-    "czeresnie":              GIEntry(22, 0, "Cherries, raw", "Atkinson2021"),
+    "wisnie":                 GIEntry(22, 3, "Sour cherries, raw", "Atkinson2021"),
+    "czeresnie":              GIEntry(29, 4, "Cherries, raw", "Atkinson2021"),
 
     # "Kiwi fruit, raw" (GI: 50 ± 2)
-    "kiwi":                   GIEntry(50, 2, "Kiwi fruit, raw", "Atkinson2021"),
+    "kiwi":                   GIEntry(47, 4, "Kiwi fruit, raw", "Atkinson2021"),
 
     # "Grapes, raw" (GI: 49 ± 2)
-    "winogrona":              GIEntry(49, 2, "Grapes, raw", "Atkinson2021"),
-    "winogrono":              GIEntry(49, 2, "Grapes, raw", "Atkinson2021"),
+    "winogrona":              GIEntry(49, 2, "Grapes, raw (mean)", "Atkinson2021"),
+    "winogrono":              GIEntry(49, 2, "Grapes, raw (mean)", "Atkinson2021"),
 
     # "Plum, raw" (GI: 40 ± 3)
-    "sliwki":                 GIEntry(40, 3, "Plum, raw", "Atkinson2021"),
-    "sliwka":                 GIEntry(40, 3, "Plum, raw", "Atkinson2021"),
+    "sliwki":                 GIEntry(40, 3, "Plum, raw (mean)", "Atkinson2021"),
+    "sliwka":                 GIEntry(40, 3, "Plum, raw (mean)", "Atkinson2021"),
 
     # "Grapefruit, raw" (GI: 25 ± 3)
-    "grejpfrut":              GIEntry(25, 3, "Grapefruit, raw", "Atkinson2021"),
+    "grejpfrut":              GIEntry(26, 4, "Grapefruit, raw", "Atkinson2021"),
 
     # "Strawberries, raw" (GI: 40 ± 4)
-    "truskawki":              GIEntry(40, 4, "Strawberries, raw", "Atkinson2021"),
-    "truskawka":              GIEntry(40, 4, "Strawberries, raw", "Atkinson2021"),
+    "truskawki":              GIEntry(40, 7, "Strawberries, raw", "Atkinson2021"),
+    "truskawka":              GIEntry(40, 7, "Strawberries, raw", "Atkinson2021"),
 
     # "Peach, raw" (GI: 42 ± 4)
-    "brzoskwinia":            GIEntry(42, 4, "Peach, raw", "Atkinson2021"),
+    "brzoskwinia":            GIEntry(42, 4, "Peach, raw (mean)", "Atkinson2021"),
 
     # ── Legumes ──────────────────────────────────────────────────────────────
-    # "Navy/white beans, cooked" (GI: 31 ± 3)
-    "fasola biala":           GIEntry(31, 3, "Navy/white beans, cooked", "Atkinson2021"),
-    "fasola cannellini":      GIEntry(31, 3, "Navy/white beans, cooked", "Atkinson2021"),
-    "fasola jasna":           GIEntry(31, 3, "Navy/white beans, cooked", "Atkinson2021"),
+    # "Navy/white beans, boiled" (GI: 31 ± 3)
+    "fasola biala":           GIEntry(31, 4, "Navy/white beans, boiled", "Atkinson2021"),
+    "fasola cannellini":      GIEntry(31, 4, "Navy/white beans, boiled", "Atkinson2021"),
+    "fasola jasna":           GIEntry(31, 4, "Navy/white beans, boiled", "Atkinson2021"),
 
-    # "Peas, green, boiled" (GI: 51 ± 5)
-    "groszek":                GIEntry(51, 5, "Peas, green, boiled", "Atkinson2021"),
-    "groch zielony":          GIEntry(51, 5, "Peas, green, boiled", "Atkinson2021"),
+    # "Peas, green, heated" (GI: 51 ± 5)
+    "groszek":                GIEntry(42, 4, "Peas, green, heated", "Atkinson2021"),
+    "groch zielony":          GIEntry(42, 4, "Peas, green, heated", "Atkinson2021"),
 
     # "Split peas, yellow, boiled" (GI: 32 ± 2)
-    "groch polowkowy":        GIEntry(32, 2, "Split peas, yellow, boiled", "Atkinson2021"),
-    "groch luskany":          GIEntry(32, 2, "Split peas, yellow, boiled", "Atkinson2021"),
+    "groch polowkowy":        GIEntry(25, 6, "Split peas, yellow, boiled", "Atkinson2021"),
+    "groch luskany":          GIEntry(25, 6, "Split peas, yellow, boiled", "Atkinson2021"),
 
-    # "Broad beans / fava beans, cooked" (GI: 79 ± 16)
-    "bob":                    GIEntry(79, 16, "Broad beans, cooked", "Atkinson2021"),
+    # "Broad beans / fava beans, boiled" (GI: 79 ± 16)
+    "bob":                    GIEntry(79, 16, "Broad beans, boiled", "Atkinson2021"),
 
     # ── Vegetables ───────────────────────────────────────────────────────────
-    # "Beetroot, cooked" (GI: 64 ± 16)
-    "burak":                  GIEntry(64, 16, "Beetroot, cooked", "Atkinson2021"),
-    "burak cwikla":           GIEntry(64, 16, "Beetroot, cooked", "Atkinson2021"),
-    "cwikla":                 GIEntry(64, 16, "Beetroot, cooked", "Atkinson2021"),
+    # "Beetroot, boiled" (GI: 64 ± 16)
+    "burak":                  GIEntry(64, 16, "Beetroot, boiled", "Atkinson2021"),
+    "burak cwikla":           GIEntry(64, 16, "Beetroot, boiled", "Atkinson2021"),
+    "cwikla":                 GIEntry(64, 16, "Beetroot, boiled", "Atkinson2021"),
 }
 
 

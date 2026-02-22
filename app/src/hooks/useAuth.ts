@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { storageService } from "../services/storage.service";
 import { authService } from "../services/auth.service";
-import { User, LoginInput, RegisterInput } from "../utils/validators";
+import { User } from "../types/user";
+import { LoginInput, RegisterInput } from "../utils/validators";
 import { setOnUnauthorizedCallback } from "../services/api.client";
 import {
   isNetworkError,

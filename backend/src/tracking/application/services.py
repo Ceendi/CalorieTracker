@@ -42,6 +42,38 @@ class TrackingService:
             gi_per_100g=gi_per_100g if gi_per_100g is not None else product.glycemic_index
         )
 
+    def _create_custom_meal_entry(
+        self,
+        daily_log_id: uuid.UUID,
+        meal_type: MealType,
+        product_name: str,
+        amount_grams: float,
+        unit_label: Optional[str] = None,
+        unit_grams: Optional[float] = None,
+        unit_quantity: Optional[float] = None,
+        kcal_per_100g: int = 0,
+        protein_per_100g: float = 0.0,
+        fat_per_100g: float = 0.0,
+        carbs_per_100g: float = 0.0,
+        gi_per_100g: Optional[float] = None
+    ) -> MealEntry:
+        return MealEntry(
+            id=uuid.uuid4(),
+            daily_log_id=daily_log_id,
+            meal_type=meal_type,
+            product_id=None,
+            product_name=product_name,
+            amount_grams=amount_grams,
+            unit_label=unit_label,
+            unit_grams=unit_grams,
+            unit_quantity=unit_quantity,
+            kcal_per_100g=kcal_per_100g,
+            protein_per_100g=protein_per_100g,
+            fat_per_100g=fat_per_100g,
+            carbs_per_100g=carbs_per_100g,
+            gi_per_100g=gi_per_100g
+        )
+
     async def add_meal_entry(
         self,
         user_id: uuid.UUID,
@@ -89,21 +121,37 @@ class TrackingService:
         entries_to_add = []
 
         for item_data in items:
-            product_id = item_data['product_id']
-            product = await self.food_repo.get_by_id(product_id)
-            if not product:
-                raise ProductNotFoundInTrackingError(str(product_id))
+            product_id = item_data.get('product_id')
+            if product_id:
+                product = await self.food_repo.get_by_id(product_id)
+                if not product:
+                    raise ProductNotFoundInTrackingError(str(product_id))
 
-            entry_domain = self._create_meal_entry(
-                daily_log_id=daily_log.id,
-                meal_type=meal_type,
-                product=product,
-                amount_grams=item_data['amount_grams'],
-                unit_label=item_data.get('unit_label'),
-                unit_grams=item_data.get('unit_grams'),
-                unit_quantity=item_data.get('unit_quantity'),
-                gi_per_100g=item_data.get('gi_per_100g')
-            )
+                entry_domain = self._create_meal_entry(
+                    daily_log_id=daily_log.id,
+                    meal_type=meal_type,
+                    product=product,
+                    amount_grams=item_data['amount_grams'],
+                    unit_label=item_data.get('unit_label'),
+                    unit_grams=item_data.get('unit_grams'),
+                    unit_quantity=item_data.get('unit_quantity'),
+                    gi_per_100g=item_data.get('gi_per_100g')
+                )
+            else:
+                entry_domain = self._create_custom_meal_entry(
+                    daily_log_id=daily_log.id,
+                    meal_type=meal_type,
+                    product_name=item_data.get('product_name', 'Nieznany produkt'),
+                    amount_grams=item_data['amount_grams'],
+                    unit_label=item_data.get('unit_label'),
+                    unit_grams=item_data.get('unit_grams'),
+                    unit_quantity=item_data.get('unit_quantity'),
+                    kcal_per_100g=item_data.get('kcal_per_100g', 0),
+                    protein_per_100g=item_data.get('protein_per_100g', 0.0),
+                    fat_per_100g=item_data.get('fat_per_100g', 0.0),
+                    carbs_per_100g=item_data.get('carbs_per_100g', 0.0),
+                    gi_per_100g=item_data.get('gi_per_100g')
+                )
             entries_to_add.append(entry_domain)
 
         await self.tracking_repo.add_entries_bulk(user_id, entries_to_add)

@@ -85,9 +85,9 @@ export default function AddScreen() {
             const today = formatDateForApi();
 
             const bulkItems = mealToLog.items
-                .filter(item => item.status === 'matched' && item.product_id)
                 .map(item => {
-                    const productId = String(item.product_id);
+                    const hasValidId = item.product_id && item.product_id !== "00000000-0000-0000-0000-000000000000";
+                    const productId = hasValidId ? String(item.product_id) : undefined;
 
                     let unitLabel: string | undefined;
                     let unitGrams: number | undefined;
@@ -105,14 +105,21 @@ export default function AddScreen() {
                         }
                     }
 
+                    const scale = item.quantity_grams > 0 ? (100 / item.quantity_grams) : 0;
+
                     return {
                         product_id: productId,
+                        product_name: item.name,
                         amount_grams: item.quantity_grams,
                         ...(unitLabel ? {
                             unit_label: unitLabel,
                             unit_grams: unitGrams,
                             unit_quantity: unitQuantity,
                         } : {}),
+                        kcal_per_100g: Math.round(item.kcal * scale),
+                        protein_per_100g: Number((item.protein * scale).toFixed(1)),
+                        fat_per_100g: Number((item.fat * scale).toFixed(1)),
+                        carbs_per_100g: Number((item.carbs * scale).toFixed(1)),
                         gi_per_100g: item.glycemic_index
                     };
                 });
