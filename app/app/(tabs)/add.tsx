@@ -15,6 +15,7 @@ import { AudioEntryMode } from '@/components/add/AudioEntryMode';
 import { PhotoEntryMode } from '@/components/add/PhotoEntryMode';
 import { Colors } from '@/constants/theme';
 import { formatDateForApi } from '@/utils/date';
+import { matchUnit } from '@/utils/matchUnit';
 
 type EntryMode = 'product' | 'audio' | 'photo' | 'barcode';
 
@@ -88,18 +89,31 @@ export default function AddScreen() {
                 .map(item => {
                     const productId = String(item.product_id);
 
-                    let unitGrams = 1;
-                    if (item.unit_matched !== 'g' && item.unit_matched !== 'gram' && item.units) {
-                        const unit = item.units.find(u => u.label === item.unit_matched);
-                        if (unit) unitGrams = unit.grams;
+                    let unitLabel: string | undefined;
+                    let unitGrams: number | undefined;
+                    let unitQuantity: number | undefined;
+
+                    const isGramLike = !item.unit_matched || ['g', 'gram', 'gramy'].includes(item.unit_matched.toLowerCase());
+
+                    if (!isGramLike && item.units) {
+                        const gramsPerUnit = item.quantity_grams / Math.max(item.quantity_unit_value, 1);
+                        const matchedUnit = matchUnit(item.unit_matched, item.units, gramsPerUnit);
+                        if (matchedUnit) {
+                            unitLabel = matchedUnit.label;
+                            unitGrams = matchedUnit.grams;
+                            unitQuantity = item.quantity_unit_value;
+                        }
                     }
 
                     return {
                         product_id: productId,
                         amount_grams: item.quantity_grams,
-                        unit_label: item.unit_matched,
-                        unit_grams: unitGrams,
-                        unit_quantity: item.quantity_unit_value
+                        ...(unitLabel ? {
+                            unit_label: unitLabel,
+                            unit_grams: unitGrams,
+                            unit_quantity: unitQuantity,
+                        } : {}),
+                        gi_per_100g: item.glycemic_index
                     };
                 });
 

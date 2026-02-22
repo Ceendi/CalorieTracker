@@ -17,6 +17,7 @@ import { Colors } from "@/constants/theme";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Day, Meal, Ingredient } from "@/schemas/meal-plan";
 import { FoodProduct } from "@/types/food";
+import { calculateGL } from "@/utils/glycemicLoad";
 
 const MEAL_TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
   breakfast: { icon: "sun.horizon.fill", color: "#F59E0B" },
@@ -138,7 +139,7 @@ export default function PlanDetailsScreen() {
     <TouchableOpacity
       key={ingredient.id}
       onPress={() => handleAddIngredientToDiary(ingredient, mealType)}
-      className="flex-row items-center py-3 border-b border-border/50"
+      className="flex-row items-center justify-between py-3 border-b border-border/50"
       activeOpacity={0.6}
     >
       <View className="flex-1 pr-3">
@@ -148,9 +149,25 @@ export default function PlanDetailsScreen() {
           {ingredient.unit_label && ` (${ingredient.unit_label})`}
         </Text>
       </View>
-      <Text className="text-foreground text-sm font-medium mr-3">
-        {Math.round(ingredient.kcal ?? 0)} kcal
-      </Text>
+      <View className="items-end mr-3">
+        <Text className="text-foreground text-sm font-medium">
+          {Math.round(ingredient.kcal ?? 0)} kcal
+        </Text>
+        {ingredient.gi_per_100g != null && ingredient.carbs != null && (
+            (() => {
+                const gl = calculateGL(ingredient.gi_per_100g, ingredient.carbs);
+                const color =
+                    gl.label === 'low' ? 'text-green-600 dark:text-green-400'
+                    : gl.label === 'medium' ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-red-600 dark:text-red-400';
+                return (
+                    <Text className={`text-xs font-bold ${color}`}>
+                        {t('foodDetails.gl.title')} {Math.round(gl.value)}
+                    </Text>
+                );
+            })()
+        )}
+      </View>
       <IconSymbol
         name="plus.circle.fill"
         size={22}

@@ -17,6 +17,7 @@ import { calculateItemMacros } from '@/utils/calculations';
 import { calculateGL } from '@/utils/glycemicLoad';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/theme';
+import { matchUnit } from '@/utils/matchUnit';
 
 interface EditProductModalProps {
   visible: boolean;
@@ -46,11 +47,8 @@ export function EditProductModal({
       if (!currentUnitLabel || ['g', 'gram', 'gramy'].includes(currentUnitLabel.toLowerCase())) {
         setSelectedUnit(null);
       } else {
-        const found = item.units?.find(u => 
-            u.label === currentUnitLabel || 
-            u.label.toLowerCase() === currentUnitLabel.toLowerCase()
-        );
-        setSelectedUnit(found || null);
+        const gramsPerUnit = item.quantity_grams / Math.max(item.quantity_unit_value, 1);
+        setSelectedUnit(matchUnit(currentUnitLabel, item.units, gramsPerUnit));
       }
     }
   }, [item, visible]);
@@ -155,22 +153,22 @@ export function EditProductModal({
                   </View>
                 </View>
 
-                <View className="flex-row gap-4 mb-8 bg-secondary/50 dark:bg-black/20 p-4 rounded-2xl">
+                <View className="flex-row gap-2 mb-8 bg-secondary/50 dark:bg-black/20 p-4 rounded-2xl">
                     <View className="flex-1">
-                        <Text className="text-[10px] font-bold text-sky-500 uppercase mb-0.5">{t('foodDetails.protein')}</Text>
-                        <Text className="text-sm font-black text-foreground">
+                        <Text className="text-[10px] font-bold text-sky-500 uppercase mb-0.5" numberOfLines={1} adjustsFontSizeToFit>{t('foodDetails.protein')}</Text>
+                        <Text className="text-sm font-black text-foreground" numberOfLines={1} adjustsFontSizeToFit>
                             {calculatedValues.protein.toFixed(1)}g
                         </Text>
                     </View>
                     <View className="flex-1">
-                        <Text className="text-[10px] font-bold text-amber-500 uppercase mb-0.5">{t('foodDetails.fat')}</Text>
-                        <Text className="text-sm font-black text-foreground">
+                        <Text className="text-[10px] font-bold text-amber-500 uppercase mb-0.5" numberOfLines={1} adjustsFontSizeToFit>{t('foodDetails.fat')}</Text>
+                        <Text className="text-sm font-black text-foreground" numberOfLines={1} adjustsFontSizeToFit>
                             {calculatedValues.fat.toFixed(1)}g
                         </Text>
                     </View>
                     <View className="flex-1">
-                        <Text className="text-[10px] font-bold text-orange-500 uppercase mb-0.5">{t('foodDetails.carbs')}</Text>
-                        <Text className="text-sm font-black text-foreground">
+                        <Text className="text-[10px] font-bold text-orange-500 uppercase mb-0.5" numberOfLines={1} adjustsFontSizeToFit>{t('foodDetails.carbs')}</Text>
+                        <Text className="text-sm font-black text-foreground" numberOfLines={1} adjustsFontSizeToFit>
                             {calculatedValues.carbs.toFixed(1)}g
                         </Text>
                     </View>
@@ -178,14 +176,16 @@ export function EditProductModal({
                         (() => {
                             const gl = calculateGL(item.glycemic_index, calculatedValues.carbs);
                             const color =
-                                gl.label === 'niski' ? 'text-green-500'
-                                : gl.label === 'średni' ? 'text-amber-500'
+                                gl.label === 'low' ? 'text-green-500'
+                                : gl.label === 'medium' ? 'text-amber-500'
                                 : 'text-red-500';
                             return (
                                 <View className="flex-1">
-                                    <Text className="text-[10px] font-bold text-indigo-500 uppercase mb-0.5">ŁG</Text>
-                                    <Text className={`text-sm font-black ${color}`}>
-                                        {gl.value}
+                                    <View className="flex-row items-baseline gap-1 mb-0.5">
+                                      <Text className="text-[10px] font-bold text-indigo-500 uppercase" numberOfLines={1} adjustsFontSizeToFit>{t('foodDetails.gl.title')}</Text>
+                                    </View>
+                                    <Text className={`text-xs font-black ${color}`} numberOfLines={1} adjustsFontSizeToFit>
+                                        {Math.round(gl.value)} - {t(`foodDetails.gl.${gl.label}`)}
                                     </Text>
                                 </View>
                             );
@@ -249,21 +249,23 @@ export function EditProductModal({
                       </Text>
                     </TouchableOpacity>
 
-                    {item.units?.map((unit, idx) => (
+                    {item.units?.map((unit, idx) => {
+                      const isSelected = selectedUnit?.label === unit.label && selectedUnit?.grams === unit.grams;
+                      return (
                       <TouchableOpacity
                         key={idx}
                         onPress={() => handleUnitChange(unit)}
                         className={`mr-2 px-5 py-3 rounded-xl border ${
-                          selectedUnit?.label === unit.label 
+                          isSelected
                             ? 'bg-indigo-600 border-indigo-600' 
                             : 'bg-secondary/50 dark:bg-black/20 border-transparent'
                         }`}
                       >
-                        <Text className={`font-bold ${selectedUnit?.label === unit.label ? 'text-white' : 'text-foreground'}`}>
+                        <Text className={`font-bold ${isSelected ? 'text-white' : 'text-foreground'}`}>
                           {unit.label} ({unit.grams}g)
                         </Text>
                       </TouchableOpacity>
-                    ))}
+                    )})}
                   </ScrollView>
                 </View>
 

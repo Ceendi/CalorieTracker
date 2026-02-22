@@ -103,6 +103,7 @@ class MealPlanRepository(MealPlanRepositoryPort):
                         protein=ing.protein,
                         fat=ing.fat,
                         carbs=ing.carbs,
+                        gi_per_100g=ing.gi_per_100g,
                         sort_order=ing_idx
                     )
                     db_meal.ingredients.append(db_ingredient)
@@ -236,6 +237,7 @@ class MealPlanRepository(MealPlanRepositoryPort):
                         protein=orm_ing.protein or 0.0,
                         fat=orm_ing.fat or 0.0,
                         carbs=orm_ing.carbs or 0.0,
+                        gi_per_100g=orm_ing.gi_per_100g,
                     ))
                 meals.append(GeneratedMeal(
                     meal_type=orm_meal.meal_type,

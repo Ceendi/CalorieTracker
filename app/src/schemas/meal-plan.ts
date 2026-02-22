@@ -51,6 +51,7 @@ export const IngredientSchema = z.object({
   protein: z.number().nullable().optional(),
   fat: z.number().nullable().optional(),
   carbs: z.number().nullable().optional(),
+  gi_per_100g: z.number().nullable().optional(),
 });
 
 export const MealSchema = z.object({

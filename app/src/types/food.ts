@@ -74,6 +74,7 @@ export interface BulkMealItem {
   unit_label?: string;
   unit_grams?: number;
   unit_quantity?: number;
+  gi_per_100g?: number | null;
 }
 
 /**
@@ -94,6 +95,7 @@ export interface CreateFoodDto {
   name: string;
   barcode?: string;
   nutrition: Nutrition;
+  glycemic_index?: number | null;
 }
 
 /**

@@ -11,6 +11,7 @@ import { VoiceMealSummary } from "./VoiceMealSummary";
 import { ProcessedMeal, ProcessedFoodItem } from "@/types/ai";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/theme";
+import { calculateGL } from "@/utils/glycemicLoad";
 
 const FoodItemReview = React.memo(
   ({
@@ -86,6 +87,20 @@ const FoodItemReview = React.memo(
                 kcal
               </Text>
             </Text>
+            {item.glycemic_index != null && item.carbs != null && (
+              (() => {
+                const gl = calculateGL(item.glycemic_index, item.carbs);
+                const color =
+                    gl.label === 'low' ? 'text-green-600 dark:text-green-400'
+                    : gl.label === 'medium' ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-red-600 dark:text-red-400';
+                return (
+                    <Text className={`text-xs font-bold mt-0.5 ${color}`}>
+                        {t('foodDetails.gl.title')} {Math.round(gl.value)}
+                    </Text>
+                );
+              })()
+            )}
           </View>
         </View>
       </Pressable>

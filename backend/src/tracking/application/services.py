@@ -22,7 +22,8 @@ class TrackingService:
         amount_grams: float,
         unit_label: Optional[str] = None,
         unit_grams: Optional[float] = None,
-        unit_quantity: Optional[float] = None
+        unit_quantity: Optional[float] = None,
+        gi_per_100g: Optional[float] = None
     ) -> MealEntry:
         return MealEntry(
             id=uuid.uuid4(),
@@ -38,7 +39,7 @@ class TrackingService:
             protein_per_100g=product.nutrition.protein_per_100g,
             fat_per_100g=product.nutrition.fat_per_100g,
             carbs_per_100g=product.nutrition.carbs_per_100g,
-            gi_per_100g=product.glycemic_index
+            gi_per_100g=gi_per_100g if gi_per_100g is not None else product.glycemic_index
         )
 
     async def add_meal_entry(
@@ -100,7 +101,8 @@ class TrackingService:
                 amount_grams=item_data['amount_grams'],
                 unit_label=item_data.get('unit_label'),
                 unit_grams=item_data.get('unit_grams'),
-                unit_quantity=item_data.get('unit_quantity')
+                unit_quantity=item_data.get('unit_quantity'),
+                gi_per_100g=item_data.get('gi_per_100g')
             )
             entries_to_add.append(entry_domain)
 

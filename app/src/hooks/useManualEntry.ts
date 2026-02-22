@@ -39,7 +39,8 @@ export function useManualEntry() {
       fat: 0,
       carbs: 0,
       weight: 100,
-      mealType: getInitialMealType()
+      mealType: getInitialMealType(),
+      glycemic_index: null
     }
   });
 
@@ -57,7 +58,8 @@ export function useManualEntry() {
                   protein_per_100g: Number(data.protein) || 0,
                   fat_per_100g: Number(data.fat) || 0,
                   carbs_per_100g: Number(data.carbs) || 0
-              }
+              },
+              glycemic_index: data.glycemic_index ? Number(data.glycemic_index) : undefined
           };
 
           let productId: string;

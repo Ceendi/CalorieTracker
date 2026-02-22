@@ -7,9 +7,10 @@ interface NutrientSummaryProps {
   protein: number;
   fat: number;
   carbs: number;
+  gl?: number;
 }
 
-export function NutrientSummary({ calories, protein, fat, carbs }: NutrientSummaryProps) {
+export function NutrientSummary({ calories, protein, fat, carbs, gl }: NutrientSummaryProps) {
   const { t } = useLanguage();
 
   return (
@@ -33,6 +34,15 @@ export function NutrientSummary({ calories, protein, fat, carbs }: NutrientSumma
         <Text className="text-lg font-bold text-foreground mb-1">{carbs.toFixed(1)}g</Text>
         <Text className="text-xs text-muted-foreground">{t('manualEntry.carbs')}</Text>
       </View>
+      {gl !== undefined && (
+          <>
+            <View className="w-px h-10 bg-border" />
+            <View className="items-center flex-1">
+              <Text className="text-lg font-black text-indigo-500 mb-1">{gl}</Text>
+              <Text className="text-xs font-bold text-muted-foreground uppercase">{t('foodDetails.gl.title')}</Text>
+            </View>
+          </>
+      )}
     </View>
   );
 }

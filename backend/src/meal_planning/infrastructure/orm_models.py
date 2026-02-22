@@ -184,6 +184,7 @@ class MealPlanIngredientModel(UUIDModel):
     protein: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     fat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     carbs: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    gi_per_100g: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
 

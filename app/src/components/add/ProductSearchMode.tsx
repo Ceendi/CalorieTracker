@@ -65,7 +65,7 @@ export function ProductSearchMode({ onItemPress, onManualPress }: ProductSearchM
         </Text>
         {item.glycemic_index != null && (
           <Text className="text-xs font-semibold text-indigo-500 ml-2">
-            IG {item.glycemic_index}
+            {t('foodDetails.gl.ig')} {item.glycemic_index}
           </Text>
         )}
       </View>

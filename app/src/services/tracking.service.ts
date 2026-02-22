@@ -66,7 +66,8 @@ function mapLog(apiLog: DailyLogResponse): DailyLog {
           protein_per_100g: e.protein_per_100g,
           fat_per_100g: e.fat_per_100g,
           carbs_per_100g: e.carbs_per_100g,
-        }
+        },
+        glycemic_index: e.gi_per_100g ?? undefined,
       },
       calories: e.computed_kcal,
       protein: e.computed_protein,
@@ -75,6 +76,7 @@ function mapLog(apiLog: DailyLogResponse): DailyLog {
       unit_label: e.unit_label ?? undefined,
       unit_grams: e.unit_grams ?? undefined,
       unit_quantity: e.unit_quantity ?? undefined,
+      gi_per_100g: e.gi_per_100g ?? undefined,
     }))
   };
 }

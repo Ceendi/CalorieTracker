@@ -30,7 +30,8 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             kcal_per_100g=orm_entry.kcal_per_100g,
             protein_per_100g=orm_entry.protein_per_100g,
             fat_per_100g=orm_entry.fat_per_100g,
-            carbs_per_100g=orm_entry.carbs_per_100g
+            carbs_per_100g=orm_entry.carbs_per_100g,
+            gi_per_100g=orm_entry.gi_per_100g
         )
 
     @staticmethod
@@ -48,7 +49,8 @@ class SqlAlchemyTrackingRepository(TrackingRepositoryPort):
             kcal_per_100g=entry.kcal_per_100g,
             protein_per_100g=entry.protein_per_100g,
             fat_per_100g=entry.fat_per_100g,
-            carbs_per_100g=entry.carbs_per_100g
+            carbs_per_100g=entry.carbs_per_100g,
+            gi_per_100g=entry.gi_per_100g
         )
 
     async def get_daily_log(self, user_id: UUID, log_date: date) -> Optional[DailyLog]:

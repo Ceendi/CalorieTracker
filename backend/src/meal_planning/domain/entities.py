@@ -90,6 +90,7 @@ class GeneratedIngredient:
     protein: float
     fat: float
     carbs: float
+    gi_per_100g: Optional[float] = None
 
 
 @dataclass

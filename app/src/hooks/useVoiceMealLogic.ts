@@ -96,7 +96,7 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
   const addManualItem = (product: FoodProduct) => {
     if (!localMeal) return;
     const newItem: ProcessedFoodItem = {
-      product_id: product.id ? Number(product.id) : null,
+      product_id: product.id || null,
       name: product.name,
       quantity_grams: 100,
       quantity_unit_value: 100,
@@ -105,6 +105,7 @@ export function useVoiceMealLogic({ initialMeal, t }: UseVoiceMealLogicProps) {
       protein: product.nutrition.protein_per_100g,
       fat: product.nutrition.fat_per_100g,
       carbs: product.nutrition.carbs_per_100g,
+      glycemic_index: product.glycemic_index,
       confidence: 1.0,
       status: "matched",
       brand: product.brand,

@@ -107,6 +107,30 @@ export function MacroInputGrid({ control }: MacroInputGridProps) {
                 </View>
             </View>
         </View>
+
+        <View className="flex-row gap-3 mt-3">
+            <View className="flex-1">
+                <Text className="text-xs text-muted-foreground mb-1">{t('foodDetails.gl.ig')} ({t('menu.optional') || 'Opcjonalnie'})</Text>
+                <View className="border border-border rounded-xl bg-background h-12 justify-center px-3">
+                    <Controller
+                        control={control}
+                        name="glycemic_index"
+                        render={({ field: { onChange, value } }) => (
+                            <TextInput
+                                testID="macro-gi"
+                                className="text-foreground w-full"
+                                style={{ fontSize: 16, textAlignVertical: 'center', paddingVertical: 0, includeFontPadding: false, height: '100%' }}
+                                value={value?.toString()}
+                                onChangeText={onChange}
+                                keyboardType="numeric"
+                                placeholder="0"
+                                placeholderTextColor={Colors[theme].placeholder}
+                            />
+                        )}
+                    />
+                </View>
+            </View>
+        </View>
     </View>
   );
 }

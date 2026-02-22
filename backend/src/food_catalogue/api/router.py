@@ -112,7 +112,8 @@ async def create_custom_product(
         barcode=payload.barcode,
         nutrition=domain_nutrition,
         owner_id=user.id,
-        source="user"
+        source="user",
+        glycemic_index=payload.glycemic_index
     )
 
     saved_food = await svc.create_custom_food(domain_food, owner_id=user.id)

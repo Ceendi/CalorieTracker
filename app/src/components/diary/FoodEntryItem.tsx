@@ -61,12 +61,12 @@ export function FoodEntryItem({ entry, onDelete, onPress }: FoodEntryItemProps) 
                             (() => {
                                 const gl = calculateGL(entry.gi_per_100g, entry.carbs);
                                 const color =
-                                    gl.label === 'niski' ? 'text-green-600 dark:text-green-400'
-                                    : gl.label === 'średni' ? 'text-amber-600 dark:text-amber-400'
+                                    gl.label === 'low' ? 'text-green-600 dark:text-green-400'
+                                    : gl.label === 'medium' ? 'text-amber-600 dark:text-amber-400'
                                     : 'text-red-600 dark:text-red-400';
                                 return (
                                     <Text className={`text-xs font-medium ${color}`}>
-                                        ŁG {gl.value}
+                                        {t('foodDetails.gl.title')} {Math.round(gl.value)}
                                     </Text>
                                 );
                             })()

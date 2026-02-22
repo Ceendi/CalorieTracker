@@ -287,7 +287,14 @@ export const translations = {
         protein: "Protein",
         fat: "Fat",
         carbs: "Carbs",
-        quantity: "Enter amount"
+        quantity: "Enter amount",
+        gl: {
+            title: "GL",
+            ig: "GI",
+            low: "Low",
+            medium: "Medium",
+            high: "High"
+        }
     },
     meals: {
         breakfast: "Breakfast",
@@ -373,6 +380,9 @@ export const translations = {
         activateSuccess: "Plan activated!",
         archiveSuccess: "Plan archived!",
         statusUpdateError: "Failed to update plan status"
+    },
+    menu: {
+        optional: "Optional"
     }
   },
   pl: {
@@ -661,7 +671,14 @@ export const translations = {
         protein: "Białko",
         fat: "Tłuszcz",
         carbs: "Węglowodany",
-        quantity: "Podaj ilość"
+        quantity: "Podaj ilość",
+        gl: {
+            title: "ŁG",
+            ig: "IG",
+            low: "Niski",
+            medium: "Średni",
+            high: "Wysoki"
+        }
     },
     meals: {
         breakfast: "Śniadanie",
@@ -747,6 +764,9 @@ export const translations = {
         activateSuccess: "Plan aktywowany!",
         archiveSuccess: "Plan zarchiwizowany!",
         statusUpdateError: "Nie udało się zaktualizować statusu planu"
+    },
+    menu: {
+        optional: "Opcjonalnie"
     }
   }
 };

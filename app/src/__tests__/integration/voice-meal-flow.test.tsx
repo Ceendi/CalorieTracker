@@ -16,7 +16,7 @@ jest.mock('react-native/Libraries/Components/Keyboard/Keyboard', () => ({
 const mockT = (k: string) => k;
 
 const createItem = (overrides?: Partial<ProcessedFoodItem>): ProcessedFoodItem => ({
-  product_id: 1,
+  product_id: "1",
   name: 'Chicken',
   quantity_grams: 200,
   kcal: 330,
@@ -34,7 +34,7 @@ const createMeal = (items?: ProcessedFoodItem[]): ProcessedMeal => ({
   meal_type: 'lunch',
   items: items || [
     createItem(),
-    createItem({ product_id: 2, name: 'Rice', quantity_grams: 150, kcal: 195, protein: 4, fat: 0.4, carbs: 43, quantity_unit_value: 150 }),
+    createItem({ product_id: "2", name: 'Rice', quantity_grams: 150, kcal: 195, protein: 4, fat: 0.4, carbs: 43, quantity_unit_value: 150 }),
   ],
   raw_transcription: 'chicken with rice',
   processing_time_ms: 500,

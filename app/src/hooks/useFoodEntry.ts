@@ -6,6 +6,7 @@ import { useLogEntry, useUpdateEntry } from "@/hooks/useFood";
 import { ensureFoodProduct } from "@/services/food.service";
 import { FoodProduct, UnitInfo, MealType, CreateEntryDto } from "@/types/food";
 import { formatDateForApi } from "@/utils/date";
+import { matchUnit } from "@/utils/matchUnit";
 
 interface FoodEntryParams {
   entryId?: string;
@@ -34,13 +35,25 @@ export function useFoodEntry(
   } = params;
 
   const getInitialUnit = (): UnitInfo | null => {
-    if (initialUnitLabel && initialUnitGrams) {
+    if (!initialUnitLabel || !initialUnitGrams) return null;
+
+    const gramLabels = ['g', 'gram', 'gramy'];
+    if (gramLabels.includes(initialUnitLabel.toLowerCase())) return null;
+
+    if (food?.units && food.units.length > 0) {
+      const realUnit = matchUnit(initialUnitLabel, food.units);
+      if (realUnit) return realUnit;
+    }
+
+    const grams = parseFloat(initialUnitGrams);
+    if (grams > 1) {
       return {
         label: initialUnitLabel,
-        grams: parseFloat(initialUnitGrams),
+        grams,
         unit: initialUnitLabel,
       };
     }
+
     return null;
   };
 

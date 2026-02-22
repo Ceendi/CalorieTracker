@@ -83,6 +83,7 @@ class IngredientSchema(BaseModel):
     protein: Optional[float] = Field(default=None, description="Protein in grams")
     fat: Optional[float] = Field(default=None, description="Fat in grams")
     carbs: Optional[float] = Field(default=None, description="Carbohydrates in grams")
+    gi_per_100g: Optional[float] = Field(default=None, description="Glycemic index per 100g")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -99,6 +100,7 @@ class IngredientSchema(BaseModel):
             protein=orm_obj.protein,
             fat=orm_obj.fat,
             carbs=orm_obj.carbs,
+            gi_per_100g=getattr(orm_obj, 'gi_per_100g', None),
         )
 
 

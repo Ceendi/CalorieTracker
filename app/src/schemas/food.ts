@@ -9,6 +9,7 @@ export const manualFoodSchema = z.object({
   carbs: z.coerce.number().min(0).default(0),
   weight: z.coerce.number().min(1).default(100),
   mealType: z.enum(MealType),
+  glycemic_index: z.coerce.number().optional().nullable(),
 });
 
 export type ManualFoodFormValues = z.infer<typeof manualFoodSchema>;

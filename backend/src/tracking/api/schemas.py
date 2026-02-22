@@ -13,6 +13,7 @@ class MealEntryBase(BaseModel):
     unit_label: Optional[str] = None
     unit_grams: Optional[float] = None
     unit_quantity: Optional[float] = None
+    gi_per_100g: Optional[float] = None
 
 
 class MealEntryCreate(MealEntryBase):

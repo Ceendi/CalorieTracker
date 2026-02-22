@@ -1,4 +1,4 @@
-export type GLLabel = 'niski' | 'średni' | 'wysoki';
+export type GLLabel = 'low' | 'medium' | 'high';
 
 export interface GLResult {
   value: number;
@@ -17,6 +17,6 @@ export interface GLResult {
 export function calculateGL(gi: number, carbsGrams: number): GLResult {
   const gl = (gi * carbsGrams) / 100;
   const value = Math.round(gl * 10) / 10;
-  const label: GLLabel = value <= 10 ? 'niski' : value <= 19 ? 'średni' : 'wysoki';
+  const label: GLLabel = value <= 10 ? 'low' : value <= 19 ? 'medium' : 'high';
   return { value, label };
 }

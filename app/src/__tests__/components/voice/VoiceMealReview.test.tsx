@@ -35,7 +35,7 @@ const createMeal = (overrides?: Partial<ProcessedMeal>): ProcessedMeal => ({
   meal_type: 'lunch',
   items: [
     {
-      product_id: 1,
+      product_id: "1",
       name: 'Chicken',
       quantity_grams: 200,
       kcal: 330,
@@ -48,7 +48,7 @@ const createMeal = (overrides?: Partial<ProcessedMeal>): ProcessedMeal => ({
       status: 'matched',
     },
     {
-      product_id: 2,
+      product_id: "2",
       name: 'Rice',
       quantity_grams: 150,
       kcal: 195,
@@ -156,7 +156,7 @@ describe('VoiceMealReview', () => {
   it('renders unit_value for non-gram units', () => {
     const meal = createMeal({
       items: [{
-        product_id: 3,
+        product_id: "3",
         name: 'Eggs',
         quantity_grams: 120,
         kcal: 186,

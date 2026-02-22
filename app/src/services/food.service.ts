@@ -26,6 +26,7 @@ function mapFoodProduct(apiFood: FoodProductResponse): FoodProduct {
     source: apiFood.source ?? undefined,
     brand: apiFood.brand ?? undefined,
     units: apiFood.units,
+    glycemic_index: apiFood.glycemic_index ?? undefined,
   };
 }
 
@@ -76,7 +77,8 @@ export const foodService = {
         protein_per_100g: food.nutrition.protein_per_100g,
         fat_per_100g: food.nutrition.fat_per_100g,
         carbs_per_100g: food.nutrition.carbs_per_100g,
-      }
+      },
+      glycemic_index: food.glycemic_index,
     };
     const response = await apiClient.post(`/api/v1/foods/custom`, payload);
     const validated = FoodProductResponseSchema.parse(response.data);

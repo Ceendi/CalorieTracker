@@ -32,32 +32,32 @@ describe('calculateGL', () => {
   });
 
   describe('label classification', () => {
-    it('returns "niski" when GL = 10.0 (boundary)', () => {
-      expect(calculateGL(50, 20).label).toBe('niski');
+    it('returns "low" when GL = 10.0 (boundary)', () => {
+      expect(calculateGL(50, 20).label).toBe('low');
     });
 
-    it('returns "niski" when GL < 10', () => {
-      expect(calculateGL(36, 14).label).toBe('niski');
+    it('returns "low" when GL < 10', () => {
+      expect(calculateGL(36, 14).label).toBe('low');
     });
 
-    it('returns "średni" when GL = 11.0 (just above low boundary)', () => {
-      expect(calculateGL(55, 20).label).toBe('średni');
+    it('returns "medium" when GL = 11.0 (just above low boundary)', () => {
+      expect(calculateGL(55, 20).label).toBe('medium');
     });
 
-    it('returns "średni" when GL = 19.0 (boundary)', () => {
-      expect(calculateGL(76, 25).label).toBe('średni');
+    it('returns "medium" when GL = 19.0 (boundary)', () => {
+      expect(calculateGL(76, 25).label).toBe('medium');
     });
 
-    it('returns "wysoki" when GL = 20.0 (just above medium boundary)', () => {
-      expect(calculateGL(80, 25).label).toBe('wysoki');
+    it('returns "high" when GL = 20.0 (just above medium boundary)', () => {
+      expect(calculateGL(80, 25).label).toBe('high');
     });
 
-    it('returns "wysoki" when GL is large', () => {
-      expect(calculateGL(87, 50).label).toBe('wysoki');
+    it('returns "high" when GL is large', () => {
+      expect(calculateGL(87, 50).label).toBe('high');
     });
 
-    it('returns "niski" for zero GL', () => {
-      expect(calculateGL(0, 0).label).toBe('niski');
+    it('returns "low" for zero GL', () => {
+      expect(calculateGL(0, 0).label).toBe('low');
     });
   });
 
@@ -73,7 +73,7 @@ describe('calculateGL', () => {
     });
 
     it('label is one of the valid GLLabel values', () => {
-      const validLabels = ['niski', 'średni', 'wysoki'];
+      const validLabels: string[] = ['low', 'medium', 'high'];
       expect(validLabels).toContain(calculateGL(55, 30).label);
     });
   });
