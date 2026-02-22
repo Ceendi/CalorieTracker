@@ -70,19 +70,19 @@ describe('calculateDailyGoal', () => {
 
   it('applies lose weight goal modifier correctly', () => {
     // BMR=1780 * 1.4 = 2492
-    // Lose goal: 2492 * 0.8 = 1993.6 -> trunc -> 1993
+    // Lose goal: Math.round(2492 * 0.8) = Math.round(1993.6) = 1994
     const result = calculateDailyGoal({ ...baseProfile, goal: 'lose' });
-    expect(result.calories).toBe(1993);
-    expect(result.protein).toBe(99.7); // 1993 * 0.2 / 4 = 99.65 -> 99.7
-    expect(result.fat).toBe(66.4); // 1993 * 0.3 / 9 = 66.43 -> 66.4
-    expect(result.carbs).toBe(249.1); // 1993 * 0.5 / 4 = 249.125 -> 249.1
+    expect(result.calories).toBe(1994);
+    expect(result.protein).toBe(99.7); // 1994 * 0.2 / 4 = 99.7
+    expect(result.fat).toBe(66.5); // 1994 * 0.3 / 9 = 66.46 -> 66.5
+    expect(result.carbs).toBe(249.3); // 1994 * 0.5 / 4 = 249.25 -> 249.3
   });
 
   it('applies gain weight goal modifier correctly', () => {
     // BMR=1780 * 1.4 = 2492
-    // Gain goal: 2492 * 1.15 = 2865.8 -> trunc -> 2865
+    // Gain goal: Math.round(2492 * 1.15) = Math.round(2865.8) = 2866
     const result = calculateDailyGoal({ ...baseProfile, goal: 'gain' });
-    expect(result.calories).toBe(2865);
+    expect(result.calories).toBe(2866);
   });
 
   it('uses very_high activity multiplier', () => {
