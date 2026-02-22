@@ -321,7 +321,7 @@ class TestScoringEndToEnd:
         # Exact match "ryż" gets EXACT_MATCH_BOOST (3.0) + PREFIX_MATCH_BOOST (0.5)
         # = 0.70 + 3.0 + 0.5 = 4.2, clamped to 1.0
         # Partial "ryż jaśminowy..." gets 0.90 + 0.5 (prefix) - 0.5 (multi-token) = 0.9
-        assert result.matched_products[0].name_pl == "ryż"
+        assert result.matched_products[0].name_pl == "Ryż"
         assert result.matched_products[0].match_confidence == 1.0
 
     @pytest.mark.asyncio
@@ -372,7 +372,7 @@ class TestScoringEndToEnd:
         # 0.65 + 3.0 (exact) + 0.5 (prefix) + 0.3 (fresh) = 4.45 -> 1.0
         # Processed "pomidor suszony" gets:
         # 0.70 + 0.5 (prefix) - 0.5 (multi-token) = 0.70
-        assert result.matched_products[0].name_pl == "pomidor"
+        assert result.matched_products[0].name_pl == "Pomidor"
 
     @pytest.mark.asyncio
     async def test_derivative_penalty(self):

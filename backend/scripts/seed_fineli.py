@@ -80,49 +80,65 @@ async def seed_fineli():
 
     async with async_session() as session:
         counter = 0
+        skipped = 0
         units_counter = 0
 
         for p in products:
-            food_id = uuid4()
-
             name = p.get("name_pl") or p.get("name_en", "Unknown")
 
-            cat_code = p.get("category", "INGRMISC")
-            category_pl = CATEGORY_MAP.get(cat_code, "Inne")
-
-            await session.execute(
-                text("""
-                    INSERT INTO foods (id, name, category, calories, protein, fat, carbs, source, default_unit, popularity_score)
-                    VALUES (:id, :name, :category, :calories, :protein, :fat, :carbs, :source, :default_unit, :popularity_score)
-                    ON CONFLICT (id) DO NOTHING
-                """),
-                {
-                    "id": str(food_id),
-                    "name": name,
-                    "category": category_pl,
-                    "calories": p.get("kcal_100g", 0),
-                    "protein": p.get("protein_100g", 0),
-                    "fat": p.get("fat_100g", 0),
-                    "carbs": p.get("carbs_100g", 0),
-                    "source": "fineli",
-                    "default_unit": "gram",
-                    "popularity_score": 10,
-                }
+            # Check for duplicate by name
+            result = await session.execute(
+                text("SELECT id FROM foods WHERE name = :name AND source = 'fineli'"),
+                {"name": name},
             )
-            
+            existing = result.fetchone()
+
+            if existing:
+                food_id = existing[0]
+                # Refresh units from JSON
+                await session.execute(
+                    text("DELETE FROM food_units WHERE food_id = :fid"),
+                    {"fid": str(food_id)},
+                )
+                skipped += 1
+                logger.debug(f"Refreshing units for existing: {name}")
+            else:
+                food_id = uuid4()
+                cat_code = p.get("category", "INGRMISC")
+                category_pl = CATEGORY_MAP.get(cat_code, "Inne")
+
+                await session.execute(
+                    text("""
+                        INSERT INTO foods (id, name, category, calories, protein, fat, carbs, source, default_unit, popularity_score)
+                        VALUES (:id, :name, :category, :calories, :protein, :fat, :carbs, :source, :default_unit, :popularity_score)
+                    """),
+                    {
+                        "id": str(food_id),
+                        "name": name,
+                        "category": category_pl,
+                        "calories": p.get("kcal_100g", 0),
+                        "protein": p.get("protein_100g", 0),
+                        "fat": p.get("fat_100g", 0),
+                        "carbs": p.get("carbs_100g", 0),
+                        "source": "fineli",
+                        "default_unit": "gram",
+                        "popularity_score": 10,
+                    }
+                )
+                counter += 1
+
             for idx, u in enumerate(p.get("units", [])):
                 u_name = u.get("name")
                 u_weight = u.get("weight_g", 0)
-                
+
                 if u_name in UNIT_MAP:
                     u_type, u_label = UNIT_MAP[u_name]
                     unit_id = uuid4()
-                    
+
                     await session.execute(
                         text("""
                             INSERT INTO food_units (id, food_id, unit, grams, label, priority)
                             VALUES (:id, :food_id, :unit, :grams, :label, :priority)
-                            ON CONFLICT (id) DO NOTHING
                         """),
                         {
                             "id": str(unit_id),
@@ -134,13 +150,15 @@ async def seed_fineli():
                         }
                     )
                     units_counter += 1
-            
-            counter += 1
-            if counter % 200 == 0:
-                logger.info(f"Processed {counter} products...")
-        
+
+            if (counter + skipped) % 200 == 0:
+                logger.info(f"Processed {counter + skipped} products...")
+
         await session.commit()
-        logger.info(f"Seeding completed: {counter} foods, {units_counter} units inserted.")
+        logger.info(
+            f"Seeding completed: {counter} foods inserted, "
+            f"{skipped} units refreshed, {units_counter} units total."
+        )
 
     await engine.dispose()
 

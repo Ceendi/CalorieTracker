@@ -142,7 +142,7 @@ class TestRecognizeMeal:
 
         result = await service.recognize_meal("200g ryżu")
         assert len(result.matched_products) == 1
-        assert result.matched_products[0].name_pl == "ryż"
+        assert result.matched_products[0].name_pl == "Ryż"
 
     @pytest.mark.asyncio
     async def test_fallback_to_regex_when_slm_unavailable(
@@ -413,7 +413,7 @@ class TestScoringHeuristics:
 
         result = await service.recognize_meal("mleko")
         # "mleko" exact match (c2) gets EXACT_MATCH_BOOST + PREFIX, should win
-        assert result.matched_products[0].name_pl == "mleko zagęszczone"
+        assert result.matched_products[0].name_pl == "Mleko zagęszczone"
 
 
 # ============================================================================

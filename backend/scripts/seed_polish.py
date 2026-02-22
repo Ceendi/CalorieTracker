@@ -124,9 +124,12 @@ def guess_unit_type(name: str) -> tuple[str, str]:
         return "portion", "opakowanie"
     if "porcja" in n:
         return "portion", "porcja"
-    # Descriptive names like "mały z łupiną", "średni", "duży" → sztuka
-    if any(w in n for w in ["mały", "mała", "średni", "średnia", "duży", "duża"]):
-        return "piece", "sztuka"
+    if any(w in n for w in ["mały", "mała"]):
+        return "piece", "Sztuka (mała)"
+    if any(w in n for w in ["średni", "średnia"]):
+        return "piece", "Sztuka (średnia)"
+    if any(w in n for w in ["duży", "duża"]):
+        return "piece", "Sztuka (duża)"
     # Default
     return "piece", "sztuka"
 
@@ -193,9 +196,14 @@ async def seed_polish():
                     replaced += 1
                     logger.info(f"Replaced openfoodfacts: {name}")
                 else:
-                    logger.info(f"Skipping duplicate ({existing_source}): {name}")
+                    # Refresh units from JSON even for existing kunachowicz products
+                    await session.execute(
+                        text("DELETE FROM food_units WHERE food_id = :fid"),
+                        {"fid": str(existing_id)},
+                    )
+                    food_id = existing_id
                     skipped += 1
-                    continue
+                    logger.info(f"Refreshing units for existing ({existing_source}): {name}")
             else:
                 food_id = uuid4()
                 cat_code = p.get("category", "POLISH_DISH")

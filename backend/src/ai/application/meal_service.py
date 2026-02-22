@@ -21,6 +21,13 @@ from src.ai.config import (
 )
 
 
+def _normalize_product_name(name: str) -> str:
+    """Strip whitespace, collapse newlines, capitalize first letter."""
+    name = name.strip().replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ')
+    name = ' '.join(name.split())
+    return name[0].upper() + name[1:] if name else name
+
+
 class MealRecognitionService:
     """
     Service for recognizing food items from text using pgvector hybrid search.
@@ -139,7 +146,7 @@ class MealRecognitionService:
                 
                 matched = MatchedProduct(
                     product_id=best_match.product_id,
-                    name_pl=best_match.name,
+                    name_pl=_normalize_product_name(best_match.name),
                     name_en=raw_product.get("name_en", ""),
                     quantity_grams=round(final_grams, 1),
                     kcal=round(raw_product.get("kcal_100g", 0) * qty_scale, 1),
@@ -178,8 +185,8 @@ class MealRecognitionService:
 
                 matched = MatchedProduct(
                     product_id="00000000-0000-0000-0000-000000000000",
-                    name_pl=item.name,
-                    name_en=item.name,
+                    name_pl=_normalize_product_name(item.name),
+                    name_en=_normalize_product_name(item.name),
                     quantity_grams=round(fallback_grams, 1),
                     kcal=round(item.kcal or 0, 1),
                     protein=round(item.protein or 0, 1),
@@ -312,7 +319,7 @@ class MealRecognitionService:
 
                 matched = MatchedProduct(
                     product_id=best_match.product_id,
-                    name_pl=best_match.name,
+                    name_pl=_normalize_product_name(best_match.name),
                     name_en=raw_product.get("name_en", ""),
                     quantity_grams=round(grams, 1),
                     kcal=round(raw_product.get("kcal_100g", 0) * qty_scale, 1),
