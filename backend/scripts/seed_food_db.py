@@ -19,8 +19,8 @@ os.chdir(BASE_DIR)
 ENV_PATH = os.path.join(BASE_DIR, ".env")
 load_dotenv(ENV_PATH)
 
-from src.core.config import settings
-from src.food_catalogue.infrastructure.orm_models import FoodModel
+from src.core.config import settings  # noqa: E402
+from src.food_catalogue.infrastructure.orm_models import FoodModel  # noqa: E402
 
 OFF_CSV_URL = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz"
 LOCAL_FILENAME = os.path.join(BASE_DIR, "off_dump.csv.gz")
@@ -67,7 +67,8 @@ def extract_file():
 def clean_float(val):
     try:
         f = float(val)
-        if pd.isna(f): return 0.0
+        if pd.isna(f):
+            return 0.0
         return f
     except (ValueError, TypeError):
         return 0.0
@@ -78,7 +79,7 @@ async def process_and_seed():
     engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URI, echo=False)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-    print(f"[4/5] Analyzing CSV. Strategy: STRICTLY POLAND (Tags or EAN=590)...")
+    print("[4/5] Analyzing CSV. Strategy: STRICTLY POLAND (Tags or EAN=590)...")
 
     usecols = [
         'code', 'product_name', 'countries_tags', 'unique_scans_n',
