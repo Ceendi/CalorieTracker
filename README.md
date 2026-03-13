@@ -6,27 +6,27 @@ CalorieTracker AI is a comprehensive nutrition assistant designed to simplify di
 
 Experience the core AI capabilities directly through the mobile interface. Below are demonstrations of the primary tracking and planning modules:
 
-<table align="center">
+<table align="center" width="100%">
   <tr>
-    <td align="center"><b>🎙️ Voice-First Tracking</b></td>
-    <td align="center"><b>📸 Photo Recognition</b></td>
-    <td align="center"><b>📅 AI Meal Planner</b></td>
+    <td align="center" width="33%"><b>🎙️ Voice-First Tracking</b></td>
+    <td align="center" width="33%"><b>📸 Photo Recognition</b></td>
+    <td align="center" width="33%"><b>📅 AI Meal Planner</b></td>
   </tr>
   <tr>
-    <td align="center">
-      <video src="https://github.com/user-attachments/assets/7b1463b6-9bae-419c-b86f-3ee62139ed5d" width="220" autoplay loop muted playsinline></video>
+    <td align="center" valign="top">
+      <video src="https://github.com/user-attachments/assets/7b1463b6-9bae-419c-b86f-3ee62139ed5d" width="100%" autoplay loop muted playsinline></video>
     </td>
-    <td align="center">
-      <video src="https://github.com/user-attachments/assets/734a8607-3573-4ce0-989a-7797ea6ab54f" width="220" autoplay loop muted playsinline></video>
+    <td align="center" valign="top">
+      <video src="https://github.com/user-attachments/assets/734a8607-3573-4ce0-989a-7797ea6ab54f" width="100%" autoplay loop muted playsinline></video>
     </td>
-    <td align="center">
-      <video src="https://github.com/user-attachments/assets/be828c53-a737-4ea8-8019-0bbf2ac0f623" width="220" autoplay loop muted playsinline></video>
+    <td align="center" valign="top">
+      <video src="https://github.com/user-attachments/assets/be828c53-a737-4ea8-8019-0bbf2ac0f623" width="100%" autoplay loop muted playsinline></video>
     </td>
   </tr>
   <tr>
-    <td align="center"><i>Natural language processing using <b>Whisper STT</b> and <b>Bielik SLM</b> to extract ingredients and weights.</i></td>
-    <td align="center"><i>Visual identification and portion estimation powered by <b>Gemini Flash</b>.</i></td>
-    <td align="center"><i>Personalized daily plans generated via <b>RAG</b> and <b>pgvector</b> to match specific macros.</i></td>
+    <td align="center" valign="top"><i>Natural language processing using <b>Whisper STT</b> and <b>Bielik SLM</b> to extract ingredients and weights.</i></td>
+    <td align="center" valign="top"><i>Visual identification and portion estimation powered by <b>Gemini Flash</b>.</i></td>
+    <td align="center" valign="top"><i>Personalized daily plans generated via <b>RAG</b> and <b>pgvector</b> to match specific macros.</i></td>
   </tr>
 </table>
 
