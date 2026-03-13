@@ -2,6 +2,34 @@
 
 CalorieTracker AI is a comprehensive nutrition assistant designed to simplify diet management through artificial intelligence. The application combines a mobile interface for daily tracking with a backend system capable of intelligent voice processing, photo-based meal recognition, and personalized meal planning.
 
+## Application in Action
+
+Experience the core AI capabilities directly through the mobile interface. Below are demonstrations of the primary tracking and planning modules:
+
+<table align="center">
+  <tr>
+    <td align="center"><b>🎙️ Voice-First Tracking</b></td>
+    <td align="center"><b>📸 Photo Recognition</b></td>
+    <td align="center"><b>📅 AI Meal Planner</b></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <video src="https://github.com/user-attachments/assets/7b1463b6-9bae-419c-b86f-3ee62139ed5d" width="220" autoplay loop muted playsinline></video>
+    </td>
+    <td align="center">
+      <video src="https://github.com/user-attachments/assets/734a8607-3573-4ce0-989a-7797ea6ab54f" width="220" autoplay loop muted playsinline></video>
+    </td>
+    <td align="center">
+      <video src="https://github.com/user-attachments/assets/be828c53-a737-4ea8-8019-0bbf2ac0f623" width="220" autoplay loop muted playsinline></video>
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><i>Natural language processing using <b>Whisper STT</b> and <b>Bielik SLM</b> to extract ingredients and weights.</i></td>
+    <td align="center"><i>Visual identification and portion estimation powered by <b>Gemini Flash</b>.</i></td>
+    <td align="center"><i>Personalized daily plans generated via <b>RAG</b> and <b>pgvector</b> to match specific macros.</i></td>
+  </tr>
+</table>
+
 ## Project Purpose
 
 The main goal of this project is to fix the common problem of tedious calorie counting. Instead of manually searching for products and weighing generic ingredients, users can simply describe their meals using natural language or take a photo. The system automatically identifies food items, estimates portion sizes based on context, and calculates nutritional values. Additionally, the application helps users stick to their diet by generating realistic daily meal plans tailored to their specific caloric and macronutrient goals.
