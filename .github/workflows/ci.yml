@@ -39,9 +39,6 @@ jobs:
       GEMINI_API_KEY: dummy
       FOOD_OFF_USER_AGENT: "CalorieTracker/1.0 (ci@example.com)"
       FOOD_OFF_TIMEOUT_SEC: "15"
-      # Force CPU torch on CI — avoids 2 GB CUDA wheel download
-      UV_INDEX_PYTORCH_URL: https://download.pytorch.org/whl/cpu
-
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +55,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        run: uv sync
+        # --no-sources ignores [tool.uv.sources]: skips local Windows wheel for
+        # llama-cpp-python and the CUDA pytorch index — both resolve from PyPI (CPU)
+        run: uv sync --no-sources
 
       - name: Lint with ruff
         working-directory: backend
