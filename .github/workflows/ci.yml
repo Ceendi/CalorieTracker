@@ -27,7 +27,7 @@ jobs:
           --health-retries 5
 
     env:
-      ENVIRONMENT: test
+      ENVIRONMENT: testing
       PROJECT_NAME: CalorieTracker
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
