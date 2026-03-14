@@ -39,6 +39,10 @@ jobs:
       GEMINI_API_KEY: dummy
       FOOD_OFF_USER_AGENT: "CalorieTracker/1.0 (ci@example.com)"
       FOOD_OFF_TIMEOUT_SEC: "15"
+      # Ignore [tool.uv.sources] for all uv commands — skips the local Windows
+      # wheel for llama-cpp-python and the CUDA pytorch index; both use PyPI instead
+      UV_NO_SOURCES: "1"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -55,9 +59,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        # --no-sources ignores [tool.uv.sources]: skips local Windows wheel for
-        # llama-cpp-python and the CUDA pytorch index — both resolve from PyPI (CPU)
-        run: uv sync --no-sources
+        run: uv sync
 
       - name: Lint with ruff
         working-directory: backend
